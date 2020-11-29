@@ -10,9 +10,9 @@ use Raxos\Router\Response\Response;
 /**
  * Interface ExceptionAwareInterface
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Controller
- * @since 2.0.0
+ * @since 1.0.0
  */
 interface ExceptionAwareInterface
 {
@@ -23,8 +23,8 @@ interface ExceptionAwareInterface
      * @param Exception $err
      *
      * @return Effect|Response
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function onException(Exception $err): Effect|Response;
 
