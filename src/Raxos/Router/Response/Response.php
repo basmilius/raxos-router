@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use Raxos\Router\Router;
+use function header;
 use function is_array;
 
 /**

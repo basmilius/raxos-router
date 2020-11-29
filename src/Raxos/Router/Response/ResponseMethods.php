@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
+use JetBrains\PhpStorm\Pure;
+use function array_key_exists;
+use function is_array;
+
 /**
  * Trait ResponseMethods
  *
@@ -50,6 +54,7 @@ trait ResponseMethods
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
+    #[Pure]
     protected final function json(mixed $value): JsonResponse
     {
         return new JsonResponse($this->router, [], $value);

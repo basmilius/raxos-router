@@ -8,6 +8,7 @@ use Raxos\Router\Effect\ResponseEffect;
 use Raxos\Router\Effect\ResultEffect;
 use Raxos\Router\Response\Response;
 use Raxos\Router\Router;
+use function array_map;
 
 /**
  * Class RouteExecutor

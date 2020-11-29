@@ -4,6 +4,12 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use function array_key_exists;
+use function json_encode;
+use const JSON_BIGINT_AS_STRING;
+use const JSON_HEX_AMP;
+use const JSON_HEX_APOS;
+use const JSON_HEX_QUOT;
+use const JSON_HEX_TAG;
 
 /**
  * Class JsonResponse
