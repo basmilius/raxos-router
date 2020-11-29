@@ -4,7 +4,7 @@
 	"license": "mit",
 	"minimum-stability": "stable",
 	"type": "library",
-	"version": "0.1.0",
+	"version": "dev-master",
 	"authors": [
 		{
 			"name": "Bas Milius",
@@ -24,6 +24,6 @@
 	"require": {
 		"ext-json": "*",
 		"jetbrains/phpstorm-attributes": "^1.0",
-		"raxos/http": "0.1.0"
+		"raxos/http": "dev-master"
 	}
 }

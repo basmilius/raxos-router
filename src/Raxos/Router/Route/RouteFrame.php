@@ -7,6 +7,7 @@ use Exception;
 use Raxos\Router\Controller\ExceptionAwareInterface;
 use Raxos\Router\Effect\Effect;
 use Raxos\Router\Effect\NotFoundEffect;
+use Raxos\Router\Effect\VoidEffect;
 use Raxos\Router\Error\RouterException;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Middleware\Middleware;
@@ -32,6 +33,7 @@ class RouteFrame
     private array $middlewares;
     private array $params;
     private array $request;
+    private string $type;
 
     /**
      * RouteFrame constructor.
@@ -48,6 +50,7 @@ class RouteFrame
         $this->middlewares = $frame['middlewares'] ?? [];
         $this->params = $frame['params'] ?? [];
         $this->request = $frame['request'];
+        $this->type = $frame['type'];
     }
 
     /**
@@ -83,7 +86,13 @@ class RouteFrame
         $params = RouterUtil::prepareParameters($router, $this->params, $this->class, $this->method);
 
         try {
-            return $controller->invoke($this->method, ...$params);
+            if ($this->type === 'void') {
+            	$controller->invoke($this->method, ...$params);
+
+            	return new VoidEffect($router);
+			}
+
+			return $controller->invoke($this->method, ...$params);
         } catch (Exception $err) {
             if ($controller instanceof ExceptionAwareInterface) {
                 return $controller->onException($err);
