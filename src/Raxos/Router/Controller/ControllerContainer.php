@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Controller;
 
-use Raxos\Router\Error\ControllerException;
+use Raxos\Router\Error\RouterException;
+use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Router;
 use Raxos\Router\RouterUtil;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionNamedType;
 use function sprintf;
 
 /**
@@ -29,12 +27,13 @@ final class ControllerContainer
      * @param string $class
      *
      * @return Controller
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
     public final function get(string $class): Controller
     {
-        return $this->instances[$class] ?? throw new ControllerException(sprintf('Instance of controller "%s" not found.', $class), ControllerException::ERR_INSTANCE_NOT_FOUND);
+        return $this->instances[$class] ?? throw new RuntimeException(sprintf('Instance of controller "%s" not found.', $class), RuntimeException::ERR_INSTANCE_NOT_FOUND);
     }
 
     /**
@@ -58,39 +57,16 @@ final class ControllerContainer
      * @param string $class
      *
      * @return Controller
+     * @throws RouterException
      * @since 1.0.0
      * @author Bas Milius <bas@mili.us>
      */
     public final function load(Router $router, string $class): Controller
     {
-        try {
-            $reflection = new ReflectionClass($class);
-            $parameters = $reflection->getConstructor()->getParameters();
-            $params = [];
+        $params = RouterUtil::prepareParametersForClass($class);
+        $params = RouterUtil::prepareParameters($router, $params, $class);
 
-            foreach ($parameters as $parameter) {
-                /** @var ReflectionNamedType $parameterType */
-                $parameterType = $parameter->getType();
-                $parameterType = $parameterType->getName();
-
-                $param = [
-                    'name' => $parameter->getName(),
-                    'type' => $parameterType
-                ];
-
-                if ($parameter->isDefaultValueAvailable()) {
-                    $param['default'] = $parameter->getDefaultValue();
-                }
-
-                $params[] = $param;
-            }
-
-            $params = RouterUtil::prepareParameters($router, $params, $class);
-
-            return $this->instances[$class] = new $class(...$params);
-        } catch (ReflectionException $err) {
-            throw new ControllerException(sprintf('Could not initialize controller "%s".', $class), ControllerException::ERR_INITIALIZATION_FAILED, $err);
-        }
+        return $this->instances[$class] = new $class(...$params);
     }
 
 }

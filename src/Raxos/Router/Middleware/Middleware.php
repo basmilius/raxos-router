@@ -41,4 +41,21 @@ abstract class Middleware
      */
     public abstract function handle(): Effect|Response|bool|null;
 
+    /**
+     * Adds a parameter.
+     *
+     * @param string $name
+     * @param mixed $value
+     *
+     * @return $this
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    protected final function parameter(string $name, mixed $value): static
+    {
+        $this->router->parameter($name, $value);
+
+        return $this;
+    }
+
 }

@@ -8,6 +8,7 @@ use Raxos\Router\Controller\Controller;
 use Raxos\Router\Controller\ControllerContainer;
 use Raxos\Router\Effect\Effect;
 use Raxos\Router\Effect\NotFoundEffect;
+use Raxos\Router\Error\RouterException;
 use function array_key_exists;
 
 /**
@@ -87,6 +88,7 @@ class Router extends Resolver
      * @param Controller|string $controller
      *
      * @return $this
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -138,6 +140,7 @@ class Router extends Resolver
      * @param string $path
      *
      * @return Effect
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Error;
 
 use Exception;
+use Throwable;
 
 /**
  * Class RouterException
@@ -14,4 +15,20 @@ use Exception;
  */
 abstract class RouterException extends Exception
 {
+
+    /**
+     * RouterException constructor.
+     *
+     * @param string $message
+     * @param int $code
+     * @param Throwable|null $previous
+     *
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public function __construct(string $message, int $code = 0, ?Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+    }
+
 }

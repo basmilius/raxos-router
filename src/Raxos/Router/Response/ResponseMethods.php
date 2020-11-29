@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
+use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
+use Raxos\Http\HttpCode;
+use Raxos\Router\Effect\RedirectEffect;
 use function array_key_exists;
 use function is_array;
 
@@ -58,6 +61,21 @@ trait ResponseMethods
     protected final function json(mixed $value): JsonResponse
     {
         return new JsonResponse($this->router, [], $value);
+    }
+
+    /**
+     * Returns a redirect effect.
+     *
+     * @param string $destination
+     * @param int $responseCode
+     *
+     * @return RedirectEffect
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    protected final function redirect(string $destination, #[ExpectedValues(flagsFromClass: HttpCode::class)] int $responseCode = HttpCode::TEMPORARY_REDIRECT): RedirectEffect
+    {
+        return new RedirectEffect($this->router, $destination, $responseCode);
     }
 
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
+use JetBrains\PhpStorm\ArrayShape;
 use Raxos\Router\Attribute\Get;
 use Raxos\Router\Attribute\Prefix;
 use Raxos\Router\Attribute\Route;
@@ -10,8 +11,8 @@ use Raxos\Router\Attribute\SubController;
 use Raxos\Router\Attribute\With;
 use Raxos\Router\Controller\Controller;
 use Raxos\Router\Error\RegisterException;
+use Raxos\Router\Error\RouterException;
 use Raxos\Router\Route\RouteExecutor;
-use JetBrains\PhpStorm\ArrayShape;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
@@ -93,7 +94,7 @@ class Resolver
     /**
      * Resolves the controller mappings.
      *
-     * @throws RegisterException
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -156,6 +157,7 @@ class Resolver
      *
      * @return array|null
      * @throws ReflectionException
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -199,6 +201,7 @@ class Resolver
      * @param array $options
      *
      * @throws ReflectionException
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -362,6 +365,7 @@ class Resolver
      *
      * @return array|null
      * @throws ReflectionException
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -408,6 +412,7 @@ class Resolver
      *
      * @return array|null
      * @throws ReflectionException
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -466,6 +471,7 @@ class Resolver
      *
      * @return array
      * @throws ReflectionException
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */

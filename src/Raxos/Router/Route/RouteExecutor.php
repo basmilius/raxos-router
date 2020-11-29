@@ -6,6 +6,7 @@ namespace Raxos\Router\Route;
 use Raxos\Router\Effect\Effect;
 use Raxos\Router\Effect\ResponseEffect;
 use Raxos\Router\Effect\ResultEffect;
+use Raxos\Router\Error\RouterException;
 use Raxos\Router\Response\Response;
 use Raxos\Router\Router;
 use function array_map;
@@ -43,6 +44,7 @@ class RouteExecutor
      * @param Router $router
      *
      * @return Effect
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -51,7 +53,7 @@ class RouteExecutor
         $result = null;
 
         foreach ($this->frames as $frame) {
-            $result = $this->executeFrame($router, $frame);
+            $result = $frame->invoke($router, $this->params);
 
             if ($result instanceof Effect) {
                 return $result;
@@ -63,23 +65,6 @@ class RouteExecutor
         }
 
         return new ResultEffect($router, $result);
-    }
-
-    /**
-     * Executes a single route frame.
-     *
-     * @param Router $router
-     * @param RouteFrame $frame
-     *
-     * @return mixed
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    private function executeFrame(Router $router, RouteFrame $frame): mixed
-    {
-        $frame->prepareController($router);
-
-        return $frame->invoke($router, $this->params);
     }
 
 }
