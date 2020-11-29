@@ -8,9 +8,9 @@ use function array_key_exists;
 /**
  * Class JsonResponse
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Response
- * @since 2.0.0
+ * @since 1.0.0
  */
 class JsonResponse extends Response
 {
@@ -19,8 +19,8 @@ class JsonResponse extends Response
 
     /**
      * {@inheritdoc}
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function respondBody(): void
     {
@@ -29,8 +29,8 @@ class JsonResponse extends Response
 
     /**
      * {@inheritdoc}
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function respondHeaders(): void
     {

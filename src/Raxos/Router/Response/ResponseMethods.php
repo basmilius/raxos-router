@@ -6,9 +6,9 @@ namespace Raxos\Router\Response;
 /**
  * Trait ResponseMethods
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Controller
- * @since 2.0.0
+ * @since 1.0.0
  */
 trait ResponseMethods
 {
@@ -23,8 +23,8 @@ trait ResponseMethods
      * @param bool $replace
      *
      * @return $this
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function header(string $name, string $value, bool $replace = true): static
     {
@@ -47,8 +47,8 @@ trait ResponseMethods
      * @param mixed $value
      *
      * @return JsonResponse
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected final function json(mixed $value): JsonResponse
     {

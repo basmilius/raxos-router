@@ -8,9 +8,9 @@ use Attribute;
 /**
  * Class With
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute
- * @since 2.0.0
+ * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class With
@@ -22,8 +22,8 @@ final class With
      * @param string $class
      * @param array $arguments
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(private string $class, private array $arguments = [])
     {
@@ -33,8 +33,8 @@ final class With
      * Gets the middleware arguments.
      *
      * @return array
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getArguments(): array
     {
@@ -45,8 +45,8 @@ final class With
      * Gets the middleware class.
      *
      * @return string
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getClass(): string
     {

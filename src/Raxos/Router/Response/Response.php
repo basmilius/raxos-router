@@ -9,9 +9,9 @@ use function is_array;
 /**
  * Class Response
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Response
- * @since 2.0.0
+ * @since 1.0.0
  */
 abstract class Response
 {
@@ -23,8 +23,8 @@ abstract class Response
      * @param array $headers
      * @param mixed $value
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(protected Router $router, protected array $headers, protected mixed $value)
     {
@@ -35,8 +35,8 @@ abstract class Response
      *
      * @return array
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getHeaders(): array
     {
@@ -48,8 +48,8 @@ abstract class Response
      *
      * @return Router
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getRouter(): Router
     {
@@ -61,8 +61,8 @@ abstract class Response
      *
      * @return mixed
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getValue(): mixed
     {
@@ -72,8 +72,8 @@ abstract class Response
     /**
      * Sends the response to browser.
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function respond(): void
     {
@@ -84,16 +84,16 @@ abstract class Response
     /**
      * Respond the body to the browser.
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected abstract function respondBody(): void;
 
     /**
      * Respond the headers to the browser.
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function respondHeaders(): void
     {

@@ -12,9 +12,9 @@ use Raxos\Router\Router;
 /**
  * Class RouteExecutor
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Route
- * @since 2.0.0
+ * @since 1.0.0
  */
 class RouteExecutor
 {
@@ -28,8 +28,8 @@ class RouteExecutor
      * @param array $frames
      * @param array $params
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(array $frames, private array $params)
     {
@@ -42,8 +42,8 @@ class RouteExecutor
      * @param Router $router
      *
      * @return Effect
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function execute(Router $router): Effect
     {
@@ -71,8 +71,8 @@ class RouteExecutor
      * @param RouteFrame $frame
      *
      * @return mixed
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function executeFrame(Router $router, RouteFrame $frame): mixed
     {

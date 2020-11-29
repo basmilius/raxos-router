@@ -6,9 +6,9 @@ namespace Raxos\Router\Error;
 /**
  * Class RegisterException
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Error
- * @since 2.0.0
+ * @since 1.0.0
  */
 final class RegisterException extends RouterException
 {

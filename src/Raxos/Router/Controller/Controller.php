@@ -10,9 +10,9 @@ use Closure;
 /**
  * Class Controller
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Controller
- * @since 2.0.0
+ * @since 1.0.0
  */
 abstract class Controller
 {
@@ -24,8 +24,8 @@ abstract class Controller
      *
      * @param Router $router
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(protected Router $router)
     {
@@ -38,8 +38,8 @@ abstract class Controller
      * @param mixed ...$params
      *
      * @return mixed
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      * @internal
      */
     public function invoke(string $method, mixed ...$params): mixed
@@ -56,8 +56,8 @@ abstract class Controller
      * @param mixed $value
      *
      * @return $this
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected final function parameter(string $name, mixed $value): static
     {

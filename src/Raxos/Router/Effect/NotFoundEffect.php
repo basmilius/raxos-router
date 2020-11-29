@@ -6,9 +6,9 @@ namespace Raxos\Router\Effect;
 /**
  * Class NotFoundEffect
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Effect
- * @since 2.0.0
+ * @since 1.0.0
  */
 final class NotFoundEffect extends Effect
 {

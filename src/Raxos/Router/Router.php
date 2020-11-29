@@ -13,9 +13,9 @@ use function array_key_exists;
 /**
  * Class Router
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
- * @since 2.0.0
+ * @since 1.0.0
  */
 class Router extends Resolver
 {
@@ -27,8 +27,8 @@ class Router extends Resolver
     /**
      * Router constructor.
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct()
     {
@@ -39,8 +39,8 @@ class Router extends Resolver
      * Gets the controller container.
      *
      * @return ControllerContainer
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getControllers(): ControllerContainer
     {
@@ -54,8 +54,8 @@ class Router extends Resolver
      * @param mixed|null $defaultValue
      *
      * @return mixed
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getParameter(string $name, mixed $defaultValue = null): mixed
     {
@@ -72,8 +72,8 @@ class Router extends Resolver
      * @param string $name
      *
      * @return bool
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     #[Pure]
     public final function hasParameter(string $name): bool
@@ -87,8 +87,8 @@ class Router extends Resolver
      * @param Controller|string $controller
      *
      * @return $this
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function controller(Controller|string $controller): static
     {
@@ -104,8 +104,8 @@ class Router extends Resolver
      * @param mixed $value
      *
      * @return $this
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function global(string $name, mixed $value): static
     {
@@ -121,8 +121,8 @@ class Router extends Resolver
      * @param mixed $value
      *
      * @return $this
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function parameter(string $name, mixed $value): static
     {
@@ -138,8 +138,8 @@ class Router extends Resolver
      * @param string $path
      *
      * @return Effect
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function resolve(string $method, string $path): Effect
     {

@@ -11,9 +11,9 @@ use Raxos\Router\Router;
 /**
  * Class Middleware
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Middleware
- * @since 2.0.0
+ * @since 1.0.0
  */
 abstract class Middleware
 {
@@ -25,8 +25,8 @@ abstract class Middleware
      *
      * @param Router $router
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(protected Router $router)
     {
@@ -36,8 +36,8 @@ abstract class Middleware
      * Handles the request.
      *
      * @return Effect|Response|bool|null
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public abstract function handle(): Effect|Response|bool|null;
 

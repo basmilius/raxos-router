@@ -12,9 +12,9 @@ use function strval;
 /**
  * Class RouterUtil
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
- * @since 2.0.0
+ * @since 1.0.0
  */
 final class RouterUtil
 {
@@ -28,8 +28,8 @@ final class RouterUtil
      * @param string $value
      *
      * @return string|int|bool|null
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     #[Pure]
     public static function convertParameterType(string $type, string $value): string|int|bool|null
@@ -51,8 +51,8 @@ final class RouterUtil
      * @param string|null $method
      *
      * @return array
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public static function prepareParameters(Router $router, array $parameters, string $controller, ?string $method = null): array
     {

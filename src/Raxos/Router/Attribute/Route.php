@@ -10,9 +10,9 @@ use Raxos\Http\HttpMethods;
 /**
  * Class Route
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute
- * @since 2.0.0
+ * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class Route
@@ -24,8 +24,8 @@ class Route
      * @param string $path
      * @param string $method
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(protected string $path, #[ExpectedValues(flagsFromClass: HttpMethods::class)] protected string $method = HttpMethods::ANY)
     {
@@ -35,8 +35,8 @@ class Route
      * Gets the request method.
      *
      * @return string
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     #[ExpectedValues(flagsFromClass: HttpMethods::class)]
     public final function getMethod(): string
@@ -48,8 +48,8 @@ class Route
      * Gets the request path.
      *
      * @return string
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getPath(): string
     {

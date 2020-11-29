@@ -10,9 +10,9 @@ use Raxos\Router\Error\RegisterException;
 /**
  * Class SubController
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute
- * @since 2.0.0
+ * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_METHOD)]
 class SubController
@@ -23,8 +23,8 @@ class SubController
      *
      * @param string $class
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(private string $class)
     {
@@ -37,8 +37,8 @@ class SubController
      * Gets the controller class name.
      *
      * @return string
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getClass(): string
     {

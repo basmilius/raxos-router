@@ -12,9 +12,9 @@ use Raxos\Router\RouterUtil;
 /**
  * Class RouteFrame
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Route
- * @since 2.0.0
+ * @since 1.0.0
  */
 class RouteFrame
 {
@@ -30,8 +30,8 @@ class RouteFrame
      *
      * @param array $frame
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(array $frame)
     {
@@ -49,8 +49,8 @@ class RouteFrame
      * @param array $params
      *
      * @return mixed
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function invoke(Router $router, array $params): mixed
     {
@@ -88,8 +88,8 @@ class RouteFrame
      *
      * @param Router $router
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function prepareController(Router $router): void
     {

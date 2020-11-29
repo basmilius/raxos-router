@@ -14,9 +14,9 @@ use function sprintf;
 /**
  * Class ControllerContainer
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Controller
- * @since 2.0.0
+ * @since 1.0.0
  */
 final class ControllerContainer
 {
@@ -29,8 +29,8 @@ final class ControllerContainer
      * @param string $class
      *
      * @return Controller
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function get(string $class): Controller
     {
@@ -43,8 +43,8 @@ final class ControllerContainer
      * @param string $class
      *
      * @return bool
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function has(string $class): bool
     {
@@ -58,8 +58,8 @@ final class ControllerContainer
      * @param string $class
      *
      * @return Controller
-     * @since 2.0.0
-     * @author Bas Milius <bas@glybe.nl>
+     * @since 1.0.0
+     * @author Bas Milius <bas@mili.us>
      */
     public final function load(Router $router, string $class): Controller
     {

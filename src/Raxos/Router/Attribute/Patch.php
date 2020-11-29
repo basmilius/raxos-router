@@ -9,9 +9,9 @@ use Raxos\Http\HttpMethods;
 /**
  * Class Patch
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute
- * @since 2.0.0
+ * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 final class Patch extends Route
@@ -22,8 +22,8 @@ final class Patch extends Route
      *
      * @param string $path
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(string $path)
     {

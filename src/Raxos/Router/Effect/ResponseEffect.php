@@ -9,9 +9,9 @@ use Raxos\Router\Router;
 /**
  * Class ResponseEffect
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Effect
- * @since 2.0.0
+ * @since 1.0.0
  */
 final class ResponseEffect extends Effect
 {
@@ -22,8 +22,8 @@ final class ResponseEffect extends Effect
      * @param Router $router
      * @param Response $response
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public function __construct(Router $router, private Response $response)
     {
@@ -34,8 +34,8 @@ final class ResponseEffect extends Effect
      * Gets the response.
      *
      * @return Response
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function getResponse(): Response
     {

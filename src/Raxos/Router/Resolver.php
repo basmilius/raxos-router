@@ -34,9 +34,9 @@ use const ARRAY_FILTER_USE_KEY;
 /**
  * Class Resolver
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
- * @since 2.0.0
+ * @since 1.0.0
  */
 class Resolver
 {
@@ -55,8 +55,8 @@ class Resolver
      * @param Controller|string $controller
      *
      * @throws RegisterException
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function addController(Router $router, Controller|string $controller): void
     {
@@ -74,8 +74,8 @@ class Resolver
     /**
      * Resolves the call stack for each route from the mappings.
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function resolveCallStack(): void
     {
@@ -94,8 +94,8 @@ class Resolver
      * Resolves the controller mappings.
      *
      * @throws RegisterException
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function resolveMappings(): void
     {
@@ -124,8 +124,8 @@ class Resolver
      * @param string $path
      *
      * @return RouteExecutor|null
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     protected function resolveRequest(string $method, string $path): ?RouteExecutor
     {
@@ -156,8 +156,8 @@ class Resolver
      *
      * @return array|null
      * @throws ReflectionException
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function convertAttribute(ReflectionAttribute $attribute): ?array
     {
@@ -199,8 +199,8 @@ class Resolver
      * @param array $options
      *
      * @throws ReflectionException
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function convertAttributes(array $attributes, array &$options): void
     {
@@ -225,8 +225,8 @@ class Resolver
      * @param array $request
      * @param array $params
      *
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function convertPath(array &$request, array $params): void
     {
@@ -256,8 +256,8 @@ class Resolver
      * @param bool $defaultValue
      *
      * @return string
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function convertPathParam(string $name, string $type, bool $defaultValue): string
     {
@@ -281,8 +281,8 @@ class Resolver
      * @param array $parents
      *
      * @return array
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function resolveCallStackController(array $controller, ?string $prefix = null, array $parents = []): array
     {
@@ -309,8 +309,8 @@ class Resolver
      * @param array $parents
      *
      * @return array
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function resolveCallStackRoute(array $controller, array $route, string $prefix, array $parents = []): array
     {
@@ -362,8 +362,8 @@ class Resolver
      *
      * @return array|null
      * @throws ReflectionException
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function resolveControllerMapping(ReflectionClass $class): ?array
     {
@@ -408,8 +408,8 @@ class Resolver
      *
      * @return array|null
      * @throws ReflectionException
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     private function resolveMethodMapping(ReflectionClass $class, ReflectionMethod $method): ?array
     {
@@ -466,8 +466,8 @@ class Resolver
      *
      * @return array
      * @throws ReflectionException
-     * @author Bas Milius <bas@glybe.nl>
-     * @since 2.0.0
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     #[ArrayShape([
         'name' => 'string',
