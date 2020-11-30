@@ -27,4 +27,16 @@ abstract class Effect
     {
     }
 
+    /**
+     * Gets the router instance.
+     *
+     * @return Router
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function getRouter(): Router
+    {
+        return $this->router;
+    }
+
 }

@@ -87,12 +87,12 @@ class RouteFrame
 
         try {
             if ($this->type === 'void') {
-            	$controller->invoke($this->method, ...$params);
+                $controller->invoke($this->method, ...$params);
 
-            	return new VoidEffect($router);
-			}
+                return new VoidEffect($router);
+            }
 
-			return $controller->invoke($this->method, ...$params);
+            return $controller->invoke($this->method, ...$params);
         } catch (Exception $err) {
             if ($controller instanceof ExceptionAwareInterface) {
                 return $controller->onException($err);

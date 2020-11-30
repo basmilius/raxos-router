@@ -12,4 +12,5 @@ namespace Raxos\Router\Effect;
  */
 final class NotFoundEffect extends Effect
 {
+
 }

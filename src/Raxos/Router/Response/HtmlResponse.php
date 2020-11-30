@@ -13,29 +13,28 @@ namespace Raxos\Router\Response;
 class HtmlResponse extends Response
 {
 
-	/**
-	 * {@inheritdoc}
-	 * @author Bas Milius <bas@mili.us>
-	 * @since 1.0.0
-	 */
-	protected function respondBody(): void
-	{
-		echo (string)$this->value;
-	}
+    /**
+     * {@inheritdoc}
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    protected function respondBody(): void
+    {
+        echo (string)$this->value;
+    }
 
-	/**
-	 * {@inheritdoc}
-	 * @author Bas Milius <bas@mili.us>
-	 * @since 1.0.0
-	 */
-	protected function respondHeaders(): void
-	{
-		if (!array_key_exists('Content-Type', $this->headers))
-		{
-			$this->headers['Content-Type'] = 'text/html';
-		}
+    /**
+     * {@inheritdoc}
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    protected function respondHeaders(): void
+    {
+        if (!array_key_exists('Content-Type', $this->headers)) {
+            $this->headers['Content-Type'] = 'text/html';
+        }
 
-		parent::respondHeaders();
-	}
+        parent::respondHeaders();
+    }
 
 }

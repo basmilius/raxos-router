@@ -58,8 +58,8 @@ final class ControllerContainer
      *
      * @return Controller
      * @throws RouterException
-     * @since 1.0.0
      * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
      */
     public final function load(Router $router, string $class): Controller
     {
