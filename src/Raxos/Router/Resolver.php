@@ -4,8 +4,14 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use JetBrains\PhpStorm\ArrayShape;
+use Raxos\Router\Attribute\Delete;
 use Raxos\Router\Attribute\Get;
+use Raxos\Router\Attribute\Head;
+use Raxos\Router\Attribute\Options;
+use Raxos\Router\Attribute\Patch;
+use Raxos\Router\Attribute\Post;
 use Raxos\Router\Attribute\Prefix;
+use Raxos\Router\Attribute\Put;
 use Raxos\Router\Attribute\Route;
 use Raxos\Router\Attribute\SubController;
 use Raxos\Router\Attribute\With;
@@ -23,6 +29,7 @@ use ReflectionUnionType;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
+use function array_merge_recursive;
 use function in_array;
 use function is_string;
 use function is_subclass_of;
@@ -166,7 +173,13 @@ class Resolver
     private function convertAttribute(ReflectionAttribute $attribute): ?array
     {
         switch ($attribute->getName()) {
+            case Delete::class:
             case Get::class:
+            case Head::class:
+            case Options::class:
+            case Patch::class:
+            case Post::class:
+            case Put::class:
             case Route::class:
                 /** @var Route $attr */
                 $attr = $attribute->newInstance();
@@ -312,7 +325,7 @@ class Resolver
         }
 
         foreach ($controller['routes'] as $route) {
-            $frames = array_merge($frames, $this->resolveCallStackRoute($controller, $route, $prefix, $parents));
+            $frames = array_merge_recursive($frames, $this->resolveCallStackRoute($controller, $route, $prefix, $parents));
         }
 
         return $frames;
