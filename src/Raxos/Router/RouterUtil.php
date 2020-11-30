@@ -9,7 +9,13 @@ use Raxos\Router\Error\RuntimeException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionNamedType;
+use ReflectionUnionType;
+use function array_key_exists;
+use function get_class;
+use function gettype;
+use function implode;
 use function in_array;
+use function is_subclass_of;
 use function sprintf;
 
 /**
@@ -68,15 +74,50 @@ final class RouterUtil
 
             if ($router->hasParameter($parameterName)) {
                 $value = $router->getParameter($parameterName);
+                $valueType = gettype($value);
 
-                if (in_array($parameterType, self::SIMPLE_TYPES)) {
-                    $value = self::convertParameterType($parameterType, $value);
+                if ($valueType !== 'object') {
+                    foreach ($parameterType as $type) {
+                        if (!in_array($type, self::SIMPLE_TYPES)) {
+                            continue;
+                        }
+
+                        $value = self::convertParameterType($type, $value);
+                        break;
+                    }
+                } else {
+                    $isCorrectType = false;
+                    $valueType = get_class($value);
+
+                    foreach ($parameterType as $type) {
+                        if ($valueType === $type) {
+                            $isCorrectType = true;
+                            break;
+                        }
+
+                        if (is_subclass_of($valueType, $type)) {
+                            $isCorrectType = true;
+                            break;
+                        }
+                    }
+
+                    if (!$isCorrectType) {
+                        $parameterType = implode('|', $parameterType);
+
+                        if ($method !== null) {
+                            throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", wrong type ("%s") for parameter "%s", should be "%s".', $controller, $method, $valueType, $parameterName, $parameterType), RuntimeException::ERR_INVALID_PARAMETER);
+                        } else {
+                            throw new RuntimeException(sprintf('Could not initialize controller "%s", wrong type ("%s") for parameter "%s", should be "%s".', $controller, $valueType, $parameterName, $parameterType), RuntimeException::ERR_INVALID_PARAMETER);
+                        }
+                    }
                 }
 
                 $params[] = $value;
-            } else if (isset($parameter['default'])) {
+            } else if (array_key_exists('default', $parameter)) {
                 $params[] = $parameter['default'];
             } else {
+                $parameterType = implode('|', $parameterType);
+
                 if ($method !== null) {
                     throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", missing parameter "%s" with type "%s".', $controller, $method, $parameterName, $parameterType), RuntimeException::ERR_MISSING_PARAMETER);
                 } else {
@@ -106,13 +147,27 @@ final class RouterUtil
             $params = [];
 
             foreach ($parameters as $parameter) {
-                /** @var ReflectionNamedType $parameterType */
                 $parameterType = $parameter->getType();
-                $parameterType = $parameterType->getName();
+
+                if ($parameterType instanceof ReflectionUnionType) {
+                    $types = [];
+
+                    foreach ($parameterType->getTypes() as $type) {
+                        $types[] = $type->getName();
+                    }
+                } else if ($parameterType instanceof ReflectionNamedType) {
+                    $types = [$parameterType->getName()];
+
+                    if ($parameterType->allowsNull()) {
+                        $types[] = 'null';
+                    }
+                } else {
+                    throw new ReflectionException('Unknown reflection type.');
+                }
 
                 $param = [
                     'name' => $parameter->getName(),
-                    'type' => $parameterType
+                    'type' => $types
                 ];
 
                 if ($parameter->isDefaultValueAvailable()) {

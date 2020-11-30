@@ -52,30 +52,32 @@ trait ResponseMethods
      * Returns a HTML response.
      *
      * @param mixed $value
+     * @param int $responseCode
      *
      * @return HtmlResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
     #[Pure]
-    protected final function html(string $value): HtmlResponse
+    protected final function html(string $value, #[ExpectedValues(flagsFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): HtmlResponse
     {
-        return new HtmlResponse($this->router, [], $value);
+        return new HtmlResponse($this->router, [], $responseCode, $value);
     }
 
     /**
      * Returns a JSON response.
      *
      * @param mixed $value
+     * @param int $responseCode
      *
      * @return JsonResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
     #[Pure]
-    protected final function json(mixed $value): JsonResponse
+    protected final function json(mixed $value, #[ExpectedValues(flagsFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): JsonResponse
     {
-        return new JsonResponse($this->router, [], $value);
+        return new JsonResponse($this->router, [], $responseCode, $value);
     }
 
     /**

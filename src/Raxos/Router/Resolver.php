@@ -19,7 +19,9 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 use function array_filter;
+use function array_key_exists;
 use function array_merge;
 use function in_array;
 use function is_string;
@@ -228,6 +230,7 @@ class Resolver
      * @param array $request
      * @param array $params
      *
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -236,11 +239,22 @@ class Resolver
         $path = $request[1];
 
         foreach ($params as $param) {
-            if (!in_array($param['type'], RouterUtil::SIMPLE_TYPES)) {
+            $simpleType = null;
+
+            foreach ($param['type'] as $type) {
+                if (!in_array($type, RouterUtil::SIMPLE_TYPES)) {
+                    continue;
+                }
+
+                $simpleType = $type;
+                break;
+            }
+
+            if ($simpleType === null) {
                 continue;
             }
 
-            $regex = $this->convertPathParam($param['name'], $param['type'], isset($param['default']));
+            $regex = $this->convertPathParam($param['name'], $simpleType, array_key_exists('default', $param));
 
             $path = strtr($path, [
                 '/$' . $param['name'] => $regex,
@@ -259,6 +273,7 @@ class Resolver
      * @param bool $defaultValue
      *
      * @return string
+     * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -268,12 +283,12 @@ class Resolver
             'string' => '[a-zA-Z0-9-_.@=,]+',
             'int' => '[0-9]+',
             'bool' => '(1|0|true|false)',
-            default => ''
+            default => throw new RegisterException('Parameter types used in route paths can only be simple types.', RegisterException::ERR_MAPPING_FAILED)
         };
 
         $prefix = '[/.]' . ($defaultValue ? '?' : '');
 
-        return "{$prefix}(?<{$name}>{$regex})";
+        return "{$prefix}(?<{$name}>{$regex})" . ($defaultValue ? '?' : '');
     }
 
     /**
@@ -480,7 +495,7 @@ class Resolver
      */
     #[ArrayShape([
         'name' => 'string',
-        'type' => 'string',
+        'type' => 'string[]',
         'default' => 'mixed'
     ])]
     private function resolveParameterMapping(ReflectionClass $class, ReflectionMethod $method, ReflectionParameter $parameter): array
@@ -489,12 +504,27 @@ class Resolver
             throw new RegisterException(sprintf('Parameter "%s" of method "%s::%s" should be strongly typed.', $parameter->getName(), $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
         }
 
-        /** @var ReflectionNamedType $type */
-        $type = $parameter->getType();
+        $parameterType = $parameter->getType();
+
+        if ($parameterType instanceof ReflectionUnionType) {
+            $types = [];
+
+            foreach ($parameterType->getTypes() as $type) {
+                $types[] = $type->getName();
+            }
+        } else if ($parameterType instanceof ReflectionNamedType) {
+            $types = [$parameterType->getName()];
+
+            if ($parameterType->allowsNull()) {
+                $types[] = 'null';
+            }
+        } else {
+            throw new ReflectionException('Unknown reflection type.');
+        }
 
         $param = [
             'name' => $parameter->getName(),
-            'type' => $type->getName()
+            'type' => $types
         ];
 
         if ($parameter->isDefaultValueAvailable()) {

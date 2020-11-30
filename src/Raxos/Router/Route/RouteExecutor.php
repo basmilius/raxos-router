@@ -10,6 +10,7 @@ use Raxos\Router\Error\RouterException;
 use Raxos\Router\Response\Response;
 use Raxos\Router\Router;
 use function array_map;
+use function count;
 
 /**
  * Class RouteExecutor
@@ -35,7 +36,10 @@ class RouteExecutor
      */
     public function __construct(array $frames, private array $params)
     {
-        $this->frames = array_map(fn(array $frame): RouteFrame => new RouteFrame($frame), $frames);
+        $frameCount = count($frames);
+        $index = 0;
+
+        $this->frames = array_map(fn(array $frame): RouteFrame => new RouteFrame($frame, $index === 0, ++$index === $frameCount), $frames);
     }
 
     /**

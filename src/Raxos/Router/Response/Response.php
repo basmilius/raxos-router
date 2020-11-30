@@ -3,8 +3,11 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
+use JetBrains\PhpStorm\ExpectedValues;
+use Raxos\Http\HttpCode;
 use Raxos\Router\Router;
 use function header;
+use function http_response_code;
 use function is_array;
 
 /**
@@ -22,12 +25,18 @@ abstract class Response
      *
      * @param Router $router
      * @param array $headers
+     * @param int $responseCode
      * @param mixed $value
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(protected Router $router, protected array $headers, protected mixed $value)
+    public function __construct(
+        protected Router $router,
+        protected array $headers,
+        #[ExpectedValues(flagsFromClass: HttpCode::class)] protected int $responseCode,
+        protected mixed $value
+    )
     {
     }
 
@@ -78,6 +87,8 @@ abstract class Response
      */
     public final function respond(): void
     {
+        http_response_code($this->responseCode);
+
         $this->respondHeaders();
         $this->respondBody();
     }

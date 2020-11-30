@@ -39,11 +39,13 @@ class RouteFrame
      * RouteFrame constructor.
      *
      * @param array $frame
+     * @param bool $isFirst
+     * @param bool $isLast
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(array $frame)
+    public function __construct(array $frame, private bool $isFirst, private bool $isLast)
     {
         $this->class = $frame['class'];
         $this->method = $frame['method'];
@@ -51,6 +53,78 @@ class RouteFrame
         $this->params = $frame['params'] ?? [];
         $this->request = $frame['request'];
         $this->type = $frame['type'];
+    }
+
+    /**
+     * Gets the controller class name.
+     *
+     * @return string
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function getClass(): string
+    {
+        return $this->class;
+    }
+
+    /**
+     * Gets the controller method name.
+     *
+     * @return string
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    /**
+     * Gets the middleware used in this frame.
+     *
+     * @return string[]
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function getMiddlewares(): array
+    {
+        return $this->middlewares;
+    }
+
+    /**
+     * Gets the params defined in the controller method.
+     *
+     * @return array
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function getParams(): array
+    {
+        return $this->params;
+    }
+
+    /**
+     * Gets the request.
+     *
+     * @return array
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function getRequest(): array
+    {
+        return $this->request;
+    }
+
+    /**
+     * Gets the return type of the controller method.
+     *
+     * @return string
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function getType(): string
+    {
+        return $this->type;
     }
 
     /**
@@ -86,7 +160,7 @@ class RouteFrame
         $params = RouterUtil::prepareParameters($router, $this->params, $this->class, $this->method);
 
         try {
-            if ($this->type === 'void') {
+            if ($this->type === 'void' && $this->isLast) {
                 $controller->invoke($this->method, ...$params);
 
                 return new VoidEffect($router);
@@ -121,6 +195,7 @@ class RouteFrame
 
             /** @var Middleware $middleware */
             $middleware = new $class($router, ...$arguments, ...$params);
+            $middleware->setFrame($this);
 
             return $middleware->handle();
         } catch (RouterException $err) {
