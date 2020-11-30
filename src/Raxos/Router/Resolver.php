@@ -465,11 +465,25 @@ class Resolver
             throw new RegisterException(sprintf('Method "%s::%s()" should have a return type.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
         }
 
-        /** @var ReflectionNamedType $returnType */
         $returnType = $method->getReturnType();
-        $returnType = $returnType->getName();
 
-        if (isset($mapping['child']) && $returnType !== 'void') {
+        if ($returnType instanceof ReflectionUnionType) {
+            $types = [];
+
+            foreach ($returnType->getTypes() as $type) {
+                $types[] = $type->getName();
+            }
+        } else if ($returnType instanceof ReflectionNamedType) {
+            $types = [$returnType->getName()];
+
+            if ($returnType->allowsNull()) {
+                $types[] = 'null';
+            }
+        } else {
+            throw new ReflectionException('Unknown reflection type.');
+        }
+
+        if (isset($mapping['child']) && $types[0] !== 'void') {
             throw new RegisterException(sprintf('The return type of method "%s::%s()" should be void.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
         }
 
@@ -488,7 +502,7 @@ class Resolver
             $this->convertPath($request, $mapping['params'] ?? []);
         }
 
-        $mapping['type'] = $returnType;
+        $mapping['type'] = $types;
 
         return $mapping;
     }

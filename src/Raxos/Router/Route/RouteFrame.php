@@ -33,7 +33,7 @@ class RouteFrame
     private array $middlewares;
     private array $params;
     private array $request;
-    private string $type;
+    private array $type;
 
     /**
      * RouteFrame constructor.
@@ -118,11 +118,11 @@ class RouteFrame
     /**
      * Gets the return type of the controller method.
      *
-     * @return string
+     * @return array
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function getType(): string
+    public final function getType(): array
     {
         return $this->type;
     }
@@ -160,7 +160,7 @@ class RouteFrame
         $params = RouterUtil::prepareParameters($router, $this->params, $this->class, $this->method);
 
         try {
-            if ($this->type === 'void' && $this->isLast) {
+            if ($this->type[0] === 'void' && $this->isLast) {
                 $controller->invoke($this->method, ...$params);
 
                 return new VoidEffect($router);
