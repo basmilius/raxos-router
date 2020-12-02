@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Error;
 
-use Exception;
+use Raxos\Foundation\Error\RaxosException;
 use Throwable;
 
 /**
@@ -13,7 +13,7 @@ use Throwable;
  * @package Raxos\Router\Error
  * @since 1.0.0
  */
-abstract class RouterException extends Exception
+abstract class RouterException extends RaxosException
 {
 
     /**
