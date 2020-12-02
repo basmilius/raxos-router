@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use JetBrains\PhpStorm\ArrayShape;
+use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Router\Attribute\Delete;
 use Raxos\Router\Attribute\Get;
 use Raxos\Router\Attribute\Head;
@@ -23,9 +24,7 @@ use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use ReflectionNamedType;
 use ReflectionParameter;
-use ReflectionUnionType;
 use function array_filter;
 use function array_key_exists;
 use function array_merge;
@@ -465,23 +464,7 @@ class Resolver
             throw new RegisterException(sprintf('Method "%s::%s()" should have a return type.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
         }
 
-        $returnType = $method->getReturnType();
-
-        if ($returnType instanceof ReflectionUnionType) {
-            $types = [];
-
-            foreach ($returnType->getTypes() as $type) {
-                $types[] = $type->getName();
-            }
-        } else if ($returnType instanceof ReflectionNamedType) {
-            $types = [$returnType->getName()];
-
-            if ($returnType->allowsNull()) {
-                $types[] = 'null';
-            }
-        } else {
-            throw new ReflectionException('Unknown reflection type.');
-        }
+        $types = ReflectionUtil::getTypes($method->getReturnType()) ?? [];
 
         if (isset($mapping['child']) && $types[0] !== 'void') {
             throw new RegisterException(sprintf('The return type of method "%s::%s()" should be void.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
@@ -531,27 +514,9 @@ class Resolver
             throw new RegisterException(sprintf('Parameter "%s" of method "%s::%s" should be strongly typed.', $parameter->getName(), $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
         }
 
-        $parameterType = $parameter->getType();
-
-        if ($parameterType instanceof ReflectionUnionType) {
-            $types = [];
-
-            foreach ($parameterType->getTypes() as $type) {
-                $types[] = $type->getName();
-            }
-        } else if ($parameterType instanceof ReflectionNamedType) {
-            $types = [$parameterType->getName()];
-
-            if ($parameterType->allowsNull()) {
-                $types[] = 'null';
-            }
-        } else {
-            throw new ReflectionException('Unknown reflection type.');
-        }
-
         $param = [
             'name' => $parameter->getName(),
-            'type' => $types
+            'type' => ReflectionUtil::getTypes($parameter->getType()) ?? []
         ];
 
         if ($parameter->isDefaultValueAvailable()) {

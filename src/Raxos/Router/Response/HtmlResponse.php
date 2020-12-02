@@ -6,9 +6,9 @@ namespace Raxos\Router\Response;
 /**
  * Class HtmlResponse
  *
- * @author Bas Milius <bas@glybe.nl>
+ * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Response
- * @since 2.0.0
+ * @since 1.0.0
  */
 class HtmlResponse extends Response
 {

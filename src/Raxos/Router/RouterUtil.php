@@ -4,12 +4,11 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use JetBrains\PhpStorm\Pure;
+use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Router\Error\RouterException;
 use Raxos\Router\Error\RuntimeException;
 use ReflectionClass;
 use ReflectionException;
-use ReflectionNamedType;
-use ReflectionUnionType;
 use function array_key_exists;
 use function get_class;
 use function gettype;
@@ -147,23 +146,7 @@ final class RouterUtil
             $params = [];
 
             foreach ($parameters as $parameter) {
-                $parameterType = $parameter->getType();
-
-                if ($parameterType instanceof ReflectionUnionType) {
-                    $types = [];
-
-                    foreach ($parameterType->getTypes() as $type) {
-                        $types[] = $type->getName();
-                    }
-                } else if ($parameterType instanceof ReflectionNamedType) {
-                    $types = [$parameterType->getName()];
-
-                    if ($parameterType->allowsNull()) {
-                        $types[] = 'null';
-                    }
-                } else {
-                    throw new ReflectionException('Unknown reflection type.');
-                }
+                $types = ReflectionUtil::getTypes($parameter->getType()) ?? [];
 
                 $param = [
                     'name' => $parameter->getName(),

@@ -24,6 +24,7 @@
 	"require": {
 		"ext-json": "*",
 		"jetbrains/phpstorm-attributes": "^1.0",
+        "raxos/foundation": "dev-master",
 		"raxos/http": "dev-master"
 	}
 }
