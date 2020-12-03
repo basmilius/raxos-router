@@ -5,6 +5,7 @@ namespace Raxos\Router;
 
 use JetBrains\PhpStorm\ArrayShape;
 use Raxos\Foundation\Util\ReflectionUtil;
+use Raxos\Http\HttpMethods;
 use Raxos\Router\Attribute\Delete;
 use Raxos\Router\Attribute\Get;
 use Raxos\Router\Attribute\Head;
@@ -27,6 +28,7 @@ use ReflectionMethod;
 use ReflectionParameter;
 use function array_filter;
 use function array_key_exists;
+use function array_keys;
 use function array_merge;
 use function array_merge_recursive;
 use function in_array;
@@ -139,12 +141,18 @@ class Resolver
     protected function resolveRequest(string $method, string $path): ?RouteExecutor
     {
         foreach ($this->callStack as $route => $requestMethods) {
-            $frames = $requestMethods[$method] ?? $requestMethods['any'] ?? null;
-            $regex = "#^{$route}$#";
+            $frames = $requestMethods[$method] ?? $requestMethods[HttpMethods::ANY] ?? null;
+
+            if ($frames === null && $method === HttpMethods::OPTIONS) {
+                $key = array_keys($requestMethods)[0] ?? null;
+                $frames = $requestMethods[$key] ?? null;
+            }
 
             if ($frames === null) {
                 continue;
             }
+
+            $regex = "#^{$route}$#";
 
             if (!preg_match($regex, $path, $matches)) {
                 continue;
