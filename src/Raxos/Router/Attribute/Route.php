@@ -27,7 +27,7 @@ class Route
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(protected string $path, #[ExpectedValues(flagsFromClass: HttpMethods::class)] protected string $method = HttpMethods::ANY)
+    public function __construct(protected string $path, #[ExpectedValues(valuesFromClass: HttpMethods::class)] protected string $method = HttpMethods::ANY)
     {
     }
 
@@ -38,7 +38,7 @@ class Route
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    #[ExpectedValues(flagsFromClass: HttpMethods::class)]
+    #[ExpectedValues(valuesFromClass: HttpMethods::class)]
     public final function getMethod(): string
     {
         return $this->method;

@@ -34,7 +34,7 @@ abstract class Response
     public function __construct(
         protected Router $router,
         protected array $headers,
-        #[ExpectedValues(flagsFromClass: HttpCode::class)] protected int $responseCode,
+        #[ExpectedValues(valuesFromClass: HttpCode::class)] protected int $responseCode,
         protected mixed $value
     )
     {

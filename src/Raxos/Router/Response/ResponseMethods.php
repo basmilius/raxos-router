@@ -59,7 +59,7 @@ trait ResponseMethods
      * @since 1.0.0
      */
     #[Pure]
-    protected final function html(string $value, #[ExpectedValues(flagsFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): HtmlResponse
+    protected final function html(string $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): HtmlResponse
     {
         return new HtmlResponse($this->router, [], $responseCode, $value);
     }
@@ -75,7 +75,7 @@ trait ResponseMethods
      * @since 1.0.0
      */
     #[Pure]
-    protected final function json(mixed $value, #[ExpectedValues(flagsFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): JsonResponse
+    protected final function json(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): JsonResponse
     {
         return new JsonResponse($this->router, [], $responseCode, $value);
     }
@@ -90,7 +90,7 @@ trait ResponseMethods
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected final function redirect(string $destination, #[ExpectedValues(flagsFromClass: HttpCode::class)] int $responseCode = HttpCode::TEMPORARY_REDIRECT): RedirectEffect
+    protected final function redirect(string $destination, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::TEMPORARY_REDIRECT): RedirectEffect
     {
         return new RedirectEffect($this->router, $destination, $responseCode);
     }

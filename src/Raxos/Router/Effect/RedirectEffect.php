@@ -27,7 +27,7 @@ final class RedirectEffect extends Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(Router $router, private string $destination, #[ExpectedValues(flagsFromClass: HttpCode::class)] private int $responseCode = HttpCode::TEMPORARY_REDIRECT)
+    public function __construct(Router $router, private string $destination, #[ExpectedValues(valuesFromClass: HttpCode::class)] private int $responseCode = HttpCode::TEMPORARY_REDIRECT)
     {
         parent::__construct($router);
     }
@@ -53,7 +53,7 @@ final class RedirectEffect extends Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    #[ExpectedValues(flagsFromClass: HttpCode::class)]
+    #[ExpectedValues(valuesFromClass: HttpCode::class)]
     public final function getResponseCode(): int
     {
         return $this->responseCode;
