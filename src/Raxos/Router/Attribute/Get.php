@@ -13,7 +13,7 @@ use Raxos\Http\HttpMethods;
  * @package Raxos\Router\Attribute
  * @since 1.0.0
  */
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class Get extends Route
 {
 
