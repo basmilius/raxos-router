@@ -5,6 +5,11 @@ namespace Raxos\Router;
 
 use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Util\ReflectionUtil;
+use Raxos\Http\Body\HttpBodyJson;
+use Raxos\Http\HttpRequest;
+use Raxos\Http\Validate\Error\ValidatorException;
+use Raxos\Http\Validate\RequestModel;
+use Raxos\Http\Validate\Validator;
 use Raxos\Router\Error\RouterException;
 use Raxos\Router\Error\RuntimeException;
 use ReflectionClass;
@@ -114,6 +119,34 @@ final class RouterUtil
                 $params[] = $value;
             } else if (array_key_exists('default', $parameter)) {
                 $params[] = $parameter['default'];
+            } else if (isset($parameterType[0]) && is_subclass_of($parameterType[0], RequestModel::class)) {
+                try {
+                    $request = $router->getParameter('request');
+
+                    if ($request === null || !($request instanceof HttpRequest)) {
+                        throw new RuntimeException(sprintf('Validation failed for controller method "%s::%s()". The $request global was not set or is not an instance of %s.', $controller, $method, HttpRequest::class), RuntimeException::ERR_VALIDATION_ERROR);
+                    }
+
+                    $body = $request->body();
+                    $contentType = $request->contentType();
+
+                    if ($contentType === 'application/json' && $body instanceof HttpBodyJson) {
+                        $data = $body->array();
+                    } else {
+                        $data = $request->post()->array();
+
+                        foreach ($request->files() as $key => $file) {
+                            $data[$key] = $file;
+                        }
+                    }
+
+                    /** @var string $requestModel */
+                    $requestModel = $parameterType[0];
+
+                    $params[] = Validator::validate($requestModel, $data);
+                } catch (ValidatorException $err) {
+                    throw new RuntimeException(sprintf('Validation failed for controller method "%s::%s()".', $controller, $method), RuntimeException::ERR_VALIDATION_FAILED, $err);
+                }
             } else {
                 $parameterType = implode('|', $parameterType);
 

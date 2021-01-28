@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Middleware;
 
+use Raxos\Http\Validate\Error\ValidatorException;
 use Raxos\Router\Effect\Effect;
 use Raxos\Router\Response\Response;
 use Raxos\Router\Response\ResponseMethods;
@@ -64,6 +65,7 @@ abstract class Middleware
      * Handles the request.
      *
      * @return Effect|Response|bool|null
+     * @throws ValidatorException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
