@@ -95,4 +95,20 @@ trait ResponseMethods
         return new RedirectEffect($this->router, $destination, $responseCode);
     }
 
+    /**
+     * Returns a XML response.
+     *
+     * @param mixed $value
+     * @param int $responseCode
+     *
+     * @return XmlResponse
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    #[Pure]
+    protected final function xml(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): XmlResponse
+    {
+        return new XmlResponse($this->router, [], $responseCode, $value);
+    }
+
 }
