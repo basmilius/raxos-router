@@ -29,18 +29,19 @@ use ReflectionParameter;
 use function array_filter;
 use function array_key_exists;
 use function array_keys;
+use function array_map;
 use function array_merge;
 use function array_merge_recursive;
+use function array_multisort;
 use function in_array;
 use function is_string;
 use function is_subclass_of;
 use function preg_match;
 use function rtrim;
 use function sprintf;
-use function strlen;
 use function strtr;
-use function uksort;
 use const ARRAY_FILTER_USE_KEY;
+use const SORT_DESC;
 
 /**
  * Class Resolver
@@ -54,9 +55,9 @@ class Resolver
 
     private const ARRAYABLE_OPTIONS = ['middlewares', 'request'];
 
-    private array $callStack = [];
-    private array $controllerList = [];
-    private array $mappings = [];
+    protected array $callStack = [];
+    protected array $controllerList = [];
+    protected array $mappings = [];
     private array $resolverDidControllers = [];
 
     /**
@@ -96,7 +97,8 @@ class Resolver
             $frames = array_merge($frames, $this->resolveCallStackController($controller));
         }
 
-        uksort($frames, fn(string $a, string $b): int => strlen($b) <=> strlen($a));
+        $paths = array_map('strlen', array_keys($frames));
+        array_multisort($paths, SORT_DESC, $frames);
 
         $this->callStack = $frames;
     }
@@ -158,7 +160,7 @@ class Resolver
                 continue;
             }
 
-            $params = array_filter($matches, fn(string|int $key): bool => is_string($key), ARRAY_FILTER_USE_KEY);
+            $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
             return new RouteExecutor($frames, $params);
         }
@@ -179,41 +181,15 @@ class Resolver
      */
     private function convertAttribute(ReflectionAttribute $attribute): ?array
     {
-        switch ($attribute->getName()) {
-            case Delete::class:
-            case Get::class:
-            case Head::class:
-            case Options::class:
-            case Patch::class:
-            case Post::class:
-            case Put::class:
-            case Route::class:
-                /** @var Route $attr */
-                $attr = $attribute->newInstance();
+        $arguments = $attribute->getArguments();
 
-                return ['request', [$attr->getMethod(), $attr->getPath()]];
-
-            case Prefix::class:
-                /** @var Prefix $attr */
-                $attr = $attribute->newInstance();
-
-                return ['prefix', $attr->getPath()];
-
-            case SubController::class:
-                /** @var SubController $attr */
-                $attr = $attribute->newInstance();
-
-                return ['child', $this->resolveControllerMapping(new ReflectionClass($attr->getClass()))];
-
-            case With::class:
-                /** @var With $attr */
-                $attr = $attribute->newInstance();
-
-                return ['middlewares', [$attr->getClass(), $attr->getArguments()]];
-
-            default:
-                return null;
-        }
+        return match ($attribute->getName()) {
+            Delete::class, Get::class, Head::class, Options::class, Patch::class, Post::class, Put::class, Route::class => ['request', [$arguments[1] ?? HttpMethods::ANY, $arguments[0] ?? '/']],
+            Prefix::class => ['prefix', $arguments[0] ?? '/'],
+            SubController::class => ['child', $this->resolveControllerMapping(new ReflectionClass($arguments[0]))],
+            With::class => ['middlewares', [$arguments[0], $arguments[1] ?? []]],
+            default => null,
+        };
     }
 
     /**
