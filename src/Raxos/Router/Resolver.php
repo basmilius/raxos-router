@@ -34,7 +34,6 @@ use function array_merge;
 use function array_merge_recursive;
 use function array_multisort;
 use function in_array;
-use function is_string;
 use function is_subclass_of;
 use function preg_match;
 use function rtrim;
@@ -181,15 +180,41 @@ class Resolver
      */
     private function convertAttribute(ReflectionAttribute $attribute): ?array
     {
-        $arguments = $attribute->getArguments();
+        switch ($attribute->getName()) {
+            case Delete::class:
+            case Get::class:
+            case Head::class:
+            case Options::class:
+            case Patch::class:
+            case Post::class:
+            case Put::class:
+            case Route::class:
+                /** @var Route $attr */
+                $attr = $attribute->newInstance();
 
-        return match ($attribute->getName()) {
-            Delete::class, Get::class, Head::class, Options::class, Patch::class, Post::class, Put::class, Route::class => ['request', [$arguments[1] ?? HttpMethods::ANY, $arguments[0] ?? '/']],
-            Prefix::class => ['prefix', $arguments[0] ?? '/'],
-            SubController::class => ['child', $this->resolveControllerMapping(new ReflectionClass($arguments[0]))],
-            With::class => ['middlewares', [$arguments[0], $arguments[1] ?? []]],
-            default => null,
-        };
+                return ['request', [$attr->getMethod(), $attr->getPath()]];
+
+            case Prefix::class:
+                /** @var Prefix $attr */
+                $attr = $attribute->newInstance();
+
+                return ['prefix', $attr->getPath()];
+
+            case SubController::class:
+                /** @var SubController $attr */
+                $attr = $attribute->newInstance();
+
+                return ['child', $this->resolveControllerMapping(new ReflectionClass($attr->getClass()))];
+
+            case With::class:
+                /** @var With $attr */
+                $attr = $attribute->newInstance();
+
+                return ['middlewares', [$attr->getClass(), $attr->getArguments()]];
+
+            default:
+                return null;
+        }
     }
 
     /**
