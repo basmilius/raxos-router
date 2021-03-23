@@ -76,7 +76,7 @@ class Resolver
             throw new RegisterException(sprintf('Argument 1 to %s must be an instance or subclass of %s.', __METHOD__, Controller::class), RegisterException::ERR_NOT_A_CONTROLLER);
         }
 
-        if (is_string($controller)) {
+        if (!($controller instanceof Controller)) {
             $controller = new $controller($router);
         }
 
