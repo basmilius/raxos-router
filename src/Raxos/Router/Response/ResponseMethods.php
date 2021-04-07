@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use JetBrains\PhpStorm\ExpectedValues;
-use JetBrains\PhpStorm\Pure;
 use Raxos\Http\HttpCode;
 use Raxos\Router\Effect\RedirectEffect;
-use function array_key_exists;
-use function is_array;
+use Raxos\Router\Router;
 
 /**
  * Trait ResponseMethods
+ *
+ * @property Router $router
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Controller
@@ -19,8 +19,6 @@ use function is_array;
  */
 trait ResponseMethods
 {
-
-    private static array $headers = [];
 
     /**
      * Adds the given header to the response.
@@ -35,15 +33,9 @@ trait ResponseMethods
      */
     protected function header(string $name, string $value, bool $replace = true): static
     {
-        if (array_key_exists($name, static::$headers) && !$replace) {
-            if (is_array(static::$headers[$name])) {
-                static::$headers[$name][] = $value;
-            } else {
-                static::$headers[$name] = [static::$headers[$name], $value];
-            }
-        } else {
-            static::$headers[$name] = $value;
-        }
+        $this->router
+            ->getResponseRegistry()
+            ->header($name, $value, $replace);
 
         return $this;
     }
@@ -58,10 +50,13 @@ trait ResponseMethods
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    #[Pure]
     protected final function html(string $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): HtmlResponse
     {
-        return new HtmlResponse($this->router, static::$headers, $responseCode, $value);
+        $this->router
+            ->getResponseRegistry()
+            ->responseCode($responseCode);
+
+        return new HtmlResponse($this->router, $value);
     }
 
     /**
@@ -74,10 +69,13 @@ trait ResponseMethods
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    #[Pure]
     protected final function json(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): JsonResponse
     {
-        return new JsonResponse($this->router, static::$headers, $responseCode, $value);
+        $this->router
+            ->getResponseRegistry()
+            ->responseCode($responseCode);
+
+        return new JsonResponse($this->router, $value);
     }
 
     /**
@@ -105,10 +103,13 @@ trait ResponseMethods
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    #[Pure]
     protected final function xml(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): XmlResponse
     {
-        return new XmlResponse($this->router, static::$headers, $responseCode, $value);
+        $this->router
+            ->getResponseRegistry()
+            ->responseCode($responseCode);
+
+        return new XmlResponse($this->router, $value);
     }
 
 }

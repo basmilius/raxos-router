@@ -20,12 +20,12 @@ use function is_array;
 abstract class Response
 {
 
+    protected ?ResponseRegistry $responseRegistry;
+
     /**
      * Response constructor.
      *
      * @param Router $router
-     * @param array $headers
-     * @param int $responseCode
      * @param mixed $value
      *
      * @author Bas Milius <bas@mili.us>
@@ -33,11 +33,10 @@ abstract class Response
      */
     public function __construct(
         protected Router $router,
-        protected array $headers,
-        #[ExpectedValues(valuesFromClass: HttpCode::class)] protected int $responseCode,
         protected mixed $value
     )
     {
+        $this->responseRegistry = $router->getResponseRegistry();
     }
 
     /**
@@ -50,7 +49,21 @@ abstract class Response
      */
     public final function getHeaders(): array
     {
-        return $this->headers;
+        return $this->router->getResponseRegistry()->getHeaders();
+    }
+
+    /**
+     * Gets the http code for the response.
+     *
+     * @return int
+     *
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    #[ExpectedValues(valuesFromClass: HttpCode::class)]
+    public final function getResponseCode(): int
+    {
+        return $this->router->getResponseRegistry()->getResponseCode();
     }
 
     /**
@@ -87,7 +100,7 @@ abstract class Response
      */
     public final function respond(): void
     {
-        http_response_code($this->responseCode);
+        http_response_code($this->getResponseCode());
 
         $this->respondHeaders();
         $this->respondBody();
@@ -109,7 +122,7 @@ abstract class Response
      */
     protected function respondHeaders(): void
     {
-        foreach ($this->headers as $name => $value) {
+        foreach ($this->getHeaders() as $name => $value) {
             if (is_array($value)) {
                 foreach ($value as $v) {
                     header("{$name}: {$v}", replace: false);

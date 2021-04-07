@@ -20,7 +20,7 @@ class HtmlResponse extends Response
      */
     protected function respondBody(): void
     {
-        echo (string)$this->value;
+        echo $this->value;
     }
 
     /**
@@ -30,8 +30,8 @@ class HtmlResponse extends Response
      */
     protected function respondHeaders(): void
     {
-        if (!array_key_exists('Content-Type', $this->headers)) {
-            $this->headers['Content-Type'] = 'text/html';
+        if (!$this->responseRegistry->hasHeader('Content-Type')) {
+            $this->responseRegistry->header('Content-Type', 'text/html');
         }
 
         parent::respondHeaders();

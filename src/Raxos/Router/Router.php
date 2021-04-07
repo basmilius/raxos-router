@@ -9,6 +9,7 @@ use Raxos\Router\Controller\ControllerContainer;
 use Raxos\Router\Effect\Effect;
 use Raxos\Router\Effect\NotFoundEffect;
 use Raxos\Router\Error\RouterException;
+use Raxos\Router\Response\ResponseRegistry;
 use function array_key_exists;
 
 /**
@@ -24,6 +25,9 @@ class Router extends Resolver
     private ControllerContainer $controllers;
     private array $globals = [];
     private array $parameters = [];
+    private ?ResponseRegistry $responseRegistry = null;
+
+    private bool $isSetupDone = false;
 
     /**
      * Router constructor.
@@ -49,6 +53,20 @@ class Router extends Resolver
     }
 
     /**
+     * Gets the response registry.
+     *
+     * @return ResponseRegistry
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function &getResponseRegistry(): ResponseRegistry
+    {
+        $this->responseRegistry ??= new ResponseRegistry();
+
+        return $this->responseRegistry;
+    }
+
+    /**
      * Gets a parameter value.
      *
      * @param string $name
@@ -57,6 +75,8 @@ class Router extends Resolver
      * @return mixed
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
+     *
+     * @noinspection PhpMixedReturnTypeCanBeReducedInspection // phpstorm suggests mixed|static, which is not possible.
      */
     public final function getParameter(string $name, mixed $defaultValue = null): mixed
     {
@@ -146,14 +166,20 @@ class Router extends Resolver
      */
     public function resolve(string $method, string $path): Effect
     {
-        $this->resolveMappings();
-        $this->resolveCallStack();
+        if (!$this->isSetupDone) {
+            $this->resolveMappings();
+            $this->resolveCallStack();
+
+            $this->isSetupDone = true;
+        }
 
         $route = $this->resolveRequest($method, $path);
 
         if ($route === null) {
             return new NotFoundEffect($this);
         }
+
+        $this->responseRegistry = null;
 
         return $route->execute($this);
     }

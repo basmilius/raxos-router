@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use function array_key_exists;
 use function json_encode;
 use const JSON_BIGINT_AS_STRING;
 use const JSON_HEX_AMP;
@@ -40,8 +39,8 @@ class JsonResponse extends Response
      */
     protected function respondHeaders(): void
     {
-        if (!array_key_exists('Content-Type', $this->headers)) {
-            $this->headers['Content-Type'] = 'application/json';
+        if (!$this->responseRegistry->hasHeader('Content-Type')) {
+            $this->responseRegistry->header('Content-Type', 'application/json');
         }
 
         parent::respondHeaders();

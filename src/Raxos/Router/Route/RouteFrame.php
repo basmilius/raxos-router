@@ -128,6 +128,30 @@ class RouteFrame
     }
 
     /**
+     * Returns TRUE if the route frame is first.
+     *
+     * @return bool
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function isFirst(): bool
+    {
+        return $this->isFirst;
+    }
+
+    /**
+     * Returns TRUE if the route frame is last.
+     *
+     * @return bool
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function isLast(): bool
+    {
+        return $this->isLast;
+    }
+
+    /**
      * Invokes the controller method.
      *
      * @param Router $router

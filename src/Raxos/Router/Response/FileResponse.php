@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\HttpCode;
 use Raxos\Http\HttpSendFile;
 use Raxos\Router\Router;
 use function header;
@@ -31,7 +30,7 @@ class FileResponse extends Response
      */
     public function __construct(Router $router, string $value, protected string $contentType)
     {
-        parent::__construct($router, [], HttpCode::OK, $value);
+        parent::__construct($router, $value);
     }
 
     /**
