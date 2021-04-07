@@ -61,7 +61,7 @@ trait ResponseMethods
     #[Pure]
     protected final function html(string $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): HtmlResponse
     {
-        return new HtmlResponse($this->router, [], $responseCode, $value);
+        return new HtmlResponse($this->router, static::$headers, $responseCode, $value);
     }
 
     /**
@@ -77,7 +77,7 @@ trait ResponseMethods
     #[Pure]
     protected final function json(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): JsonResponse
     {
-        return new JsonResponse($this->router, [], $responseCode, $value);
+        return new JsonResponse($this->router, static::$headers, $responseCode, $value);
     }
 
     /**
@@ -108,7 +108,7 @@ trait ResponseMethods
     #[Pure]
     protected final function xml(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): XmlResponse
     {
-        return new XmlResponse($this->router, [], $responseCode, $value);
+        return new XmlResponse($this->router, static::$headers, $responseCode, $value);
     }
 
 }
