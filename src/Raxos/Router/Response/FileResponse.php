@@ -8,7 +8,6 @@ use Raxos\Router\Router;
 use function file_get_contents;
 use function filemtime;
 use function gmdate;
-use function http_response_code;
 use function md5_file;
 use function strtotime;
 
@@ -57,7 +56,7 @@ class FileResponse extends Response
      */
     public function prepareBody(): string
     {
-        if (http_response_code() === HttpCode::NOT_MODIFIED) {
+        if ($this->getResponseCode() === HttpCode::NOT_MODIFIED) {
             return '';
         }
 
@@ -93,7 +92,7 @@ class FileResponse extends Response
         $this->header('Pragma', 'cache');
 
         if ($etagMatch || $modifiedMatch) {
-            http_response_code(HttpCode::NOT_MODIFIED);
+            $this->getrouter()->getResponseRegistry()->responseCode(HttpCode::NOT_MODIFIED);
         }
     }
 
