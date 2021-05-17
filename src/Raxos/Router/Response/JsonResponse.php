@@ -27,9 +27,9 @@ class JsonResponse extends Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function respondBody(): void
+    public function prepareBody(): string
     {
-        echo json_encode($this->value, self::FLAGS);
+        return json_encode($this->value, self::FLAGS) ?: '{}';
     }
 
     /**
@@ -37,13 +37,11 @@ class JsonResponse extends Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function respondHeaders(): void
+    public function prepareHeaders(): void
     {
-        if (!$this->responseRegistry->hasHeader('Content-Type')) {
-            $this->responseRegistry->header('Content-Type', 'application/json');
+        if (!$this->hasHeader('Content-Type')) {
+            $this->header('Content-Type', 'application/json');
         }
-
-        parent::respondHeaders();
     }
 
 }

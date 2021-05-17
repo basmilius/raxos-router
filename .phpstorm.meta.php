@@ -6,4 +6,9 @@ namespace PHPSTORM_META {
         '' => '@'
     ]));
 
+    override(\Raxos\Router\Router::getParameter(), map([
+        '' => '@',
+        'request' => \Raxos\Http\HttpRequest::class
+    ]));
+
 }

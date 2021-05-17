@@ -18,9 +18,9 @@ class HtmlResponse extends Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function respondBody(): void
+    public function prepareBody(): string
     {
-        echo $this->value;
+        return (string)$this->value;
     }
 
     /**
@@ -28,13 +28,11 @@ class HtmlResponse extends Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function respondHeaders(): void
+    public function prepareHeaders(): void
     {
-        if (!$this->responseRegistry->hasHeader('Content-Type')) {
-            $this->responseRegistry->header('Content-Type', 'text/html');
+        if (!$this->hasHeader('Content-Type')) {
+            $this->header('Content-Type', 'text/html');
         }
-
-        parent::respondHeaders();
     }
 
 }

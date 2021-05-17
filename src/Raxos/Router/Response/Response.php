@@ -53,6 +53,37 @@ abstract class Response
     }
 
     /**
+     * Returns TRUE if the given header exists on the response.
+     *
+     * @param string $name
+     *
+     * @return bool
+     * @see ResponseRegistry::hasHeader()
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function hasHeader(string $name): bool
+    {
+        return $this->router->getResponseRegistry()->hasHeader($name);
+    }
+
+    /**
+     * Adds a response header with the given name and content.
+     *
+     * @param string $name
+     * @param string $content
+     *
+     * @return ResponseRegistry
+     * @see ResponseRegistry::header()
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function header(string $name, string $content): ResponseRegistry
+    {
+        return $this->router->getResponseRegistry()->header($name, $content);
+    }
+
+    /**
      * Gets the http code for the response.
      *
      * @return int
@@ -93,6 +124,23 @@ abstract class Response
     }
 
     /**
+     * Prepares the response body.
+     *
+     * @return string
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public abstract function prepareBody(): string;
+
+    /**
+     * Prepares the response headers.
+     *
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public abstract function prepareHeaders(): void;
+
+    /**
      * Sends the response to browser.
      *
      * @author Bas Milius <bas@mili.us>
@@ -100,6 +148,8 @@ abstract class Response
      */
     public final function respond(): void
     {
+        $this->prepareHeaders();
+
         http_response_code($this->getResponseCode());
 
         $this->respondHeaders();
@@ -112,7 +162,10 @@ abstract class Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected abstract function respondBody(): void;
+    private function respondBody(): void
+    {
+        echo $this->prepareBody();
+    }
 
     /**
      * Respond the headers to the browser.
@@ -120,7 +173,7 @@ abstract class Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function respondHeaders(): void
+    private function respondHeaders(): void
     {
         foreach ($this->getHeaders() as $name => $value) {
             if (is_array($value)) {

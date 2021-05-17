@@ -24,7 +24,7 @@ class XmlResponse extends Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function respondBody(): void
+    public function prepareBody(): string
     {
         if ($this->value instanceof SimpleXMLElement) {
             $xml = $this->value;
@@ -36,7 +36,7 @@ class XmlResponse extends Response
             $xml = new SimpleXMLElement('<response>' . ((string)$this->value) . '</response>');
         }
 
-        echo $xml->asXML();
+        return $xml->asXML() ?: '<response/>';
     }
 
     /**
@@ -44,13 +44,11 @@ class XmlResponse extends Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function respondHeaders(): void
+    public function prepareHeaders(): void
     {
-        if (!$this->responseRegistry->hasHeader('Content-Type')) {
-            $this->responseRegistry->header('Content-Type', 'text/xml');
+        if (!$this->hasHeader('Content-Type')) {
+            $this->header('Content-Type', 'text/xml');
         }
-
-        parent::respondHeaders();
     }
 
 }
