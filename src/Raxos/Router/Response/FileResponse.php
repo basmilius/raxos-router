@@ -57,7 +57,7 @@ class FileResponse extends Response
      */
     public function prepareBody(): string
     {
-        if (http_response_code() === HttpCode::NO_CONTENT) {
+        if (http_response_code() === HttpCode::NOT_MODIFIED) {
             return '';
         }
 
