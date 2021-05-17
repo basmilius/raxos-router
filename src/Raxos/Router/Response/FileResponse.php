@@ -57,6 +57,10 @@ class FileResponse extends Response
      */
     public function prepareBody(): string
     {
+        if (http_response_code() === HttpCode::NO_CONTENT) {
+            return '';
+        }
+
         return file_get_contents($this->value);
     }
 
@@ -90,7 +94,6 @@ class FileResponse extends Response
 
         if ($etagMatch || $modifiedMatch) {
             http_response_code(HttpCode::NOT_MODIFIED);
-            die;
         }
     }
 
