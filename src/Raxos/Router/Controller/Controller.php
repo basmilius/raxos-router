@@ -44,9 +44,7 @@ abstract class Controller
      */
     public function invoke(string $method, mixed ...$params): mixed
     {
-        $closure = Closure::fromCallable([$this, $method]);
-
-        return $closure->call($this, ...$params);
+        return $this->{$method}(...$params);
     }
 
     /**
