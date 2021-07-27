@@ -27,7 +27,7 @@ class Router extends Resolver
     private array $parameters = [];
     private ?ResponseRegistry $responseRegistry = null;
 
-    private bool $isSetupDone = false;
+    protected bool $isSetupDone = false;
 
     /**
      * Router constructor.
