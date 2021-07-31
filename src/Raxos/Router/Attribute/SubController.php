@@ -23,6 +23,7 @@ class SubController
      *
      * @param string $class
      *
+     * @throws RegisterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */

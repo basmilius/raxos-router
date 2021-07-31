@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
+use JetBrains\PhpStorm\Pure;
 
 /**
  * Class With
@@ -25,6 +26,7 @@ final class With
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
+    #[Pure]
     public function __construct(private string $class, private array $arguments = [])
     {
     }

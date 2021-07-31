@@ -5,6 +5,7 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use JetBrains\PhpStorm\ExpectedValues;
+use JetBrains\PhpStorm\Pure;
 use Raxos\Http\HttpMethods;
 
 /**
@@ -27,6 +28,7 @@ class Route
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
+    #[Pure]
     public function __construct(protected string $path, #[ExpectedValues(valuesFromClass: HttpMethods::class)] protected string $method = HttpMethods::ANY)
     {
     }

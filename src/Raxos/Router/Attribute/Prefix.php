@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
+use JetBrains\PhpStorm\Pure;
 
 /**
  * Class Prefix
@@ -24,6 +25,7 @@ final class Prefix
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
+    #[Pure]
     public function __construct(protected string $path)
     {
     }
