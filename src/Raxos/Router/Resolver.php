@@ -279,7 +279,8 @@ class Resolver
 
             $path = strtr($path, [
                 '/$' . $param['name'] => $regex,
-                '.$' . $param['name'] => $regex
+                '.$' . $param['name'] => $regex,
+                ',$' . $param['name'] => $regex
             ]);
         }
 
@@ -307,7 +308,7 @@ class Resolver
             default => throw new RegisterException('Parameter types used in route paths can only be simple types.', RegisterException::ERR_MAPPING_FAILED)
         };
 
-        $prefix = '[/.]' . ($defaultValue ? '?' : '');
+        $prefix = '[/.,]' . ($defaultValue ? '?' : '');
 
         return "{$prefix}(?<{$name}>{$regex})" . ($defaultValue ? '?' : '');
     }
