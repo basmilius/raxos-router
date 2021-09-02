@@ -123,7 +123,7 @@ final class RouterUtil
                 try {
                     $request = $router->getParameter('request');
 
-                    if ($request === null || !($request instanceof HttpRequest)) {
+                    if (!($request instanceof HttpRequest)) {
                         throw new RuntimeException(sprintf('Validation failed for controller method "%s::%s()". The $request global was not set or is not an instance of %s.', $controller, $method, HttpRequest::class), RuntimeException::ERR_VALIDATION_ERROR);
                     }
 

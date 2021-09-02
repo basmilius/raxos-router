@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Controller;
 
-use Closure;
 use Raxos\Router\Response\ResponseMethods;
 use Raxos\Router\Router;
 

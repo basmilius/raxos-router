@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use JetBrains\PhpStorm\ArrayShape;
-use Raxos\Foundation\Util\Debug;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Http\HttpMethods;
 use Raxos\Router\Attribute\Delete;
@@ -494,6 +493,8 @@ class Resolver
             $this->convertPath($request, $mapping['params'] ?? []);
         }
 
+        unset($request);
+
         $mapping['type'] = $types;
 
         return $mapping;
@@ -507,7 +508,6 @@ class Resolver
      * @param ReflectionParameter $parameter
      *
      * @return array
-     * @throws ReflectionException
      * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
