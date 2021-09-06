@@ -29,7 +29,7 @@ class Route
      * @since 1.0.0
      */
     #[Pure]
-    public function __construct(protected string $path, #[ExpectedValues(valuesFromClass: HttpMethods::class)] protected string $method = HttpMethods::ANY)
+    public function __construct(protected string $path = '/', #[ExpectedValues(valuesFromClass: HttpMethods::class)] protected string $method = HttpMethods::ANY)
     {
     }
 
