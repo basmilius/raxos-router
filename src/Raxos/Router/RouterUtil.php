@@ -6,6 +6,7 @@ namespace Raxos\Router;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Http\Body\HttpBodyJson;
+use Raxos\Http\HttpFile;
 use Raxos\Http\HttpRequest;
 use Raxos\Http\Validate\Error\ValidatorException;
 use Raxos\Http\Validate\RequestModel;
@@ -135,7 +136,15 @@ final class RouterUtil
                     } else {
                         $data = $request->post()->array();
 
+                        /**
+                         * @var string $key
+                         * @var HttpFile $file
+                         */
                         foreach ($request->files() as $key => $file) {
+                            if (!$file->isValid()) {
+                                continue;
+                            }
+
                             $data[$key] = $file;
                         }
                     }
