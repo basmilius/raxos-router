@@ -50,7 +50,7 @@ final class RouterUtil
         return match ($type) {
             'string' => (string)$value,
             'int' => (int)$value,
-            'bool' => $value === '1' || $value === 'true',
+            'bool' => $value === true || $value === '1' || $value === 'true',
             default => null
         };
     }
