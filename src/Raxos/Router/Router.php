@@ -158,13 +158,14 @@ class Router extends Resolver
      *
      * @param string $method
      * @param string $path
+     * @param float $version
      *
      * @return Effect
      * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function resolve(string $method, string $path): Effect
+    public function resolve(string $method, string $path, float $version = 1.0): Effect
     {
         if (!$this->isSetupDone) {
             $this->resolveMappings();
@@ -173,7 +174,7 @@ class Router extends Resolver
             $this->isSetupDone = true;
         }
 
-        $route = $this->resolveRequest($method, $path);
+        $route = $this->resolveRequest($method, $path, $version);
 
         if ($route === null) {
             return new NotFoundEffect($this);

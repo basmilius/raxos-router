@@ -16,6 +16,7 @@ use Raxos\Router\Attribute\Prefix;
 use Raxos\Router\Attribute\Put;
 use Raxos\Router\Attribute\Route;
 use Raxos\Router\Attribute\SubController;
+use Raxos\Router\Attribute\Version;
 use Raxos\Router\Attribute\With;
 use Raxos\Router\Controller\Controller;
 use Raxos\Router\Error\RegisterException;
@@ -134,12 +135,13 @@ class Resolver
      *
      * @param string $method
      * @param string $path
+     * @param float $version
      *
      * @return RouteExecutor|null
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function resolveRequest(string $method, string $path): ?RouteExecutor
+    protected function resolveRequest(string $method, string $path, float $version): ?RouteExecutor
     {
         foreach ($this->callStack as $route => $requestMethods) {
             $frames = $requestMethods[$method] ?? $requestMethods[HttpMethods::ANY] ?? null;
@@ -161,7 +163,7 @@ class Resolver
 
             $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
-            return new RouteExecutor($frames, $params);
+            return new RouteExecutor($frames, $params, $version);
         }
 
         return null;
@@ -205,6 +207,12 @@ class Resolver
                 $attr = $attribute->newInstance();
 
                 return ['child', $this->resolveControllerMapping(new ReflectionClass($attr->getClass()))];
+
+            case Version::class:
+                /** @var Version $attr */
+                $attr = $attribute->newInstance();
+
+                return ['version', [$attr->getMin(), $attr->getMax()]];
 
             case With::class:
                 /** @var With $attr */
@@ -369,6 +377,10 @@ class Resolver
 
         if (isset($route['params'])) {
             $frame['params'] = $route['params'];
+        }
+
+        if (isset($route['version'])) {
+            $frame['version'] = $route['version'];
         }
 
         foreach ($route['request'] as [$requestMethod, $path, $regex]) {

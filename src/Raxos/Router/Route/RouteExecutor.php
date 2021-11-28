@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Route;
 
 use Raxos\Router\Effect\Effect;
+use Raxos\Router\Effect\NotFoundEffect;
 use Raxos\Router\Effect\ResponseEffect;
 use Raxos\Router\Effect\ResultEffect;
 use Raxos\Router\Error\RouterException;
@@ -30,11 +31,12 @@ class RouteExecutor
      *
      * @param array $frames
      * @param array $params
+     * @param float $version
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(array $frames, private array $params)
+    public function __construct(array $frames, private array $params, private float $version)
     {
         $frameCount = count($frames);
         $index = 0;
@@ -57,6 +59,10 @@ class RouteExecutor
         $result = null;
 
         foreach ($this->frames as $frame) {
+            if (!$frame->isVersionSatisfiable($this->version)) {
+                return new NotFoundEffect($router);
+            }
+
             $result = $frame->invoke($router, $this->params);
 
             if ($result instanceof Effect) {

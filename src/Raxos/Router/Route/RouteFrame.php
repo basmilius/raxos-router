@@ -34,6 +34,7 @@ class RouteFrame
     private array $params;
     private array $request;
     private array $type;
+    private ?array $version;
 
     /**
      * RouteFrame constructor.
@@ -53,6 +54,7 @@ class RouteFrame
         $this->params = $frame['params'] ?? [];
         $this->request = $frame['request'];
         $this->type = $frame['type'];
+        $this->version = $frame['version'] ?? null;
     }
 
     /**
@@ -149,6 +151,36 @@ class RouteFrame
     public final function isLast(): bool
     {
         return $this->isLast;
+    }
+
+    /**
+     * Returns TRUE if the given version is satisfiable.
+     *
+     * @param float $version
+     *
+     * @return bool
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.0
+     */
+    public final function isVersionSatisfiable(float $version): bool
+    {
+        if ($this->version === null) {
+            return true;
+        }
+
+        if ($this->version[0] !== null && $this->version[1] !== null) {
+            return $version >= $this->version[0] && $version <= $this->version[1];
+        }
+
+        if ($this->version[0] !== null) {
+            return $version >= $this->version[0];
+        }
+
+        if ($this->version[1] !== null) {
+            return $version <= $this->version[1];
+        }
+
+        return true;
     }
 
     /**
