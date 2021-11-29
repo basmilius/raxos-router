@@ -6,18 +6,7 @@ namespace Raxos\Router;
 use JetBrains\PhpStorm\ArrayShape;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Http\HttpMethods;
-use Raxos\Router\Attribute\Delete;
-use Raxos\Router\Attribute\Get;
-use Raxos\Router\Attribute\Head;
-use Raxos\Router\Attribute\Options;
-use Raxos\Router\Attribute\Patch;
-use Raxos\Router\Attribute\Post;
-use Raxos\Router\Attribute\Prefix;
-use Raxos\Router\Attribute\Put;
-use Raxos\Router\Attribute\Route;
-use Raxos\Router\Attribute\SubController;
-use Raxos\Router\Attribute\Version;
-use Raxos\Router\Attribute\With;
+use Raxos\Router\Attribute\{Delete, Get, Head, Options, Patch, Post, Prefix, Put, Route, SubController, Version, With};
 use Raxos\Router\Controller\Controller;
 use Raxos\Router\Error\RegisterException;
 use Raxos\Router\Error\RouterException;
@@ -39,7 +28,11 @@ use function is_subclass_of;
 use function preg_match;
 use function rtrim;
 use function sprintf;
+use function str_starts_with;
+use function strlen;
+use function strpos;
 use function strtr;
+use function substr;
 use const ARRAY_FILTER_USE_KEY;
 use const SORT_DESC;
 
@@ -143,27 +136,32 @@ class Resolver
      */
     protected function resolveRequest(string $method, string $path, float $version): ?RouteExecutor
     {
-        foreach ($this->callStack as $route => $requestMethods) {
-            $frames = $requestMethods[$method] ?? $requestMethods[HttpMethods::ANY] ?? null;
+        $routes = array_keys($this->callStack);
+        $routes = array_filter($routes, fn(string $route): bool => str_starts_with($path, rtrim(substr($route, 0, strpos($route, '(') ?: strlen($route)), '?')));
 
-            if ($frames === null && $method === HttpMethods::OPTIONS) {
-                $key = array_keys($requestMethods)[0] ?? null;
-                $frames = $requestMethods[$key] ?? null;
+        foreach ($routes as $route) {
+            $callStack = $this->callStack[$route] ?? null;
+
+            if ($callStack === null) {
+                continue;
+            }
+
+            $frames = $callStack[$method] ?? $callStack[HttpMethods::ANY] ?? null;
+
+            if ($frames === null || $method === HttpMethods::OPTIONS) {
+                $key = array_keys($callStack)[0] ?? null;
+                $frames = $callStack[$key] ?? null;
             }
 
             if ($frames === null) {
                 continue;
             }
 
-            $regex = "#^{$route}$#";
+            if ($path === $route || preg_match("#^{$route}$#", $path, $matches)) {
+                $params = array_filter($matches ?? [], 'is_string', ARRAY_FILTER_USE_KEY);
 
-            if (!preg_match($regex, $path, $matches)) {
-                continue;
+                return new RouteExecutor($frames, $params, $version);
             }
-
-            $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-
-            return new RouteExecutor($frames, $params, $version);
         }
 
         return null;
