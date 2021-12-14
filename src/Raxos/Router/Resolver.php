@@ -28,11 +28,13 @@ use function is_subclass_of;
 use function preg_match;
 use function rtrim;
 use function sprintf;
+use function str_contains;
 use function str_starts_with;
 use function strlen;
 use function strpos;
 use function strtr;
 use function substr;
+use function usort;
 use const ARRAY_FILTER_USE_KEY;
 use const SORT_DESC;
 
@@ -138,6 +140,22 @@ class Resolver
     {
         $routes = array_keys($this->callStack);
         $routes = array_filter($routes, fn(string $route): bool => str_starts_with($path, rtrim(substr($route, 0, strpos($route, '(') ?: strlen($route)), '?')));
+
+        usort($routes, function (string $a, string $b): int {
+            if (str_contains($a, '(') && str_contains($b, '(')) {
+                return strlen($b) <=> strlen($a);
+            }
+
+            if (str_contains($a, '(')) {
+                return 1;
+            }
+
+            if (str_contains($b, '(')) {
+                return -1;
+            }
+
+            return strlen($b) <=> strlen($a);
+        });
 
         foreach ($routes as $route) {
             $callStack = $this->callStack[$route] ?? null;
