@@ -70,7 +70,7 @@ class FileResponse extends Response
         }
 
         $request = $this->router->getParameter('request');
-        $headers = $request->headers();
+        $headers = $request->headers;
 
         $etag = md5_file($this->value);
         $modified = filemtime($this->value);
