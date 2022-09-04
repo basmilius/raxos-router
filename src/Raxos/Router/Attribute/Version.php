@@ -28,7 +28,10 @@ final class Version
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(private ?float $min = null, private ?float $max = null)
+    public function __construct(
+        public readonly ?float $min = null,
+        public readonly ?float $max = null
+    )
     {
         if ($min !== null && $max !== null && $min >= $max) {
             throw new RegisterException(sprintf('Minimum version %g should be higher than maximum %g.', $min, $max), RegisterException::ERR_MAPPING_FAILED);
@@ -41,30 +44,6 @@ final class Version
         if ($max !== null && $max <= 0) {
             throw new RegisterException(sprintf('Maximum version %g should be higher than 0.', $max), RegisterException::ERR_MAPPING_FAILED);
         }
-    }
-
-    /**
-     * Gets the maximum version.
-     *
-     * @return float|null
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getMax(): ?float
-    {
-        return $this->max;
-    }
-
-    /**
-     * Gets the minimal version.
-     *
-     * @return float|null
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getMin(): ?float
-    {
-        return $this->min;
     }
 
 }

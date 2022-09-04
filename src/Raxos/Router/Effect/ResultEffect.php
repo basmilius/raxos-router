@@ -24,21 +24,9 @@ final class ResultEffect extends Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(Router $router, private mixed $result)
+    public function __construct(Router $router, public readonly mixed $result)
     {
         parent::__construct($router);
-    }
-
-    /**
-     * Gets the result.
-     *
-     * @return mixed
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getResult(): mixed
-    {
-        return $this->result;
     }
 
 }

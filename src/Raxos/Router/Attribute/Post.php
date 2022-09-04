@@ -5,7 +5,7 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use JetBrains\PhpStorm\Pure;
-use Raxos\Http\HttpMethods;
+use Raxos\Http\HttpMethod;
 
 /**
  * Class Post
@@ -29,7 +29,7 @@ final class Post extends Route
     #[Pure]
     public function __construct(string $path = '/')
     {
-        parent::__construct($path, HttpMethods::POST);
+        parent::__construct($path, HttpMethod::POST);
     }
 
 }

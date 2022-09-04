@@ -25,21 +25,9 @@ final class ResponseEffect extends Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(Router $router, private Response $response)
+    public function __construct(Router $router, public readonly Response $response)
     {
         parent::__construct($router);
-    }
-
-    /**
-     * Gets the response.
-     *
-     * @return Response
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getResponse(): Response
-    {
-        return $this->response;
     }
 
 }

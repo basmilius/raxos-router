@@ -5,7 +5,7 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use JetBrains\PhpStorm\Pure;
-use Raxos\Http\HttpMethods;
+use Raxos\Http\HttpMethod;
 
 /**
  * Class Patch
@@ -29,7 +29,7 @@ final class Patch extends Route
     #[Pure]
     public function __construct(string $path = '/')
     {
-        parent::__construct($path, HttpMethods::PATCH);
+        parent::__construct($path, HttpMethod::PATCH);
     }
 
 }

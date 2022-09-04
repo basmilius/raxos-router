@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use JetBrains\PhpStorm\ExpectedValues;
-use Raxos\Http\HttpCode;
+use Raxos\Http\HttpResponseCode;
 use Raxos\Router\Effect\RedirectEffect;
 use Raxos\Router\Router;
 
@@ -44,13 +43,13 @@ trait ResponseMethods
      * Returns a HTML response.
      *
      * @param mixed $value
-     * @param int $responseCode
+     * @param HttpResponseCode $responseCode
      *
      * @return HtmlResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected final function html(string $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): HtmlResponse
+    protected final function html(string $value, HttpResponseCode $responseCode = HttpResponseCode::OK): HtmlResponse
     {
         $this->router
             ->getResponseRegistry()
@@ -63,13 +62,13 @@ trait ResponseMethods
      * Returns a JSON response.
      *
      * @param mixed $value
-     * @param int $responseCode
+     * @param HttpResponseCode $responseCode
      *
      * @return JsonResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected final function json(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): JsonResponse
+    protected final function json(mixed $value, HttpResponseCode $responseCode = HttpResponseCode::OK): JsonResponse
     {
         $this->router
             ->getResponseRegistry()
@@ -82,13 +81,13 @@ trait ResponseMethods
      * Returns a redirect effect.
      *
      * @param string $destination
-     * @param int $responseCode
+     * @param HttpResponseCode $responseCode
      *
      * @return RedirectEffect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected final function redirect(string $destination, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::TEMPORARY_REDIRECT): RedirectEffect
+    protected final function redirect(string $destination, HttpResponseCode $responseCode = HttpResponseCode::TEMPORARY_REDIRECT): RedirectEffect
     {
         return new RedirectEffect($this->router, $destination, $responseCode);
     }
@@ -97,13 +96,13 @@ trait ResponseMethods
      * Returns a XML response.
      *
      * @param mixed $value
-     * @param int $responseCode
+     * @param HttpResponseCode $responseCode
      *
      * @return XmlResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected final function xml(mixed $value, #[ExpectedValues(valuesFromClass: HttpCode::class)] int $responseCode = HttpCode::OK): XmlResponse
+    protected final function xml(mixed $value, HttpResponseCode $responseCode = HttpResponseCode::OK): XmlResponse
     {
         $this->router
             ->getResponseRegistry()

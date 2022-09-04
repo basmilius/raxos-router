@@ -27,23 +27,11 @@ class SubController
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(private string $class)
+    public function __construct(public readonly string $class)
     {
         if (!is_subclass_of($class, Controller::class)) {
             throw new RegisterException(sprintf('Controller class must extend %s.', Controller::class), RegisterException::ERR_NOT_A_CONTROLLER);
         }
-    }
-
-    /**
-     * Gets the controller class name.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getClass(): string
-    {
-        return $this->class;
     }
 
 }

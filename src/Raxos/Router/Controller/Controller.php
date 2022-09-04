@@ -26,7 +26,7 @@ abstract class Controller
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(protected Router $router)
+    public function __construct(protected readonly Router $router)
     {
     }
 

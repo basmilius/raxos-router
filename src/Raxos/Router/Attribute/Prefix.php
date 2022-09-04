@@ -26,20 +26,8 @@ final class Prefix
      * @since 1.0.0
      */
     #[Pure]
-    public function __construct(protected string $path)
+    public function __construct(public readonly string $path)
     {
-    }
-
-    /**
-     * Gets the path.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getPath(): string
-    {
-        return $this->path;
     }
 
 }

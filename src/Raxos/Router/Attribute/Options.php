@@ -5,7 +5,7 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use JetBrains\PhpStorm\Pure;
-use Raxos\Http\HttpMethods;
+use Raxos\Http\HttpMethod;
 
 /**
  * Class Options
@@ -29,7 +29,7 @@ final class Options extends Route
     #[Pure]
     public function __construct(string $path = '/')
     {
-        parent::__construct($path, HttpMethods::OPTIONS);
+        parent::__construct($path, HttpMethod::OPTIONS);
     }
 
 }

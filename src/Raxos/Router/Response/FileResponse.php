@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\HttpCode;
+use Raxos\Http\HttpResponseCode;
 use Raxos\Router\Router;
 use function file_get_contents;
 use function filemtime;
@@ -25,28 +25,21 @@ class FileResponse extends Response
      * FileResponse constructor.
      *
      * @param Router $router
-     * @param string $value
+     * @param string $path
      * @param string $contentType
      * @param bool $allowCache
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(Router $router, string $value, protected string $contentType, protected bool $allowCache = true)
+    public function __construct(
+        Router $router,
+        public readonly string $path,
+        public readonly string $contentType,
+        public readonly bool $allowCache = true
+    )
     {
-        parent::__construct($router, $value);
-    }
-
-    /**
-     * Gets the file path.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getPath(): string
-    {
-        return $this->value;
+        parent::__construct($router, $path);
     }
 
     /**
@@ -56,7 +49,7 @@ class FileResponse extends Response
      */
     public function prepareBody(): string
     {
-        if ($this->getResponseCode() === HttpCode::NOT_MODIFIED) {
+        if ($this->getResponseCode() === HttpResponseCode::NOT_MODIFIED) {
             return '';
         }
 
@@ -92,7 +85,7 @@ class FileResponse extends Response
         $this->header('Pragma', 'cache');
 
         if ($etagMatch || $modifiedMatch) {
-            $this->getrouter()->getResponseRegistry()->responseCode(HttpCode::NOT_MODIFIED);
+            $this->router->getResponseRegistry()->responseCode(HttpResponseCode::NOT_MODIFIED);
         }
     }
 

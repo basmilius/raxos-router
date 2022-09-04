@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use JetBrains\PhpStorm\ExpectedValues;
-use Raxos\Http\HttpCode;
+use Raxos\Http\HttpResponseCode;
 use function array_key_exists;
 use function is_array;
 
@@ -18,9 +17,8 @@ use function is_array;
 final class ResponseRegistry
 {
 
-    #[ExpectedValues(valuesFromClass: HttpCode::class)]
-    private int $responseCode = HttpCode::OK;
     private array $headers = [];
+    private HttpResponseCode $responseCode = HttpResponseCode::OK;
 
     /**
      * Adds the given header to the response.
@@ -51,13 +49,13 @@ final class ResponseRegistry
     /**
      * Sets the response code.
      *
-     * @param int $code
+     * @param HttpResponseCode $code
      *
      * @return $this
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function responseCode(#[ExpectedValues(valuesFromClass: HttpCode::class)] int $code): self
+    public final function responseCode(HttpResponseCode $code): self
     {
         $this->responseCode = $code;
 
@@ -79,11 +77,11 @@ final class ResponseRegistry
     /**
      * Gets the response code.
      *
-     * @return int
+     * @return HttpResponseCode
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function getResponseCode(): int
+    public final function getResponseCode(): HttpResponseCode
     {
         return $this->responseCode;
     }

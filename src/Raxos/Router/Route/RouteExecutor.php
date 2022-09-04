@@ -24,7 +24,7 @@ class RouteExecutor
 {
 
     /** @var RouteFrame[] */
-    private array $frames;
+    private readonly array $frames;
 
     /**
      * RouteExecutor constructor.
@@ -36,7 +36,11 @@ class RouteExecutor
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(array $frames, private array $params, private float $version)
+    public function __construct(
+        array $frames,
+        private readonly array $params,
+        private readonly float $version
+    )
     {
         $frameCount = count($frames);
         $index = 0;

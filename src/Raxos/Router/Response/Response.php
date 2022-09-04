@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use JetBrains\PhpStorm\ExpectedValues;
-use Raxos\Http\HttpCode;
+use Raxos\Http\HttpResponseCode;
 use Raxos\Router\Router;
 use function header;
 use function http_response_code;
@@ -17,10 +16,10 @@ use function is_array;
  * @package Raxos\Router\Response
  * @since 1.0.0
  */
-abstract class Response
+abstract class Response implements ResponseInterface
 {
 
-    protected ?ResponseRegistry $responseRegistry;
+    protected readonly ?ResponseRegistry $responseRegistry;
 
     /**
      * Response constructor.
@@ -32,8 +31,8 @@ abstract class Response
      * @since 1.0.0
      */
     public function __construct(
-        protected Router $router,
-        protected mixed $value
+        public readonly Router $router,
+        public readonly mixed $value
     )
     {
         $this->responseRegistry = $router->getResponseRegistry();
@@ -84,65 +83,17 @@ abstract class Response
     }
 
     /**
-     * Gets the http code for the response.
-     *
-     * @return int
-     *
+     * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    #[ExpectedValues(valuesFromClass: HttpCode::class)]
-    public final function getResponseCode(): int
+    public final function getResponseCode(): HttpResponseCode
     {
         return $this->router->getResponseRegistry()->getResponseCode();
     }
 
     /**
-     * Gets the Router instance.
-     *
-     * @return Router
-     *
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getRouter(): Router
-    {
-        return $this->router;
-    }
-
-    /**
-     * Gets the value of the response.
-     *
-     * @return mixed
-     *
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getValue(): mixed
-    {
-        return $this->value;
-    }
-
-    /**
-     * Prepares the response body.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public abstract function prepareBody(): string;
-
-    /**
-     * Prepares the response headers.
-     *
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public abstract function prepareHeaders(): void;
-
-    /**
-     * Sends the response to browser.
-     *
+     * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
@@ -150,7 +101,7 @@ abstract class Response
     {
         $this->prepareHeaders();
 
-        http_response_code($this->getResponseCode());
+        http_response_code($this->getResponseCode()->value);
 
         $this->respondHeaders();
         $this->respondBody();
@@ -164,7 +115,11 @@ abstract class Response
      */
     private function respondBody(): void
     {
-        echo $this->prepareBody();
+        $body = $this->prepareBody();
+
+        if ($body) {
+            echo $body;
+        }
     }
 
     /**

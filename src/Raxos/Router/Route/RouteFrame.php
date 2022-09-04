@@ -28,13 +28,13 @@ use function sprintf;
 class RouteFrame
 {
 
-    private string $class;
-    private string $method;
-    private array $middlewares;
-    private array $params;
-    private array $request;
-    private array $type;
-    private ?array $version;
+    public readonly string $class;
+    public readonly string $method;
+    public readonly array $middlewares;
+    public readonly array $params;
+    public readonly array $request;
+    public readonly array $type;
+    public readonly ?array $version;
 
     /**
      * RouteFrame constructor.
@@ -46,7 +46,7 @@ class RouteFrame
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(array $frame, private bool $isFirst, private bool $isLast)
+    public function __construct(array $frame, public readonly bool $isFirst, public readonly bool $isLast)
     {
         $this->class = $frame['class'];
         $this->method = $frame['method'];
@@ -55,102 +55,6 @@ class RouteFrame
         $this->request = $frame['request'];
         $this->type = $frame['type'];
         $this->version = $frame['version'] ?? null;
-    }
-
-    /**
-     * Gets the controller class name.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getClass(): string
-    {
-        return $this->class;
-    }
-
-    /**
-     * Gets the controller method name.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getMethod(): string
-    {
-        return $this->method;
-    }
-
-    /**
-     * Gets the middleware used in this frame.
-     *
-     * @return string[]
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getMiddlewares(): array
-    {
-        return $this->middlewares;
-    }
-
-    /**
-     * Gets the params defined in the controller method.
-     *
-     * @return array
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getParams(): array
-    {
-        return $this->params;
-    }
-
-    /**
-     * Gets the request.
-     *
-     * @return array
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getRequest(): array
-    {
-        return $this->request;
-    }
-
-    /**
-     * Gets the return type of the controller method.
-     *
-     * @return array
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getType(): array
-    {
-        return $this->type;
-    }
-
-    /**
-     * Returns TRUE if the route frame is first.
-     *
-     * @return bool
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function isFirst(): bool
-    {
-        return $this->isFirst;
-    }
-
-    /**
-     * Returns TRUE if the route frame is last.
-     *
-     * @return bool
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function isLast(): bool
-    {
-        return $this->isLast;
     }
 
     /**
@@ -184,7 +88,7 @@ class RouteFrame
     }
 
     /**
-     * Invokes the controller method.
+     * Invokes the route frame.
      *
      * @param Router $router
      * @param array $params
@@ -196,8 +100,6 @@ class RouteFrame
      */
     public function invoke(Router $router, array $params): mixed
     {
-        $controllers = $router->getControllers();
-
         foreach ($params as $name => $value) {
             $router->parameter($name, $value);
         }
@@ -208,11 +110,26 @@ class RouteFrame
             return $result;
         }
 
-        if (!$controllers->has($this->class)) {
-            $controllers->load($router, $this->class);
+        return $this->invokeController($router);
+    }
+
+    /**
+     * Invokes the controller method.
+     *
+     * @param Router $router
+     *
+     * @return mixed
+     * @throws RouterException
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.0
+     */
+    public function invokeController(Router $router): mixed
+    {
+        if (!$router->controllers->has($this->class)) {
+            $router->controllers->load($router, $this->class);
         }
 
-        $controller = $controllers->get($this->class);
+        $controller = $router->controllers->get($this->class);
         $params = RouterUtil::prepareParameters($router, $this->params, $this->class, $this->method);
 
         try {
@@ -242,7 +159,7 @@ class RouteFrame
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    private function invokeMiddleware(Router $router, string $class, array $arguments): Effect|Response|bool|null
+    public function invokeMiddleware(Router $router, string $class, array $arguments): Effect|Response|bool|null
     {
         try {
             $params = RouterUtil::prepareParametersForClass($class);
@@ -272,7 +189,7 @@ class RouteFrame
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    private function invokeMiddlewares(Router $router, ?bool &$returnResult = null): Effect|Response|null
+    public function invokeMiddlewares(Router $router, ?bool &$returnResult = null): Effect|Response|null
     {
         $returnResult = false;
 

@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Middleware;
 
-use Raxos\Http\Validate\Error\ValidatorException;
-use Raxos\Router\Effect\Effect;
-use Raxos\Router\Response\Response;
 use Raxos\Router\Response\ResponseMethods;
 use Raxos\Router\Route\RouteFrame;
 use Raxos\Router\Router;
@@ -17,7 +14,7 @@ use Raxos\Router\Router;
  * @package Raxos\Router\Middleware
  * @since 1.0.0
  */
-abstract class Middleware
+abstract class Middleware implements MiddlewareInterface
 {
 
     use ResponseMethods;
@@ -32,7 +29,7 @@ abstract class Middleware
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(protected Router $router)
+    public function __construct(public readonly Router $router)
     {
     }
 
@@ -55,21 +52,12 @@ abstract class Middleware
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
+     * @internal
      */
     public final function setFrame(RouteFrame $frame): void
     {
         $this->frame = $frame;
     }
-
-    /**
-     * Handles the request.
-     *
-     * @return Effect|Response|bool|null
-     * @throws ValidatorException
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public abstract function handle(): Effect|Response|bool|null;
 
     /**
      * Adds a parameter.

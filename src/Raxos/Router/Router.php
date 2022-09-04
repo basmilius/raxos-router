@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use JetBrains\PhpStorm\Pure;
+use Raxos\Http\HttpMethod;
 use Raxos\Router\Controller\Controller;
 use Raxos\Router\Controller\ControllerContainer;
 use Raxos\Router\Effect\Effect;
@@ -22,12 +23,13 @@ use function array_key_exists;
 class Router extends Resolver
 {
 
-    private ControllerContainer $controllers;
+    public readonly ControllerContainer $controllers;
+
+    protected bool $isSetupDone = false;
+
     private array $globals = [];
     private array $parameters = [];
     private ?ResponseRegistry $responseRegistry = null;
-
-    protected bool $isSetupDone = false;
 
     /**
      * Router constructor.
@@ -38,18 +40,6 @@ class Router extends Resolver
     public function __construct()
     {
         $this->controllers = new ControllerContainer();
-    }
-
-    /**
-     * Gets the controller container.
-     *
-     * @return ControllerContainer
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getControllers(): ControllerContainer
-    {
-        return $this->controllers;
     }
 
     /**
@@ -156,7 +146,7 @@ class Router extends Resolver
     /**
      * Resolves the request and returns an effect if a route was found.
      *
-     * @param string $method
+     * @param HttpMethod $method
      * @param string $path
      * @param float $version
      *
@@ -165,7 +155,7 @@ class Router extends Resolver
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function resolve(string $method, string $path, float $version = 1.0): Effect
+    public function resolve(HttpMethod $method, string $path, float $version = 1.0): Effect
     {
         if (!$this->isSetupDone) {
             $this->resolveMappings();

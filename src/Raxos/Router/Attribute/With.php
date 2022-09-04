@@ -27,32 +27,11 @@ final class With
      * @since 1.0.0
      */
     #[Pure]
-    public function __construct(private string $class, private array $arguments = [])
+    public function __construct(
+        public readonly string $class,
+        public readonly array $arguments = []
+    )
     {
-    }
-
-    /**
-     * Gets the middleware arguments.
-     *
-     * @return array
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getArguments(): array
-    {
-        return $this->arguments;
-    }
-
-    /**
-     * Gets the middleware class.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getClass(): string
-    {
-        return $this->class;
     }
 
 }

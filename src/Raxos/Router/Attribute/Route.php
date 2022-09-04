@@ -4,9 +4,8 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
-use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
-use Raxos\Http\HttpMethods;
+use Raxos\Http\HttpMethod;
 
 /**
  * Class Route
@@ -23,39 +22,17 @@ class Route
      * Route constructor.
      *
      * @param string $path
-     * @param string $method
+     * @param HttpMethod $method
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
     #[Pure]
-    public function __construct(protected string $path = '/', #[ExpectedValues(valuesFromClass: HttpMethods::class)] protected string $method = HttpMethods::ANY)
+    public function __construct(
+        public readonly string $path = '/',
+        public readonly HttpMethod $method = HttpMethod::ANY
+    )
     {
-    }
-
-    /**
-     * Gets the request method.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    #[ExpectedValues(valuesFromClass: HttpMethods::class)]
-    public final function getMethod(): string
-    {
-        return $this->method;
-    }
-
-    /**
-     * Gets the request path.
-     *
-     * @return string
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getPath(): string
-    {
-        return $this->path;
     }
 
 }

@@ -83,6 +83,11 @@ final class RouterUtil
 
                 if ($valueType !== 'object') {
                     foreach ($parameterType as $type) {
+                        if (is_subclass_of($type, RouterParameterInterface::class)) {
+                            $value = $type::getRouterValue($value);
+                            break;
+                        }
+
                         if (!in_array($type, self::SIMPLE_TYPES)) {
                             continue;
                         }
@@ -134,13 +139,13 @@ final class RouterUtil
                     if ($contentType === 'application/json' && $body instanceof HttpBodyJson) {
                         $data = $body->array();
                     } else {
-                        $data = $request->post()->array();
+                        $data = $request->post->array();
 
                         /**
                          * @var string $key
                          * @var HttpFile $file
                          */
-                        foreach ($request->files() as $key => $file) {
+                        foreach ($request->files as $key => $file) {
                             if (!$file->isValid()) {
                                 continue;
                             }

@@ -23,20 +23,8 @@ abstract class Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(protected Router $router)
+    public function __construct(public readonly Router $router)
     {
-    }
-
-    /**
-     * Gets the router instance.
-     *
-     * @return Router
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getRouter(): Router
-    {
-        return $this->router;
     }
 
 }

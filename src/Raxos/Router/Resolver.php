@@ -5,7 +5,7 @@ namespace Raxos\Router;
 
 use JetBrains\PhpStorm\ArrayShape;
 use Raxos\Foundation\Util\ReflectionUtil;
-use Raxos\Http\HttpMethods;
+use Raxos\Http\HttpMethod;
 use Raxos\Router\Attribute\{Delete, Get, Head, Options, Patch, Post, Prefix, Put, Route, SubController, Version, With};
 use Raxos\Router\Controller\Controller;
 use Raxos\Router\Error\RegisterException;
@@ -49,6 +49,20 @@ class Resolver
 {
 
     private const ARRAYABLE_OPTIONS = ['middlewares', 'request'];
+    private const SUPPORTED_ATTRIBUTES = [
+        Delete::class,
+        Get::class,
+        Head::class,
+        Options::class,
+        Patch::class,
+        Post::class,
+        Put::class,
+        Route::class,
+        Prefix::class,
+        SubController::class,
+        Version::class,
+        With::class
+    ];
 
     protected array $callStack = [];
     protected array $controllerList = [];
@@ -128,7 +142,7 @@ class Resolver
     /**
      * Resolves the request into a route, and returns null if nothing is found.
      *
-     * @param string $method
+     * @param HttpMethod $method
      * @param string $path
      * @param float $version
      *
@@ -136,7 +150,7 @@ class Resolver
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    protected function resolveRequest(string $method, string $path, float $version): ?RouteExecutor
+    protected function resolveRequest(HttpMethod $method, string $path, float $version): ?RouteExecutor
     {
         $routes = array_keys($this->callStack);
         $routes = array_filter($routes, fn(string $route): bool => str_starts_with($path, rtrim(substr($route, 0, strpos($route, '(') ?: strlen($route)), '?')));
@@ -164,9 +178,9 @@ class Resolver
                 continue;
             }
 
-            $frames = $callStack[$method] ?? $callStack[HttpMethods::ANY] ?? null;
+            $frames = $callStack[$method->value] ?? $callStack[HttpMethod::ANY->value] ?? null;
 
-            if ($frames === null || $method === HttpMethods::OPTIONS) {
+            if ($frames === null || $method === HttpMethod::OPTIONS) {
                 $key = array_keys($callStack)[0] ?? null;
                 $frames = $callStack[$key] ?? null;
             }
@@ -198,47 +212,20 @@ class Resolver
      */
     private function convertAttribute(ReflectionAttribute $attribute): ?array
     {
-        switch ($attribute->getName()) {
-            case Delete::class:
-            case Get::class:
-            case Head::class:
-            case Options::class:
-            case Patch::class:
-            case Post::class:
-            case Put::class:
-            case Route::class:
-                /** @var Route $attr */
-                $attr = $attribute->newInstance();
-
-                return ['request', [$attr->getMethod(), $attr->getPath()]];
-
-            case Prefix::class:
-                /** @var Prefix $attr */
-                $attr = $attribute->newInstance();
-
-                return ['prefix', $attr->getPath()];
-
-            case SubController::class:
-                /** @var SubController $attr */
-                $attr = $attribute->newInstance();
-
-                return ['child', $this->resolveControllerMapping(new ReflectionClass($attr->getClass()))];
-
-            case Version::class:
-                /** @var Version $attr */
-                $attr = $attribute->newInstance();
-
-                return ['version', [$attr->getMin(), $attr->getMax()]];
-
-            case With::class:
-                /** @var With $attr */
-                $attr = $attribute->newInstance();
-
-                return ['middlewares', [$attr->getClass(), $attr->getArguments()]];
-
-            default:
-                return null;
+        if (!in_array($attribute->getName(), self::SUPPORTED_ATTRIBUTES)) {
+            return null;
         }
+
+        $attr = $attribute->newInstance();
+
+        return match (true) {
+            $attr instanceof Prefix => ['prefix', $attr->path],
+            $attr instanceof SubController => ['child', $this->resolveControllerMapping(new ReflectionClass($attr->class))],
+            $attr instanceof Version => ['version', [$attr->min, $attr->max]],
+            $attr instanceof With => ['middlewares', [$attr->class, $attr->arguments]],
+            $attr instanceof Route => ['request', [$attr->method->value, $attr->path]],
+            default => null
+        };
     }
 
     /**
@@ -287,6 +274,18 @@ class Resolver
             $simpleType = null;
 
             foreach ($param['type'] as $type) {
+                if (is_subclass_of($type, RouterParameterInterface::class)) {
+                    $prefix = (array_key_exists('default', $param) ? '?' : '');
+                    $regex = $type::getRouterRegex();
+                    $regex = "{$prefix}(?<{$param['name']}>{$regex}){$prefix}";
+
+                    $path = strtr($path, [
+                        '$' . $param['name'] => $regex
+                    ]);
+
+                    continue 2;
+                }
+
                 if (!in_array($type, RouterUtil::SIMPLE_TYPES)) {
                     continue;
                 }

@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Effect;
 
-use JetBrains\PhpStorm\ExpectedValues;
-use Raxos\Http\HttpCode;
+use Raxos\Http\HttpResponseCode;
 use Raxos\Router\Router;
 
 /**
@@ -22,41 +21,18 @@ final class RedirectEffect extends Effect
      *
      * @param Router $router
      * @param string $destination
-     * @param int $responseCode
+     * @param HttpResponseCode $responseCode
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(Router $router, private string $destination, #[ExpectedValues(valuesFromClass: HttpCode::class)] private int $responseCode = HttpCode::TEMPORARY_REDIRECT)
+    public function __construct(
+        Router $router,
+        public readonly string $destination,
+        public readonly HttpResponseCode $responseCode = HttpResponseCode::TEMPORARY_REDIRECT
+    )
     {
         parent::__construct($router);
-    }
-
-    /**
-     * Gets the destination.
-     *
-     * @return string
-     *
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getDestination(): string
-    {
-        return $this->destination;
-    }
-
-    /**
-     * Gets the response code.
-     *
-     * @return int
-     *
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    #[ExpectedValues(valuesFromClass: HttpCode::class)]
-    public final function getResponseCode(): int
-    {
-        return $this->responseCode;
     }
 
 }
