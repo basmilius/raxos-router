@@ -10,7 +10,7 @@ namespace Raxos\Router\Response;
  * @package Raxos\Router\Response
  * @since 1.0.0
  */
-class HtmlResponse extends Response
+readonly class HtmlResponse extends Response
 {
 
     /**

@@ -13,7 +13,7 @@ use Raxos\Router\Router;
  * @package Raxos\Router\Effect
  * @since 1.0.0
  */
-final class ResponseEffect extends Effect
+final readonly class ResponseEffect extends Effect
 {
 
     /**
@@ -25,7 +25,10 @@ final class ResponseEffect extends Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(Router $router, public readonly Response $response)
+    public function __construct(
+        Router $router,
+        public Response $response
+    )
     {
         parent::__construct($router);
     }

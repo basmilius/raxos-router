@@ -6,10 +6,9 @@ namespace Raxos\Router;
 use JetBrains\PhpStorm\ArrayShape;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Http\HttpMethod;
-use Raxos\Router\Attribute\{Delete, Get, Head, Options, Patch, Post, Prefix, Put, Route, SubController, Version, With};
+use Raxos\Router\Attribute\{Delete, FromQuery, Get, Head, Options, Patch, Post, Prefix, Put, Route, SubController, Version, With};
 use Raxos\Router\Controller\Controller;
-use Raxos\Router\Error\RegisterException;
-use Raxos\Router\Error\RouterException;
+use Raxos\Router\Error\{RegisterException, RouterException};
 use Raxos\Router\Route\RouteExecutor;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -51,6 +50,7 @@ class Resolver
     private const ARRAYABLE_OPTIONS = ['middlewares', 'request'];
     private const SUPPORTED_ATTRIBUTES = [
         Delete::class,
+        FromQuery::class,
         Get::class,
         Head::class,
         Options::class,
@@ -106,7 +106,7 @@ class Resolver
             $frames = array_merge($frames, $this->resolveCallStackController($controller));
         }
 
-        $paths = array_map('strlen', array_keys($frames));
+        $paths = array_map(strlen(...), array_keys($frames));
         array_multisort($paths, SORT_DESC, $frames);
 
         $this->callStack = $frames;
@@ -554,6 +554,12 @@ class Resolver
             'name' => $parameter->getName(),
             'type' => ReflectionUtil::getTypes($parameter->getType()) ?? []
         ];
+
+        $fromQueryAttributes = $parameter->getAttributes(FromQuery::class);
+
+        if (isset($fromQueryAttributes[0])) {
+            $param['query'] = $fromQueryAttributes[0]->getArguments()[0];
+        }
 
         if ($parameter->isDefaultValueAvailable()) {
             $param['default'] = $parameter->getDefaultValue();

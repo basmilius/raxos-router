@@ -14,7 +14,7 @@ use JetBrains\PhpStorm\Pure;
  * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-final class With
+final readonly class With
 {
 
     /**
@@ -28,8 +28,8 @@ final class With
      */
     #[Pure]
     public function __construct(
-        public readonly string $class,
-        public readonly array $arguments = []
+        public string $class,
+        public array $arguments = []
     )
     {
     }

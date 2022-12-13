@@ -14,7 +14,7 @@ use JetBrains\PhpStorm\Pure;
  * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-final class Prefix
+final readonly class Prefix
 {
 
     /**
@@ -26,7 +26,7 @@ final class Prefix
      * @since 1.0.0
      */
     #[Pure]
-    public function __construct(public readonly string $path)
+    public function __construct(public string $path)
     {
     }
 

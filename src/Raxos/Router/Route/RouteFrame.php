@@ -4,16 +4,12 @@ declare(strict_types=1);
 namespace Raxos\Router\Route;
 
 use Exception;
+use Raxos\Router\{Router, RouterUtil};
 use Raxos\Router\Controller\ExceptionAwareInterface;
-use Raxos\Router\Effect\Effect;
-use Raxos\Router\Effect\NotFoundEffect;
-use Raxos\Router\Effect\VoidEffect;
-use Raxos\Router\Error\RouterException;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Effect\{Effect, NotFoundEffect, VoidEffect};
+use Raxos\Router\Error\{RouterException, RuntimeException};
 use Raxos\Router\Middleware\Middleware;
 use Raxos\Router\Response\Response;
-use Raxos\Router\Router;
-use Raxos\Router\RouterUtil;
 use function array_slice;
 use function count;
 use function sprintf;
@@ -25,16 +21,16 @@ use function sprintf;
  * @package Raxos\Router\Route
  * @since 1.0.0
  */
-class RouteFrame
+readonly class RouteFrame
 {
 
-    public readonly string $class;
-    public readonly string $method;
-    public readonly array $middlewares;
-    public readonly array $params;
-    public readonly array $request;
-    public readonly array $type;
-    public readonly ?array $version;
+    public string $class;
+    public string $method;
+    public array $middlewares;
+    public array $params;
+    public array $request;
+    public array $type;
+    public ?array $version;
 
     /**
      * RouteFrame constructor.
@@ -46,7 +42,7 @@ class RouteFrame
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(array $frame, public readonly bool $isFirst, public readonly bool $isLast)
+    public function __construct(array $frame, public bool $isFirst, public bool $isLast)
     {
         $this->class = $frame['class'];
         $this->method = $frame['method'];

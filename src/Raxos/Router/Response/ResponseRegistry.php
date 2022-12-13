@@ -87,7 +87,7 @@ final class ResponseRegistry
     }
 
     /**
-     * Returns true if the given header is registred.
+     * Returns true if the given header is registered.
      *
      * @param string $name
      *

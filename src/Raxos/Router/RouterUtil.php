@@ -77,6 +77,11 @@ final class RouterUtil
             $parameterName = $parameter['name'];
             $parameterType = $parameter['type'];
 
+            if (array_key_exists('query', $parameter) && !$router->hasParameter($parameter['query'])) {
+                $request = $router->getParameter('request');
+                $router->parameter($parameter['query'], $request->queryString->get($parameter['query'], $parameter['default'] ?? null));
+            }
+
             if ($router->hasParameter($parameterName)) {
                 $value = $router->getParameter($parameterName);
                 $valueType = gettype($value);

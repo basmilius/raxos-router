@@ -15,7 +15,7 @@ use function is_array;
  * @package Raxos\Router\Response
  * @since 1.0.0
  */
-class XmlResponse extends Response
+readonly class XmlResponse extends Response
 {
 
     /**

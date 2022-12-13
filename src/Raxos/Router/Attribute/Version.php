@@ -15,7 +15,7 @@ use function sprintf;
  * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_METHOD)]
-final class Version
+final readonly class Version
 {
 
     /**
@@ -29,8 +29,8 @@ final class Version
      * @since 1.0.0
      */
     public function __construct(
-        public readonly ?float $min = null,
-        public readonly ?float $max = null
+        public ?float $min = null,
+        public ?float $max = null
     )
     {
         if ($min !== null && $max !== null && $min >= $max) {

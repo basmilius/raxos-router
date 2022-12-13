@@ -12,7 +12,7 @@ use Raxos\Router\Router;
  * @package Raxos\Router\Effect
  * @since 1.0.0
  */
-abstract class Effect
+abstract readonly class Effect
 {
 
     /**
@@ -23,7 +23,7 @@ abstract class Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(public readonly Router $router)
+    public function __construct(public Router $router)
     {
     }
 

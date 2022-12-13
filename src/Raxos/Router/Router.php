@@ -5,10 +5,8 @@ namespace Raxos\Router;
 
 use JetBrains\PhpStorm\Pure;
 use Raxos\Http\HttpMethod;
-use Raxos\Router\Controller\Controller;
-use Raxos\Router\Controller\ControllerContainer;
-use Raxos\Router\Effect\Effect;
-use Raxos\Router\Effect\NotFoundEffect;
+use Raxos\Router\Controller\{Controller, ControllerContainer};
+use Raxos\Router\Effect\{Effect, NotFoundEffect};
 use Raxos\Router\Error\RouterException;
 use Raxos\Router\Response\ResponseRegistry;
 use function array_key_exists;

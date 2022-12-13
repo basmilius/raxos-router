@@ -17,7 +17,7 @@ use const JSON_HEX_TAG;
  * @package Raxos\Router\Response
  * @since 1.0.0
  */
-class JsonResponse extends Response
+readonly class JsonResponse extends Response
 {
 
     public const FLAGS = JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG;

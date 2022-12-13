@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use Raxos\Http\HttpResponseCode;
+use Raxos\Router\Effect\Effect;
 use Raxos\Router\Effect\RedirectEffect;
+use Raxos\Router\Effect\VoidEffect;
 use Raxos\Router\Router;
 
 /**
@@ -51,9 +53,7 @@ trait ResponseMethods
      */
     protected final function html(string $value, HttpResponseCode $responseCode = HttpResponseCode::OK): HtmlResponse
     {
-        $this->router
-            ->getResponseRegistry()
-            ->responseCode($responseCode);
+        $this->responseCode($responseCode);
 
         return new HtmlResponse($this->router, $value);
     }
@@ -70,11 +70,23 @@ trait ResponseMethods
      */
     protected final function json(mixed $value, HttpResponseCode $responseCode = HttpResponseCode::OK): JsonResponse
     {
-        $this->router
-            ->getResponseRegistry()
-            ->responseCode($responseCode);
+        $this->responseCode($responseCode);
 
         return new JsonResponse($this->router, $value);
+    }
+
+    /**
+     * Returns a no content response effect.
+     *
+     * @return Effect
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.6
+     */
+    protected final function noContent(): Effect
+    {
+        $this->responseCode(HttpResponseCode::NO_CONTENT);
+
+        return new VoidEffect($this->router);
     }
 
     /**
@@ -93,6 +105,24 @@ trait ResponseMethods
     }
 
     /**
+     * Sets the response code.
+     *
+     * @param HttpResponseCode $responseCode
+     *
+     * @return $this
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.6
+     */
+    protected final function responseCode(HttpResponseCode $responseCode): static
+    {
+        $this->router
+            ->getResponseRegistry()
+            ->responseCode($responseCode);
+
+        return $this;
+    }
+
+    /**
      * Returns a XML response.
      *
      * @param mixed $value
@@ -104,9 +134,7 @@ trait ResponseMethods
      */
     protected final function xml(mixed $value, HttpResponseCode $responseCode = HttpResponseCode::OK): XmlResponse
     {
-        $this->router
-            ->getResponseRegistry()
-            ->responseCode($responseCode);
+        $this->responseCode($responseCode);
 
         return new XmlResponse($this->router, $value);
     }

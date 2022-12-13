@@ -13,7 +13,7 @@ use Raxos\Router\Router;
  * @package Raxos\Router\Effect
  * @since 1.0.0
  */
-final class RedirectEffect extends Effect
+final readonly class RedirectEffect extends Effect
 {
 
     /**
@@ -28,8 +28,8 @@ final class RedirectEffect extends Effect
      */
     public function __construct(
         Router $router,
-        public readonly string $destination,
-        public readonly HttpResponseCode $responseCode = HttpResponseCode::TEMPORARY_REDIRECT
+        public string $destination,
+        public HttpResponseCode $responseCode = HttpResponseCode::TEMPORARY_REDIRECT
     )
     {
         parent::__construct($router);

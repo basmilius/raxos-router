@@ -18,7 +18,7 @@ use function strtotime;
  * @package Raxos\Router\Response
  * @since 1.0.0
  */
-class FileResponse extends Response
+readonly class FileResponse extends Response
 {
 
     /**
@@ -34,9 +34,9 @@ class FileResponse extends Response
      */
     public function __construct(
         Router $router,
-        public readonly string $path,
-        public readonly string $contentType,
-        public readonly bool $allowCache = true
+        public string $path,
+        public string $contentType,
+        public bool $allowCache = true
     )
     {
         parent::__construct($router, $path);

@@ -3,10 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Route;
 
-use Raxos\Router\Effect\Effect;
-use Raxos\Router\Effect\NotFoundEffect;
-use Raxos\Router\Effect\ResponseEffect;
-use Raxos\Router\Effect\ResultEffect;
+use Raxos\Router\Effect\{Effect, NotFoundEffect, ResponseEffect, ResultEffect};
 use Raxos\Router\Error\RouterException;
 use Raxos\Router\Response\Response;
 use Raxos\Router\Router;
@@ -20,11 +17,11 @@ use function count;
  * @package Raxos\Router\Route
  * @since 1.0.0
  */
-class RouteExecutor
+readonly class RouteExecutor
 {
 
     /** @var RouteFrame[] */
-    private readonly array $frames;
+    private array $frames;
 
     /**
      * RouteExecutor constructor.
@@ -38,8 +35,8 @@ class RouteExecutor
      */
     public function __construct(
         array $frames,
-        private readonly array $params,
-        private readonly float $version
+        private array $params,
+        private float $version
     )
     {
         $frameCount = count($frames);

@@ -16,10 +16,10 @@ use function is_array;
  * @package Raxos\Router\Response
  * @since 1.0.0
  */
-abstract class Response implements ResponseInterface
+abstract readonly class Response implements ResponseInterface
 {
 
-    protected readonly ?ResponseRegistry $responseRegistry;
+    protected ?ResponseRegistry $responseRegistry;
 
     /**
      * Response constructor.
@@ -31,8 +31,8 @@ abstract class Response implements ResponseInterface
      * @since 1.0.0
      */
     public function __construct(
-        public readonly Router $router,
-        public readonly mixed $value
+        public Router $router,
+        public mixed $value
     )
     {
         $this->responseRegistry = $router->getResponseRegistry();

@@ -15,7 +15,7 @@ use Raxos\Router\Error\RegisterException;
  * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_METHOD)]
-class SubController
+readonly class SubController
 {
 
     /**
@@ -27,7 +27,7 @@ class SubController
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(public readonly string $class)
+    public function __construct(public string $class)
     {
         if (!is_subclass_of($class, Controller::class)) {
             throw new RegisterException(sprintf('Controller class must extend %s.', Controller::class), RegisterException::ERR_NOT_A_CONTROLLER);
