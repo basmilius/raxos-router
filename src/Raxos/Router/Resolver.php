@@ -180,7 +180,7 @@ class Resolver
 
             $frames = $callStack[$method->value] ?? $callStack[HttpMethod::ANY->value] ?? null;
 
-            if ($frames === null || $method === HttpMethod::OPTIONS) {
+            if ($frames === null && $method === HttpMethod::OPTIONS) {
                 $key = array_keys($callStack)[0] ?? null;
                 $frames = $callStack[$key] ?? null;
             }
