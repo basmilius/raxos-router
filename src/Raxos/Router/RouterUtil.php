@@ -33,7 +33,7 @@ use function sprintf;
 final class RouterUtil
 {
 
-    public const SIMPLE_TYPES = ['string', 'bool', 'int'];
+    public const array SIMPLE_TYPES = ['string', 'bool', 'int'];
 
     /**
      * Converts the given value to the correct type.

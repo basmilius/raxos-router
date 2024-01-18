@@ -20,7 +20,7 @@ use const JSON_HEX_TAG;
 readonly class JsonResponse extends Response
 {
 
-    public const FLAGS = JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG;
+    public const int FLAGS = JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG;
 
     /**
      * {@inheritdoc}

@@ -13,10 +13,10 @@ namespace Raxos\Router\Error;
 final class RegisterException extends RouterException
 {
 
-    public const ERR_MAPPING_FAILED = 1;
-    public const ERR_MISSING_TYPE = 2;
-    public const ERR_ILLEGAL_TYPE = 4;
-    public const ERR_NOT_A_CONTROLLER = 8;
-    public const ERR_RECURSION_DETECTED = 16;
+    public const int ERR_MAPPING_FAILED = 1;
+    public const int ERR_MISSING_TYPE = 2;
+    public const int ERR_ILLEGAL_TYPE = 4;
+    public const int ERR_NOT_A_CONTROLLER = 8;
+    public const int ERR_RECURSION_DETECTED = 16;
 
 }

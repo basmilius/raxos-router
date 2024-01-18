@@ -47,8 +47,8 @@ use const SORT_DESC;
 class Resolver
 {
 
-    private const ARRAYABLE_OPTIONS = ['middlewares', 'request'];
-    private const SUPPORTED_ATTRIBUTES = [
+    private const array ARRAYABLE_OPTIONS = ['middlewares', 'request'];
+    private const array SUPPORTED_ATTRIBUTES = [
         Delete::class,
         FromQuery::class,
         Get::class,
