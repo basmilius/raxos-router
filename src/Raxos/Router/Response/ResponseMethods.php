@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use Raxos\Http\HttpResponseCode;
-use Raxos\Router\Effect\Effect;
-use Raxos\Router\Effect\RedirectEffect;
-use Raxos\Router\Effect\VoidEffect;
+use Raxos\Router\Effect\{Effect, RedirectEffect, VoidEffect};
 use Raxos\Router\Router;
 
 /**
@@ -22,6 +20,20 @@ trait ResponseMethods
 {
 
     /**
+     * Returns an accepted response with the given data.
+     *
+     * @param array $data
+     *
+     * @return JsonResponse
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.16
+     */
+    protected function accepted(array $data = ['status' => 'ok']): JsonResponse
+    {
+        return $this->json($data, HttpResponseCode::ACCEPTED);
+    }
+
+    /**
      * Adds the given header to the response.
      *
      * @param string $name
@@ -35,7 +47,7 @@ trait ResponseMethods
     protected function header(string $name, string $value, bool $replace = true): static
     {
         $this->router
-            ->getResponseRegistry()
+            ->responseRegistry
             ->header($name, $value, $replace);
 
         return $this;
@@ -116,7 +128,7 @@ trait ResponseMethods
     protected final function responseCode(HttpResponseCode $responseCode): static
     {
         $this->router
-            ->getResponseRegistry()
+            ->responseRegistry
             ->responseCode($responseCode);
 
         return $this;

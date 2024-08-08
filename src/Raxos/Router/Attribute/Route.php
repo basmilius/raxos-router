@@ -15,7 +15,7 @@ use Raxos\Http\HttpMethod;
  * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-class Route
+readonly class Route
 {
 
     /**
@@ -29,8 +29,8 @@ class Route
      */
     #[Pure]
     public function __construct(
-        public readonly string $path = '/',
-        public readonly HttpMethod $method = HttpMethod::ANY
+        public string $path = '/',
+        public HttpMethod $method = HttpMethod::ANY
     )
     {
     }

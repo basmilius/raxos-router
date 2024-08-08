@@ -15,7 +15,7 @@ use Raxos\Router\Error\RegisterException;
  * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_METHOD)]
-readonly class SubController
+final readonly class SubController
 {
 
     /**

@@ -22,12 +22,12 @@ class Router extends Resolver
 {
 
     public readonly ControllerContainer $controllers;
+    public readonly ResponseRegistry $responseRegistry;
 
     protected bool $isSetupDone = false;
 
     private array $globals = [];
     private array $parameters = [];
-    private ?ResponseRegistry $responseRegistry = null;
 
     /**
      * Router constructor.
@@ -38,20 +38,7 @@ class Router extends Resolver
     public function __construct()
     {
         $this->controllers = new ControllerContainer();
-    }
-
-    /**
-     * Gets the response registry.
-     *
-     * @return ResponseRegistry
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function &getResponseRegistry(): ResponseRegistry
-    {
-        $this->responseRegistry ??= new ResponseRegistry();
-
-        return $this->responseRegistry;
+        $this->responseRegistry = new ResponseRegistry();
     }
 
     /**
@@ -64,7 +51,7 @@ class Router extends Resolver
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      *
-     * @noinspection PhpMixedReturnTypeCanBeReducedInspection // phpstorm suggests mixed|static, which is not possible.
+     * @noinspection PhpMixedReturnTypeCanBeReducedInspection
      */
     public final function getParameter(string $name, mixed $defaultValue = null): mixed
     {
@@ -167,8 +154,6 @@ class Router extends Resolver
         if ($route === null) {
             return new NotFoundEffect($this);
         }
-
-        $this->responseRegistry = null;
 
         return $route->execute($this);
     }

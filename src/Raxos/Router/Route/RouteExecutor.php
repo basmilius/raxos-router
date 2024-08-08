@@ -42,7 +42,7 @@ readonly class RouteExecutor
         $frameCount = count($frames);
         $index = 0;
 
-        $this->frames = array_map(fn(array $frame): RouteFrame => new RouteFrame($frame, $index === 0, ++$index === $frameCount), $frames);
+        $this->frames = array_map(static fn(array $frame): RouteFrame => new RouteFrame($frame, $index === 0, ++$index === $frameCount), $frames);
     }
 
     /**

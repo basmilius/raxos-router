@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Controller;
 
-use Raxos\Router\Error\RouterException;
-use Raxos\Router\Error\RuntimeException;
-use Raxos\Router\Router;
-use Raxos\Router\RouterUtil;
+use Raxos\Router\{Router, RouterUtil};
+use Raxos\Router\Error\{RouterException, RuntimeException};
+use ReflectionException;
 use function sprintf;
 
 /**
@@ -31,7 +30,7 @@ final class ControllerContainer
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function get(string $class): Controller
+    public function get(string $class): Controller
     {
         return $this->instances[$class] ?? throw new RuntimeException(sprintf('Instance of controller "%s" not found.', $class), RuntimeException::ERR_INSTANCE_NOT_FOUND);
     }
@@ -45,7 +44,7 @@ final class ControllerContainer
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function has(string $class): bool
+    public function has(string $class): bool
     {
         return isset($this->instances[$class]);
     }
@@ -55,18 +54,30 @@ final class ControllerContainer
      *
      * @param Router $router
      * @param string $class
+     * @param array{'name': string, 'type': string[], 'default': mixed, 'query': array}[] $properties
      *
      * @return Controller
      * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function load(Router $router, string $class): Controller
+    public function load(Router $router, string $class, array $properties): Controller
     {
-        $params = RouterUtil::prepareParametersForClass($class);
-        $params = RouterUtil::prepareParameters($router, $params, $class);
+        try {
+            $injections = RouterUtil::getInjectionsForConstructor($class);
+            $injections = RouterUtil::getInjectionValues($router, $injections, $class);
 
-        return $this->instances[$class] = new $class(...$params);
+            $instance = $this->instances[$class] = new $class(...$injections);
+
+            RouterUtil::injectProperties(
+                $instance,
+                RouterUtil::getInjectionValues($router, $properties, $class)
+            );
+
+            return $instance;
+        } catch (ReflectionException $err) {
+            throw new RuntimeException(sprintf('Loading controller "%s" failed due to a reflection exception.', $class), RuntimeException::ERR_REFLECTION_FAILED, $err);
+        }
     }
 
 }

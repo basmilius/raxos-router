@@ -24,7 +24,9 @@ final readonly class FromQuery
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.6
      */
-    public function __construct(public string $param)
+    public function __construct(
+        public string $param
+    )
     {
     }
 

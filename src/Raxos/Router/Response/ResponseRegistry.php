@@ -31,7 +31,7 @@ final class ResponseRegistry
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function header(string $name, string $value, bool $replace = true): self
+    public function header(string $name, string $value, bool $replace = true): self
     {
         if (array_key_exists($name, $this->headers) && !$replace) {
             if (is_array($this->headers[$name])) {
@@ -55,7 +55,7 @@ final class ResponseRegistry
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function responseCode(HttpResponseCode $code): self
+    public function responseCode(HttpResponseCode $code): self
     {
         $this->responseCode = $code;
 
@@ -69,7 +69,7 @@ final class ResponseRegistry
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function getHeaders(): array
+    public function getHeaders(): array
     {
         return $this->headers;
     }
@@ -81,7 +81,7 @@ final class ResponseRegistry
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function getResponseCode(): HttpResponseCode
+    public function getResponseCode(): HttpResponseCode
     {
         return $this->responseCode;
     }
@@ -95,7 +95,7 @@ final class ResponseRegistry
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function hasHeader(string $name): bool
+    public function hasHeader(string $name): bool
     {
         return array_key_exists($name, $this->headers);
     }

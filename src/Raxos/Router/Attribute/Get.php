@@ -15,7 +15,7 @@ use Raxos\Http\HttpMethod;
  * @since 1.0.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-final class Get extends Route
+final readonly class Get extends Route
 {
 
     /**

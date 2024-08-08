@@ -9,6 +9,7 @@ use const JSON_HEX_AMP;
 use const JSON_HEX_APOS;
 use const JSON_HEX_QUOT;
 use const JSON_HEX_TAG;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * Class JsonResponse
@@ -20,7 +21,7 @@ use const JSON_HEX_TAG;
 readonly class JsonResponse extends Response
 {
 
-    public const int FLAGS = JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG;
+    public const int FLAGS = JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_THROW_ON_ERROR;
 
     /**
      * {@inheritdoc}

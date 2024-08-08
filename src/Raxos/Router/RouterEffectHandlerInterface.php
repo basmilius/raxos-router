@@ -3,11 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use Raxos\Router\Effect\NotFoundEffect;
-use Raxos\Router\Effect\RedirectEffect;
-use Raxos\Router\Effect\ResponseEffect;
-use Raxos\Router\Effect\ResultEffect;
-use Raxos\Router\Effect\VoidEffect;
+use Raxos\Router\Effect\{NotFoundEffect, RedirectEffect, ResponseEffect, ResultEffect, VoidEffect};
 
 /**
  * Interface RouterEffectHandlerInterface

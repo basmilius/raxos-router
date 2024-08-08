@@ -85,7 +85,7 @@ readonly class FileResponse extends Response
         $this->header('Pragma', 'cache');
 
         if ($etagMatch || $modifiedMatch) {
-            $this->router->getResponseRegistry()->responseCode(HttpResponseCode::NOT_MODIFIED);
+            $this->router->responseRegistry->responseCode(HttpResponseCode::NOT_MODIFIED);
         }
     }
 

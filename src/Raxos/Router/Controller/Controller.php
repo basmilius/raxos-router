@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Controller;
 
-use Raxos\Router\Response\ResponseMethods;
+use Raxos\Router\Response\{ResponseMethods, ResultMethods};
 use Raxos\Router\Router;
 
 /**
@@ -17,6 +17,7 @@ abstract class Controller
 {
 
     use ResponseMethods;
+    use ResultMethods;
 
     /**
      * Controller constructor.
@@ -26,7 +27,9 @@ abstract class Controller
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(protected readonly Router $router)
+    public function __construct(
+        protected readonly Router $router
+    )
     {
     }
 

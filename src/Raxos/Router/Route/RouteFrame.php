@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace Raxos\Router\Route;
 
 use Exception;
-use Raxos\Router\{Router, RouterUtil};
+use JetBrains\PhpStorm\Pure;
+use Raxos\Router\{MiddlewareInterface, Router, RouterUtil};
 use Raxos\Router\Controller\ExceptionAwareInterface;
 use Raxos\Router\Effect\{Effect, NotFoundEffect, VoidEffect};
 use Raxos\Router\Error\{RouterException, RuntimeException};
-use Raxos\Router\Middleware\Middleware;
 use Raxos\Router\Response\Response;
 use function array_slice;
-use function count;
 use function sprintf;
 
 /**
@@ -21,13 +20,14 @@ use function sprintf;
  * @package Raxos\Router\Route
  * @since 1.0.0
  */
-readonly class RouteFrame
+final readonly class RouteFrame
 {
 
     public string $class;
     public string $method;
     public array $middlewares;
     public array $params;
+    public array $properties;
     public array $request;
     public array $type;
     public ?array $version;
@@ -42,12 +42,17 @@ readonly class RouteFrame
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(array $frame, public bool $isFirst, public bool $isLast)
+    public function __construct(
+        array $frame,
+        public bool $isFirst,
+        public bool $isLast
+    )
     {
         $this->class = $frame['class'];
         $this->method = $frame['method'];
         $this->middlewares = $frame['middlewares'] ?? [];
         $this->params = $frame['params'] ?? [];
+        $this->properties = $frame['properties'] ?? [];
         $this->request = $frame['request'];
         $this->type = $frame['type'];
         $this->version = $frame['version'] ?? null;
@@ -62,7 +67,8 @@ readonly class RouteFrame
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public final function isVersionSatisfiable(float $version): bool
+    #[Pure]
+    public function isVersionSatisfiable(float $version): bool
     {
         if ($this->version === null) {
             return true;
@@ -122,20 +128,20 @@ readonly class RouteFrame
     public function invokeController(Router $router): mixed
     {
         if (!$router->controllers->has($this->class)) {
-            $router->controllers->load($router, $this->class);
+            $router->controllers->load($router, $this->class, $this->properties);
         }
 
         $controller = $router->controllers->get($this->class);
-        $params = RouterUtil::prepareParameters($router, $this->params, $this->class, $this->method);
+        $injections = RouterUtil::getInjectionValues($router, $this->params, $this->class, $this->method, $this);
 
         try {
             if ($this->type[0] === 'void' && $this->isLast) {
-                $controller->invoke($this->method, ...$params);
+                $controller->invoke($this->method, ...$injections);
 
                 return new VoidEffect($router);
             }
 
-            return $controller->invoke($this->method, ...$params);
+            return $controller->invoke($this->method, ...$injections);
         } catch (Exception $err) {
             if ($controller instanceof ExceptionAwareInterface) {
                 return $controller->onException($err);
@@ -146,27 +152,33 @@ readonly class RouteFrame
     }
 
     /**
+     * Invokes a single middleware.
+     *
      * @param Router $router
-     * @param string $class
+     * @param class-string<MiddlewareInterface> $class
      * @param array $arguments
+     * @param array $properties
      *
      * @return Effect|Response|bool|null
      * @throws RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function invokeMiddleware(Router $router, string $class, array $arguments): Effect|Response|bool|null
+    public function invokeMiddleware(Router $router, string $class, array $arguments, array $properties): Effect|Response|bool|null
     {
         try {
-            $params = RouterUtil::prepareParametersForClass($class);
-            $params = array_slice($params, count($arguments) + 1);
-            $params = RouterUtil::prepareParameters($router, $params, $class);
+            $injections = RouterUtil::getInjectionsForConstructor($class);
+            $injections = array_slice($injections, count($arguments));
+            $injections = RouterUtil::getInjectionValues($router, $injections, $class, frame: $this);
 
-            /** @var Middleware $middleware */
-            $middleware = new $class($router, ...$arguments, ...$params);
-            $middleware->setFrame($this);
+            $instance = new $class(...$arguments, ...$injections);
 
-            return $middleware->handle();
+            RouterUtil::injectProperties(
+                $instance,
+                RouterUtil::getInjectionValues($router, $properties, $class, frame: $this)
+            );
+
+            return $instance->handle();
         } catch (RouterException $err) {
             throw $err;
         } catch (Exception $err) {
@@ -189,8 +201,8 @@ readonly class RouteFrame
     {
         $returnResult = false;
 
-        foreach ($this->middlewares as [$class, $arguments]) {
-            $result = $this->invokeMiddleware($router, $class, $arguments);
+        foreach ($this->middlewares as [$class, $arguments, $properties]) {
+            $result = $this->invokeMiddleware($router, $class, $arguments, $properties);
 
             if ($result === true) {
                 continue;

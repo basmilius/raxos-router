@@ -1,31 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Raxos\Router\Middleware;
+namespace Raxos\Router;
 
 use Raxos\Http\Validate\Error\ValidatorException;
 use Raxos\Router\Effect\Effect;
 use Raxos\Router\Response\Response;
-use Raxos\Router\Route\RouteFrame;
 
 /**
  * Interface MiddlewareInterface
  *
  * @author Bas Milius <bas@mili.us>
- * @package Raxos\Router\Middleware
+ * @package Raxos\Router
  * @since 1.0.2
  */
 interface MiddlewareInterface
 {
-
-    /**
-     * Gets the route frame.
-     *
-     * @return RouteFrame|null
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.2
-     */
-    public function getFrame(): ?RouteFrame;
 
     /**
      * Handles the request.

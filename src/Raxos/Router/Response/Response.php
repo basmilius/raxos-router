@@ -19,8 +19,6 @@ use function is_array;
 abstract readonly class Response implements ResponseInterface
 {
 
-    protected ?ResponseRegistry $responseRegistry;
-
     /**
      * Response constructor.
      *
@@ -35,7 +33,6 @@ abstract readonly class Response implements ResponseInterface
         public mixed $value
     )
     {
-        $this->responseRegistry = $router->getResponseRegistry();
     }
 
     /**
@@ -48,7 +45,7 @@ abstract readonly class Response implements ResponseInterface
      */
     public final function getHeaders(): array
     {
-        return $this->router->getResponseRegistry()->getHeaders();
+        return $this->router->responseRegistry->getHeaders();
     }
 
     /**
@@ -63,7 +60,7 @@ abstract readonly class Response implements ResponseInterface
      */
     public final function hasHeader(string $name): bool
     {
-        return $this->router->getResponseRegistry()->hasHeader($name);
+        return $this->router->responseRegistry->hasHeader($name);
     }
 
     /**
@@ -79,7 +76,7 @@ abstract readonly class Response implements ResponseInterface
      */
     public final function header(string $name, string $content): ResponseRegistry
     {
-        return $this->router->getResponseRegistry()->header($name, $content);
+        return $this->router->responseRegistry->header($name, $content);
     }
 
     /**
@@ -89,7 +86,7 @@ abstract readonly class Response implements ResponseInterface
      */
     public final function getResponseCode(): HttpResponseCode
     {
-        return $this->router->getResponseRegistry()->getResponseCode();
+        return $this->router->responseRegistry->getResponseCode();
     }
 
     /**

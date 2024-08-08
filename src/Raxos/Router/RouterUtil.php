@@ -3,23 +3,25 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use JetBrains\PhpStorm\Pure;
+use JetBrains\PhpStorm\{ArrayShape, Pure};
 use Raxos\Foundation\Util\ReflectionUtil;
+use Raxos\Http\{HttpFile, HttpRequest};
 use Raxos\Http\Body\HttpBodyJson;
-use Raxos\Http\HttpFile;
-use Raxos\Http\HttpRequest;
+use Raxos\Http\Validate\{RequestModel, Validator};
 use Raxos\Http\Validate\Error\ValidatorException;
-use Raxos\Http\Validate\RequestModel;
-use Raxos\Http\Validate\Validator;
-use Raxos\Router\Error\RouterException;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\{RouterException, RuntimeException};
+use Raxos\Router\Route\RouteFrame;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionParameter;
+use ReflectionProperty;
 use function array_key_exists;
+use function array_map;
 use function get_class;
 use function gettype;
 use function implode;
 use function in_array;
+use function is_a;
 use function is_subclass_of;
 use function sprintf;
 
@@ -57,165 +59,266 @@ final class RouterUtil
     }
 
     /**
-     * Prepares the parameters for a controller or controller method.
+     * Gets the injections for the constructor of the given class name.
      *
-     * @param Router $router
-     * @param array $parameters
-     * @param string $controller
-     * @param string|null $method
+     * @param string $className
      *
      * @return array
-     * @throws RouterException
+     * @throws RuntimeException
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.0.16
      */
-    public static function prepareParameters(Router $router, array $parameters, string $controller, ?string $method = null): array
+    public static function getInjectionsForConstructor(string $className): array
     {
-        $params = [];
+        try {
+            $classRef = new ReflectionClass($className);
+            $constructor = $classRef->getConstructor();
 
-        foreach ($parameters as $parameter) {
-            $parameterName = $parameter['name'];
-            $parameterType = $parameter['type'];
-
-            if (array_key_exists('query', $parameter) && !$router->hasParameter($parameter['query'])) {
-                $request = $router->getParameter('request');
-                $router->parameter($parameter['query'], $request->queryString->get($parameter['query'], $parameter['default'] ?? null));
+            if ($constructor === null) {
+                return [];
             }
 
-            if ($router->hasParameter($parameterName)) {
-                $value = $router->getParameter($parameterName);
-                $valueType = gettype($value);
-
-                if ($valueType !== 'object') {
-                    foreach ($parameterType as $type) {
-                        if (is_subclass_of($type, RouterParameterInterface::class)) {
-                            $value = $type::getRouterValue($value);
-                            break;
-                        }
-
-                        if (!in_array($type, self::SIMPLE_TYPES)) {
-                            continue;
-                        }
-
-                        $value = self::convertParameterType($type, $value);
-                        break;
-                    }
-                } else {
-                    $isCorrectType = false;
-                    $valueType = get_class($value);
-
-                    foreach ($parameterType as $type) {
-                        if ($valueType === $type) {
-                            $isCorrectType = true;
-                            break;
-                        }
-
-                        if (is_subclass_of($valueType, $type)) {
-                            $isCorrectType = true;
-                            break;
-                        }
-                    }
-
-                    if (!$isCorrectType) {
-                        $parameterType = implode('|', $parameterType);
-
-                        if ($method !== null) {
-                            throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", wrong type ("%s") for parameter "%s", should be "%s".', $controller, $method, $valueType, $parameterName, $parameterType), RuntimeException::ERR_INVALID_PARAMETER);
-                        } else {
-                            throw new RuntimeException(sprintf('Could not initialize controller "%s", wrong type ("%s") for parameter "%s", should be "%s".', $controller, $valueType, $parameterName, $parameterType), RuntimeException::ERR_INVALID_PARAMETER);
-                        }
-                    }
-                }
-
-                $params[] = $value;
-            } else if (array_key_exists('default', $parameter)) {
-                $params[] = $parameter['default'];
-            } else if (isset($parameterType[0]) && is_subclass_of($parameterType[0], RequestModel::class)) {
-                try {
-                    $request = $router->getParameter('request');
-
-                    if (!($request instanceof HttpRequest)) {
-                        throw new RuntimeException(sprintf('Validation failed for controller method "%s::%s()". The $request global was not set or is not an instance of %s.', $controller, $method, HttpRequest::class), RuntimeException::ERR_VALIDATION_ERROR);
-                    }
-
-                    $body = $request->body();
-                    $contentType = $request->contentType();
-
-                    if ($contentType === 'application/json' && $body instanceof HttpBodyJson) {
-                        $data = $body->array();
-                    } else {
-                        $data = $request->post->array();
-
-                        /**
-                         * @var string $key
-                         * @var HttpFile $file
-                         */
-                        foreach ($request->files as $key => $file) {
-                            if (!$file->isValid()) {
-                                continue;
-                            }
-
-                            $data[$key] = $file;
-                        }
-                    }
-
-                    /** @var string $requestModel */
-                    $requestModel = $parameterType[0];
-
-                    $params[] = Validator::validate($requestModel, $data);
-                } catch (ValidatorException $err) {
-                    throw new RuntimeException(sprintf('Validation failed for controller method "%s::%s()".', $controller, $method), RuntimeException::ERR_VALIDATION_FAILED, $err);
-                }
-            } else {
-                $parameterType = implode('|', $parameterType);
-
-                if ($method !== null) {
-                    throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", missing parameter "%s" with type "%s".', $controller, $method, $parameterName, $parameterType), RuntimeException::ERR_MISSING_PARAMETER);
-                } else {
-                    throw new RuntimeException(sprintf('Could not initialize controller "%s", missing parameter "%s" with type "%s".', $controller, $parameterName, $parameterType), RuntimeException::ERR_MISSING_PARAMETER);
-                }
-            }
+            return array_map(self::normalizeInjectable(...), $constructor->getParameters());
+        } catch (ReflectionException $err) {
+            throw new RuntimeException(sprintf('Reflection failed for class "%s".', $className), RuntimeException::ERR_REFLECTION_FAILED, $err);
         }
-
-        return $params;
     }
 
     /**
-     * Prepares the parameters for the given class.
+     * Gets an injection value.
      *
-     * @param string $class
+     * @param Router $router
+     * @param array{'name': string, 'type': string[], 'default': mixed, 'query': array} $injection
+     * @param string $controllerClass
+     * @param string|null $controllerMethod
+     * @param RouteFrame|null $frame
+     *
+     * @return mixed
+     * @throws RuntimeException
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.16
+     */
+    public static function getInjectionValue(Router $router, array $injection, string $controllerClass, ?string $controllerMethod = null, ?RouteFrame $frame = null): mixed
+    {
+        $injectionName = $injection['name'];
+        $injectionType = $injection['type'];
+        $primaryType = $injectionType[0] ?? null;
+
+        if (array_key_exists('query', $injection) && !$router->hasParameter($injection['query'])) {
+            $request = self::requireRequest($router, $controllerClass, $controllerMethod);
+            $router->parameter($injection['query'], $request->queryString->get($injection['query'], $injection['default'] ?? null));
+        }
+
+        if (is_a($primaryType, Router::class, true)) {
+            return $router;
+        }
+
+        if (is_a($primaryType, RouteFrame::class, true) && $frame !== null) {
+            return $frame;
+        }
+
+        if ($router->hasParameter($injectionName)) {
+            $value = $router->getParameter($injectionName);
+            $valueType = gettype($value);
+
+            if ($valueType !== 'object') {
+                foreach ($injectionType as $type) {
+                    if (is_subclass_of($type, RouterParameterInterface::class)) {
+                        $value = $type::getRouterValue($value);
+                        break;
+                    }
+
+                    if (!in_array($type, self::SIMPLE_TYPES, true)) {
+                        continue;
+                    }
+
+                    $value = self::convertParameterType($type, $value);
+                    break;
+                }
+
+                return $value;
+            }
+
+            $isCorrectType = false;
+            $valueType = get_class($value);
+
+            foreach ($injectionType as $type) {
+                if ($valueType === $type || is_subclass_of($valueType, $type)) {
+                    $isCorrectType = true;
+                    break;
+                }
+            }
+
+            if (!$isCorrectType) {
+                $injectionType = implode('|', $injectionType);
+
+                if ($controllerMethod !== null) {
+                    throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", wrong type ("%s") for parameter "%s", should be "%s".', $controllerClass, $controllerMethod, $valueType, $injectionName, $injectionType), RuntimeException::ERR_INVALID_PARAMETER);
+                }
+
+                throw new RuntimeException(sprintf('Could not initialize controller "%s", wrong type ("%s") for parameter "%s", should be "%s".', $controllerClass, $valueType, $injectionName, $injectionType), RuntimeException::ERR_INVALID_PARAMETER);
+            }
+
+            return $value;
+        }
+
+        if ($primaryType !== null && is_subclass_of($primaryType, RequestModel::class)) {
+            try {
+                $request = self::requireRequest($router, $controllerClass, $controllerMethod);
+                $body = $request->body();
+                $contentType = $request->contentType();
+
+                if ($contentType === 'application/json' && $body instanceof HttpBodyJson) {
+                    $data = $body->array();
+                } else {
+                    $data = $request->post->array();
+
+                    /**
+                     * @var string $key
+                     * @var HttpFile $file
+                     */
+                    foreach ($request->files as $key => $file) {
+                        if (!$file->isValid()) {
+                            continue;
+                        }
+
+                        $data[$key] = $file;
+                    }
+                }
+
+                /** @var class-string<RequestModel> $requestModel */
+                $requestModel = $injectionType[0];
+
+                return Validator::validate($requestModel, $data);
+            } catch (ValidatorException $err) {
+                throw new RuntimeException(sprintf('Validation failed for controller method "%s::%s()".', $controllerClass, $controllerMethod), RuntimeException::ERR_VALIDATION_FAILED, $err);
+            }
+        }
+
+        if (array_key_exists('default', $injection)) {
+            return $injection['default'];
+        }
+
+        $injectionType = implode('|', $injectionType);
+
+        if ($controllerMethod !== null) {
+            throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", missing parameter "%s" with type "%s".', $controllerClass, $controllerMethod, $injectionName, $injectionType), RuntimeException::ERR_MISSING_PARAMETER);
+        }
+
+        throw new RuntimeException(sprintf('Could not initialize controller "%s", missing parameter "%s" with type "%s".', $controllerClass, $injectionName, $injectionType), RuntimeException::ERR_MISSING_PARAMETER);
+    }
+
+    /**
+     * Gets the injection values based on the given injections.
+     *
+     * @param Router $router
+     * @param array{'name': string, 'type': string[], 'default': mixed, 'query': array}[] $injections
+     * @param string $controllerClass
+     * @param string|null $controllerMethod
+     * @param RouteFrame|null $frame
      *
      * @return array
      * @throws RouterException
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.0.16
      */
-    public static function prepareParametersForClass(string $class): array
+    public static function getInjectionValues(Router $router, array $injections, string $controllerClass, ?string $controllerMethod = null, ?RouteFrame $frame = null): array
     {
-        try {
-            $reflection = new ReflectionClass($class);
-            $parameters = $reflection->getConstructor()->getParameters();
-            $params = [];
+        $results = [];
 
-            foreach ($parameters as $parameter) {
-                $types = ReflectionUtil::getTypes($parameter->getType()) ?? [];
+        foreach ($injections as $injection) {
+            $results[$injection['name']] = self::getInjectionValue($router, $injection, $controllerClass, $controllerMethod, $frame);
+        }
 
-                $param = [
-                    'name' => $parameter->getName(),
-                    'type' => $types
-                ];
+        return $results;
+    }
 
-                if ($parameter->isDefaultValueAvailable()) {
-                    $param['default'] = $parameter->getDefaultValue();
-                }
+    /**
+     * Injects the given injections to the given instance.
+     *
+     * @param object $instance
+     * @param array $injections
+     *
+     * @return void
+     * @throws ReflectionException
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.16
+     */
+    public static function injectProperties(object $instance, array $injections): void
+    {
+        $classRef = new ReflectionClass($instance);
 
-                $params[] = $param;
+        foreach ($injections as $propertyName => $injectionValue) {
+            if (isset($instance->{$propertyName})) {
+                continue;
             }
 
-            return $params;
-        } catch (ReflectionException $err) {
-            throw new RuntimeException(sprintf('Reflection failed for class "%s".', $class), RuntimeException::ERR_REFLECTION_FAILED, $err);
+            $propertyRef = $classRef->getProperty($propertyName);
+            /** @noinspection PhpExpressionResultUnusedInspection */
+            $propertyRef->setAccessible(true);
+            $propertyRef->setValue($instance, $injectionValue);
         }
+    }
+
+    /**
+     * Normalizes the given parameter or property.
+     *
+     * @param ReflectionParameter|ReflectionProperty $property
+     *
+     * @return array
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.16
+     */
+    #[ArrayShape([
+        'name' => 'string',
+        'type' => 'string[]',
+        'default' => 'mixed'
+    ])]
+    public static function normalizeInjectable(ReflectionParameter|ReflectionProperty $property): array
+    {
+        $types = ReflectionUtil::getTypes($property->getType()) ?? [];
+        $param = [
+            'name' => $property->getName(),
+            'type' => $types
+        ];
+
+        if ($property instanceof ReflectionParameter && $property->isDefaultValueAvailable()) {
+            $param['default'] = $property->getDefaultValue();
+        }
+
+        if ($property instanceof ReflectionProperty && $property->hasDefaultValue()) {
+            $param['default'] = $property->getDefaultValue();
+        }
+
+        return $param;
+    }
+
+    /**
+     * Ensures a request instance.
+     *
+     * @param Router $router
+     * @param string $controllerClass
+     * @param string|null $controllerMethod
+     *
+     * @return HttpRequest
+     * @throws RuntimeException
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.0.16
+     * @see HttpRequest
+     */
+    private static function requireRequest(Router $router, string $controllerClass, ?string $controllerMethod = null): HttpRequest
+    {
+        $request = $router->getParameter('request');
+
+        if ($request === null) {
+            if ($controllerMethod !== null) {
+                throw new RuntimeException(sprintf('Controller method "%s::%s()" requires a $request injection of type "%s".', $controllerClass, $controllerMethod, HttpRequest::class), RuntimeException::ERR_INSTANCE_NOT_FOUND);
+            }
+
+            throw new RuntimeException(sprintf('Controller "%s" requires a $request injection of type "%s".', $controllerClass, HttpRequest::class), RuntimeException::ERR_INSTANCE_NOT_FOUND);
+        }
+
+        return $request;
     }
 
 }

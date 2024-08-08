@@ -26,7 +26,9 @@ final readonly class Prefix
      * @since 1.0.0
      */
     #[Pure]
-    public function __construct(public string $path)
+    public function __construct(
+        public string $path
+    )
     {
     }
 

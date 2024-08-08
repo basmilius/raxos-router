@@ -6,7 +6,7 @@ namespace Raxos\Router;
 use JetBrains\PhpStorm\ArrayShape;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Http\HttpMethod;
-use Raxos\Router\Attribute\{Delete, FromQuery, Get, Head, Options, Patch, Post, Prefix, Put, Route, SubController, Version, With};
+use Raxos\Router\Attribute\{Delete, FromQuery, Get, Head, Injected, Options, Patch, Post, Prefix, Put, Route, SubController, Version};
 use Raxos\Router\Controller\Controller;
 use Raxos\Router\Error\{RegisterException, RouterException};
 use Raxos\Router\Route\RouteExecutor;
@@ -15,6 +15,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
+use ReflectionProperty;
 use function array_filter;
 use function array_key_exists;
 use function array_keys;
@@ -60,8 +61,7 @@ class Resolver
         Route::class,
         Prefix::class,
         SubController::class,
-        Version::class,
-        With::class
+        Version::class
     ];
 
     protected array $callStack = [];
@@ -100,12 +100,7 @@ class Resolver
      */
     protected function resolveCallStack(): void
     {
-        $frames = [];
-
-        foreach ($this->mappings as $controller) {
-            $frames = array_merge($frames, $this->resolveCallStackController($controller));
-        }
-
+        $frames = array_merge_recursive(...array_map($this->resolveCallStackController(...), $this->mappings));
         $paths = array_map(strlen(...), array_keys($frames));
         array_multisort($paths, SORT_DESC, $frames);
 
@@ -153,9 +148,9 @@ class Resolver
     protected function resolveRequest(HttpMethod $method, string $path, float $version): ?RouteExecutor
     {
         $routes = array_keys($this->callStack);
-        $routes = array_filter($routes, fn(string $route): bool => str_starts_with($path, rtrim(substr($route, 0, strpos($route, '(') ?: strlen($route)), '?')));
+        $routes = array_filter($routes, static fn(string $route): bool => str_starts_with($path, rtrim(substr($route, 0, strpos($route, '(') ?: strlen($route)), '?')));
 
-        usort($routes, function (string $a, string $b): int {
+        usort($routes, static function (string $a, string $b): int {
             if (str_contains($a, '(') && str_contains($b, '(')) {
                 return strlen($b) <=> strlen($a);
             }
@@ -212,6 +207,19 @@ class Resolver
      */
     private function convertAttribute(ReflectionAttribute $attribute): ?array
     {
+        if (is_subclass_of($attribute->getName(), MiddlewareInterface::class)) {
+            $middleware = new ReflectionClass($attribute->getName());
+
+            return ['middlewares', [
+                $attribute->getName(),
+                $attribute->getArguments(),
+                array_map(
+                    RouterUtil::normalizeInjectable(...),
+                    array_filter($middleware->getProperties(), static fn(ReflectionProperty $property) => !empty($property->getAttributes(Injected::class)))
+                )
+            ]];
+        }
+
         if (!in_array($attribute->getName(), self::SUPPORTED_ATTRIBUTES)) {
             return null;
         }
@@ -222,7 +230,6 @@ class Resolver
             $attr instanceof Prefix => ['prefix', $attr->path],
             $attr instanceof SubController => ['child', $this->resolveControllerMapping(new ReflectionClass($attr->class))],
             $attr instanceof Version => ['version', [$attr->min, $attr->max]],
-            $attr instanceof With => ['middlewares', [$attr->class, $attr->arguments]],
             $attr instanceof Route => ['request', [$attr->method->value, $attr->path]],
             default => null
         };
@@ -248,7 +255,7 @@ class Resolver
                 continue;
             }
 
-            if (in_array($result[0], self::ARRAYABLE_OPTIONS)) {
+            if (in_array($result[0], self::ARRAYABLE_OPTIONS, true)) {
                 $options[$result[0]][] = $result[1];
             } else {
                 $options[$result[0]] = $result[1];
@@ -286,7 +293,7 @@ class Resolver
                     continue 2;
                 }
 
-                if (!in_array($type, RouterUtil::SIMPLE_TYPES)) {
+                if (!in_array($type, RouterUtil::SIMPLE_TYPES, true)) {
                     continue;
                 }
 
@@ -347,18 +354,13 @@ class Resolver
      */
     private function resolveCallStackController(array $controller, ?string $prefix = null, array $parents = []): array
     {
-        $frames = [];
         $prefix = $controller['prefix'] ?? $prefix ?? '';
 
         if ($prefix === '/') {
             $prefix = '';
         }
 
-        foreach ($controller['routes'] as $route) {
-            $frames = array_merge_recursive($frames, $this->resolveCallStackRoute($controller, $route, $prefix, $parents));
-        }
-
-        return $frames;
+        return array_merge_recursive(...array_map(fn($route) => $this->resolveCallStackRoute($controller, $route, $prefix, $parents), $controller['routes']));
     }
 
     /**
@@ -394,6 +396,10 @@ class Resolver
             $frame['params'] = $route['params'];
         }
 
+        if (isset($controller['properties'])) {
+            $frame['properties'] = $controller['properties'];
+        }
+
         if (isset($route['version'])) {
             $frame['version'] = $route['version'];
         }
@@ -410,7 +416,7 @@ class Resolver
             }
 
             if (isset($route['child'])) {
-                $frames = array_merge($frames, $this->resolveCallStackController($route['child'], $routePath, [...$parents, $routeCall]));
+                $frames = array_merge_recursive($frames, $this->resolveCallStackController($route['child'], $routePath, [...$parents, $routeCall]));
             } else {
                 $frames[$routePath][$requestMethod] ??= [];
                 $frames[$routePath][$requestMethod] = array_merge($frames[$routePath][$requestMethod], $parents);
@@ -434,7 +440,7 @@ class Resolver
      */
     private function resolveControllerMapping(ReflectionClass $class): ?array
     {
-        if (in_array($class->getName(), $this->resolverDidControllers)) {
+        if (in_array($class->getName(), $this->resolverDidControllers, true)) {
             throw new RegisterException(sprintf('Controller class "%s" can only be used once.', $class->getName()), RegisterException::ERR_RECURSION_DETECTED);
         }
 
@@ -445,7 +451,11 @@ class Resolver
 
         $mapping = [
             'name' => $class->getName(),
-            'routes' => []
+            'routes' => [],
+            'properties' => array_map(
+                RouterUtil::normalizeInjectable(...),
+                array_filter($class->getProperties(), static fn(ReflectionProperty $property) => !empty($property->getAttributes(Injected::class)))
+            )
         ];
 
         $this->convertAttributes($controllerAttributes, $mapping);
