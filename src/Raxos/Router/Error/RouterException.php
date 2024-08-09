@@ -12,6 +12,4 @@ use Raxos\Foundation\Error\RaxosException;
  * @package Raxos\Router\Error
  * @since 1.0.0
  */
-abstract class RouterException extends RaxosException
-{
-}
+abstract class RouterException extends RaxosException {}

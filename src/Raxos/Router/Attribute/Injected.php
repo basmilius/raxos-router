@@ -13,6 +13,4 @@ use Attribute;
  * @since 29/07/2024
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class Injected
-{
-}
+final readonly class Injected {}

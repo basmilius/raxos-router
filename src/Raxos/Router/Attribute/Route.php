@@ -31,8 +31,6 @@ readonly class Route
     public function __construct(
         public string $path = '/',
         public HttpMethod $method = HttpMethod::ANY
-    )
-    {
-    }
+    ) {}
 
 }

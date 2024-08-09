@@ -28,8 +28,6 @@ final readonly class Prefix
     #[Pure]
     public function __construct(
         public string $path
-    )
-    {
-    }
+    ) {}
 
 }

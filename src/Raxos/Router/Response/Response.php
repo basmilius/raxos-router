@@ -31,9 +31,7 @@ abstract readonly class Response implements ResponseInterface
     public function __construct(
         public Router $router,
         public mixed $value
-    )
-    {
-    }
+    ) {}
 
     /**
      * Gets the headers for the response.

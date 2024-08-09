@@ -29,9 +29,7 @@ abstract class Controller
      */
     public function __construct(
         protected readonly Router $router
-    )
-    {
-    }
+    ) {}
 
     /**
      * Invokes a method in the current controller.

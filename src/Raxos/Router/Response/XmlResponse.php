@@ -28,7 +28,7 @@ readonly class XmlResponse extends Response
     {
         if ($this->value instanceof SimpleXMLElement) {
             $xml = $this->value;
-        } else if (is_array($this->value)) {
+        } elseif (is_array($this->value)) {
             $xml = new SimpleXMLElement('<response/>');
 
             XmlUtil::arrayToXml($this->value, $xml);

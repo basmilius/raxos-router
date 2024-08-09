@@ -23,8 +23,6 @@ abstract readonly class Effect
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    public function __construct(public Router $router)
-    {
-    }
+    public function __construct(public Router $router) {}
 
 }

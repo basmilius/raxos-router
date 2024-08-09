@@ -26,8 +26,6 @@ final readonly class FromQuery
      */
     public function __construct(
         public string $param
-    )
-    {
-    }
+    ) {}
 
 }

@@ -10,7 +10,4 @@ namespace Raxos\Router\Effect;
  * @package Raxos\Router\Effect
  * @since 1.0.0
  */
-final readonly class NotFoundEffect extends Effect
-{
-
-}
+final readonly class NotFoundEffect extends Effect {}
