@@ -27,7 +27,7 @@ trait ResultMethods
      *
      * @return T
      * @author Bas Milius <bas@mili.us>
-     * @since 04-08-2024
+     * @since 1.0.16
      */
     protected function with(mixed $result): mixed
     {
