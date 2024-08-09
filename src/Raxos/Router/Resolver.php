@@ -176,7 +176,7 @@ class Resolver
             $frames = $callStack[$method->value] ?? $callStack[HttpMethod::ANY->value] ?? null;
 
             if ($frames === null && $method === HttpMethod::OPTIONS) {
-                $key = array_keys($callStack)[0] ?? null;
+                $key = array_key_first($callStack);
                 $frames = $callStack[$key] ?? null;
             }
 
@@ -509,7 +509,7 @@ class Resolver
             throw new RegisterException(sprintf('Method "%s::%s()" should have a return type.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
         }
 
-        $types = ReflectionUtil::getTypes($method->getReturnType()) ?? [];
+        $types = ($type = $method->getReturnType()) !== null ? ReflectionUtil::getTypes($type) ?? [] : [];
 
         if (isset($mapping['child']) && $types[0] !== 'void') {
             throw new RegisterException(sprintf('The return type of method "%s::%s()" should be void.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
@@ -562,7 +562,7 @@ class Resolver
 
         $param = [
             'name' => $parameter->getName(),
-            'type' => ReflectionUtil::getTypes($parameter->getType()) ?? []
+            'type' => ($type = $parameter->getType()) !== null ? ReflectionUtil::getTypes($type) ?? [] : []
         ];
 
         $fromQueryAttributes = $parameter->getAttributes(FromQuery::class);
