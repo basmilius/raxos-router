@@ -34,15 +34,15 @@ final readonly class Version
     )
     {
         if ($min !== null && $max !== null && $min >= $max) {
-            throw new RegisterException(sprintf('Minimum version %g should be higher than maximum %g.', $min, $max), RegisterException::ERR_MAPPING_FAILED);
+            throw RegisterException::mappingFailed(sprintf('Minimum version %g should be higher than maximum %g.', $min, $max));
         }
 
         if ($min !== null && $min <= 0) {
-            throw new RegisterException(sprintf('Minimum version %g should be higher than 0.', $min), RegisterException::ERR_MAPPING_FAILED);
+            throw RegisterException::mappingFailed(sprintf('Minimum version %g should be higher than 0.', $min));
         }
 
         if ($max !== null && $max <= 0) {
-            throw new RegisterException(sprintf('Maximum version %g should be higher than 0.', $max), RegisterException::ERR_MAPPING_FAILED);
+            throw RegisterException::mappingFailed(sprintf('Maximum version %g should be higher than 0.', $max));
         }
     }
 

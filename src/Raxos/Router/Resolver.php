@@ -82,7 +82,7 @@ class Resolver
     protected function addController(Router $router, Controller|string $controller): void
     {
         if (!is_subclass_of($controller, Controller::class)) {
-            throw new RegisterException(sprintf('Argument 1 to %s must be an instance or subclass of %s.', __METHOD__, Controller::class), RegisterException::ERR_NOT_A_CONTROLLER);
+            throw RegisterException::mappingFailed(sprintf('The given class "%s" is not a controller.', $controller::class));
         }
 
         if (!($controller instanceof Controller)) {
@@ -130,7 +130,7 @@ class Resolver
                 $this->mappings[] = $mapping;
             }
         } catch (ReflectionException $err) {
-            throw new RegisterException('Could not map controllers because of an reflection error.', RegisterException::ERR_MAPPING_FAILED, $err);
+            throw RegisterException::reflectionError($err, 'Could not map controllers because of a reflection error.');
         }
     }
 
@@ -333,7 +333,7 @@ class Resolver
             'string' => '[a-zA-Z0-9-_.@=,]+',
             'int' => '[0-9]+',
             'bool' => '(1|0|true|false)',
-            default => throw new RegisterException('Parameter types used in route paths can only be simple types.', RegisterException::ERR_MAPPING_FAILED)
+            default => throw RegisterException::mappingFailed('Parameter types used in route paths can only be simple types.')
         };
 
         $prefix = ($defaultValue ? '?' : '');
@@ -440,17 +440,17 @@ class Resolver
      */
     private function resolveControllerMapping(ReflectionClass $class): ?array
     {
-        if (in_array($class->getName(), $this->resolverDidControllers, true)) {
-            throw new RegisterException(sprintf('Controller class "%s" can only be used once.', $class->getName()), RegisterException::ERR_RECURSION_DETECTED);
+        if (in_array($class->name, $this->resolverDidControllers, true)) {
+            throw RegisterException::recursionDetected($class->name);
         }
 
-        $this->resolverDidControllers[] = $class->getName();
+        $this->resolverDidControllers[] = $class->name;
 
         $controllerAttributes = $class->getAttributes();
         $controllerMethods = $class->getMethods();
 
         $mapping = [
-            'name' => $class->getName(),
+            'name' => $class->name,
             'routes' => [],
             'properties' => array_map(
                 RouterUtil::normalizeInjectable(...),
@@ -494,8 +494,8 @@ class Resolver
         $methodAttributes = $method->getAttributes();
 
         $mapping = [
-            'class' => $class->getName(),
-            'method' => $method->getName(),
+            'class' => $class->name,
+            'method' => $method->name,
             'request' => null
         ];
 
@@ -506,13 +506,13 @@ class Resolver
         }
 
         if (!$method->hasReturnType()) {
-            throw new RegisterException(sprintf('Method "%s::%s()" should have a return type.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
+            throw RegisterException::missingType(sprintf('Method "%s->%s()" should have a return type.', $class->name, $method->name));
         }
 
         $types = ($type = $method->getReturnType()) !== null ? ReflectionUtil::getTypes($type) ?? [] : [];
 
         if (isset($mapping['child']) && $types[0] !== 'void') {
-            throw new RegisterException(sprintf('The return type of method "%s::%s()" should be void.', $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
+            throw RegisterException::missingType(sprintf('Method "%s->%s()" should have a void return type.', $class->name, $method->name));
         }
 
         if ($method->getNumberOfParameters() > 0) {
@@ -557,11 +557,11 @@ class Resolver
     private function resolveParameterMapping(ReflectionClass $class, ReflectionMethod $method, ReflectionParameter $parameter): array
     {
         if (!$parameter->hasType()) {
-            throw new RegisterException(sprintf('Parameter "%s" of method "%s::%s" should be strongly typed.', $parameter->getName(), $class->getName(), $method->getName()), RegisterException::ERR_MISSING_TYPE);
+            throw RegisterException::missingType(sprintf('Parameter "%s" of method "%s->%s()" should have a type.', $parameter->name, $class->name, $method->name));
         }
 
         $param = [
-            'name' => $parameter->getName(),
+            'name' => $parameter->name,
             'type' => ($type = $parameter->getType()) !== null ? ReflectionUtil::getTypes($type) ?? [] : []
         ];
 

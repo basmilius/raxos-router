@@ -6,6 +6,7 @@ namespace Raxos\Router\Attribute;
 use Attribute;
 use Raxos\Router\Controller\Controller;
 use Raxos\Router\Error\RegisterException;
+use function sprintf;
 
 /**
  * Class SubController
@@ -30,7 +31,7 @@ final readonly class SubController
     public function __construct(public string $class)
     {
         if (!is_subclass_of($class, Controller::class)) {
-            throw new RegisterException(sprintf('Controller class must extend %s.', Controller::class), RegisterException::ERR_NOT_A_CONTROLLER);
+            throw RegisterException::mappingFailed(sprintf('Class "%s" is not a controller. Controllers should extend from "%s".', $class, Controller::class));
         }
     }
 

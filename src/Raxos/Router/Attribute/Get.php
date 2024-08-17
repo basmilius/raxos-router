@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
-use JetBrains\PhpStorm\Pure;
 use Raxos\Http\HttpMethod;
 
 /**
@@ -26,7 +25,6 @@ final readonly class Get extends Route
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0
      */
-    #[Pure]
     public function __construct(string $path = '/')
     {
         parent::__construct($path, HttpMethod::GET);

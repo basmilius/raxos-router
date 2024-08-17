@@ -11,7 +11,6 @@ use Raxos\Router\Effect\{Effect, NotFoundEffect, VoidEffect};
 use Raxos\Router\Error\{RouterException, RuntimeException};
 use Raxos\Router\Response\Response;
 use function array_slice;
-use function sprintf;
 
 /**
  * Class RouteFrame
@@ -147,7 +146,7 @@ final readonly class RouteFrame
                 return $controller->onException($err);
             }
 
-            throw new RuntimeException(sprintf('Controller method "%s::%s()" threw an exception.', $this->class, $this->method), RuntimeException::ERR_EXCEPTION_IN_HANDLER, $err);
+            throw RuntimeException::controllerError($this, $err);
         }
     }
 
@@ -182,7 +181,7 @@ final readonly class RouteFrame
         } catch (RouterException $err) {
             throw $err;
         } catch (Exception $err) {
-            throw new RuntimeException(sprintf('Middleware "%s" threw an exception.', $class), RuntimeException::ERR_EXCEPTION_IN_MIDDLEWARE, $err);
+            throw RuntimeException::middlewareError($class, $err);
         }
     }
 

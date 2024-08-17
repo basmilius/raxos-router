@@ -80,7 +80,7 @@ final class RouterUtil
 
             return array_map(self::normalizeInjectable(...), $constructor->getParameters());
         } catch (ReflectionException $err) {
-            throw new RuntimeException(sprintf('Reflection failed for class "%s".', $className), RuntimeException::ERR_REFLECTION_FAILED, $err);
+            throw RuntimeException::reflectionError($err, sprintf('Could not get injections for constructor of class "%s".', $className));
         }
     }
 
@@ -153,10 +153,10 @@ final class RouterUtil
                 $injectionType = implode('|', $injectionType);
 
                 if ($controllerMethod !== null) {
-                    throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", wrong type ("%s") for parameter "%s", should be "%s".', $controllerClass, $controllerMethod, $valueType, $injectionName, $injectionType), RuntimeException::ERR_INVALID_PARAMETER);
+                    throw RuntimeException::invalidParameter(sprintf('Could not invoke controller method "%s->%s()", wrong type "%s" for parameter "%s", should be "%s".', $controllerClass, $controllerMethod, $valueType, $injectionName, $injectionType));
                 }
 
-                throw new RuntimeException(sprintf('Could not initialize controller "%s", wrong type ("%s") for parameter "%s", should be "%s".', $controllerClass, $valueType, $injectionName, $injectionType), RuntimeException::ERR_INVALID_PARAMETER);
+                throw RuntimeException::invalidParameter(sprintf('Could not instantiate controller "%s", wrong type "%s" for parameter "%s", should be "%s".', $controllerClass, $valueType, $injectionName, $injectionType));
             }
 
             return $value;
@@ -191,7 +191,7 @@ final class RouterUtil
 
                 return Validator::validate($requestModel, $data);
             } catch (ValidatorException $err) {
-                throw new RuntimeException(sprintf('Validation failed for controller method "%s::%s()".', $controllerClass, $controllerMethod), RuntimeException::ERR_VALIDATION_FAILED, $err);
+                throw RuntimeException::validationError($err, sprintf('Validation failed for controller method "%s->%s()".', $controllerClass, $controllerMethod));
             }
         }
 
@@ -202,10 +202,10 @@ final class RouterUtil
         $injectionType = implode('|', $injectionType);
 
         if ($controllerMethod !== null) {
-            throw new RuntimeException(sprintf('Could not invoke controller method "%s::%s()", missing parameter "%s" with type "%s".', $controllerClass, $controllerMethod, $injectionName, $injectionType), RuntimeException::ERR_MISSING_PARAMETER);
+            throw RuntimeException::missingParameter(sprintf('Could not invoke controller method "%s->%s()", missing parameter "%s" with type "%s".', $controllerClass, $controllerMethod, $injectionName, $injectionType));
         }
 
-        throw new RuntimeException(sprintf('Could not initialize controller "%s", missing parameter "%s" with type "%s".', $controllerClass, $injectionName, $injectionType), RuntimeException::ERR_MISSING_PARAMETER);
+        throw RuntimeException::missingParameter(sprintf('Could not initialize controller "%s", missing parameter "%s" with type "%s".', $controllerClass, $injectionName, $injectionType));
     }
 
     /**
@@ -312,10 +312,10 @@ final class RouterUtil
 
         if ($request === null) {
             if ($controllerMethod !== null) {
-                throw new RuntimeException(sprintf('Controller method "%s::%s()" requires a $request injection of type "%s".', $controllerClass, $controllerMethod, HttpRequest::class), RuntimeException::ERR_INSTANCE_NOT_FOUND);
+                throw RuntimeException::missingParameter(sprintf('Controller method "%s->%s()" requires a $request injection of type "%s".', $controllerClass, $controllerMethod, HttpRequest::class));
             }
 
-            throw new RuntimeException(sprintf('Controller "%s" requires a $request injection of type "%s".', $controllerClass, HttpRequest::class), RuntimeException::ERR_INSTANCE_NOT_FOUND);
+            throw RuntimeException::missingParameter(sprintf('Controller "%s" requires a $request injection of type "%s".', $controllerClass, HttpRequest::class));
         }
 
         return $request;
