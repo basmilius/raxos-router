@@ -61,7 +61,7 @@ final class RuntimeException extends RouterException
     }
 
     /**
-     * Returns a invalid parameter exception.
+     * Returns an invalid parameter exception.
      *
      * @param string $message
      *
