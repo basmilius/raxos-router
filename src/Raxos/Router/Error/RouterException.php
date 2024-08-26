@@ -10,6 +10,6 @@ use Raxos\Foundation\Error\RaxosException;
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Error
- * @since 1.0.0
+ * @since 1.1.0
  */
 abstract class RouterException extends RaxosException {}

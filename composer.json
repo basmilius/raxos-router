@@ -13,7 +13,8 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"Raxos\\Router\\": "src/Raxos/Router"
+			"Raxos\\Router\\": "src/Raxos/Router",
+			"Raxos\\OldRouter\\": "src/Raxos/OldRouter"
 		}
 	},
 	"config": {
@@ -34,5 +35,11 @@
 		"jetbrains/phpstorm-attributes": "^1.1",
         "raxos/foundation": "*",
 		"raxos/http": "*"
-	}
+	},
+    "require-dev": {
+        "raxos/database": "*"
+    },
+    "suggest": {
+        "raxos/database": "to use the MapModel router parameter attribute."
+    }
 }

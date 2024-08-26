@@ -3,36 +3,51 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
+use JetBrains\PhpStorm\Language;
+use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
+
 /**
  * Class HtmlResponse
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Response
- * @since 1.0.0
+ * @since 1.1.0
  */
-readonly class HtmlResponse extends Response
+final class HtmlResponse extends Response
 {
 
     /**
-     * {@inheritdoc}
+     * HtmlResponse constructor.
+     *
+     * @param string $body
+     * @param HttpHeaders $headers
+     * @param HttpResponseCode $responseCode
+     *
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    public function prepareBody(): string
+    public function __construct(
+        #[Language('HTML')] public string $body,
+        HttpHeaders $headers = new HttpHeaders(),
+        HttpResponseCode $responseCode = HttpResponseCode::OK
+    )
     {
-        return (string)$this->value;
+        parent::__construct(
+            $headers->set(HttpHeader::CONTENT_TYPE, 'text/html'),
+            $responseCode
+        );
     }
 
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    public function prepareHeaders(): void
+    public function send(): void
     {
-        if (!$this->hasHeader('Content-Type')) {
-            $this->header('Content-Type', 'text/html');
-        }
+        parent::send();
+
+        echo $this->body;
     }
 
 }

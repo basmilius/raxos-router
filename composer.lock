@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d8ea3cc702c489393c9b230584622918",
+    "content-hash": "a5d56f07ce7e61a2b3cc69f3c66a0d56",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -717,7 +717,44 @@
             "time": "2024-04-18T09:32:20+00:00"
         }
     ],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "raxos/database",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../database",
+                "reference": "d412c93cd52c7957fb81556e1e0188c582f44500"
+            },
+            "require": {
+                "ext-pdo": "*",
+                "jetbrains/phpstorm-attributes": "^1.1",
+                "raxos/foundation": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Raxos/Database/Query/functions.php"
+                ],
+                "psr-4": {
+                    "Raxos\\Database\\": "src/Raxos/Database"
+                }
+            },
+            "license": [
+                "mit"
+            ],
+            "authors": [
+                {
+                    "name": "Bas Milius",
+                    "email": "bas@mili.us"
+                }
+            ],
+            "description": "Database ORM and Query Builder.",
+            "transport-options": {
+                "relative": true
+            }
+        }
+    ],
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": [],

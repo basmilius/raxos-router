@@ -3,137 +3,125 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\HttpResponseCode;
-use Raxos\Router\Router;
+use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
 use function header;
 use function http_response_code;
-use function is_array;
 
 /**
  * Class Response
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Response
- * @since 1.0.0
+ * @since 1.1.0
  */
-abstract readonly class Response implements ResponseInterface
+abstract class Response implements ResponseInterface
 {
 
     /**
      * Response constructor.
      *
-     * @param Router $router
-     * @param mixed $value
+     * @param HttpHeaders $headers
+     * @param HttpResponseCode $responseCode
      *
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function __construct(
-        public Router $router,
-        public mixed $value
+        public HttpHeaders $headers = new HttpHeaders(),
+        public HttpResponseCode $responseCode = HttpResponseCode::OK
     ) {}
 
     /**
-     * Gets the headers for the response.
+     * Adds the given response header.
      *
-     * @return array
+     * @param HttpHeader|string $name
+     * @param string $value
+     * @param bool $replace
      *
+     * @return $this
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    public final function getHeaders(): array
+    public function withHeader(HttpHeader|string $name, string $value, bool $replace = false): static
     {
-        return $this->router->responseRegistry->getHeaders();
-    }
-
-    /**
-     * Returns TRUE if the given header exists on the response.
-     *
-     * @param string $name
-     *
-     * @return bool
-     * @see ResponseRegistry::hasHeader()
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function hasHeader(string $name): bool
-    {
-        return $this->router->responseRegistry->hasHeader($name);
-    }
-
-    /**
-     * Adds a response header with the given name and content.
-     *
-     * @param string $name
-     * @param string $content
-     *
-     * @return ResponseRegistry
-     * @see ResponseRegistry::header()
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function header(string $name, string $content): ResponseRegistry
-    {
-        return $this->router->responseRegistry->header($name, $content);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function getResponseCode(): HttpResponseCode
-    {
-        return $this->router->responseRegistry->getResponseCode();
-    }
-
-    /**
-     * {@inheritdoc}
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public final function respond(): void
-    {
-        $this->prepareHeaders();
-
-        http_response_code($this->getResponseCode()->value);
-
-        $this->respondHeaders();
-        $this->respondBody();
-    }
-
-    /**
-     * Respond the body to the browser.
-     *
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    private function respondBody(): void
-    {
-        $body = $this->prepareBody();
-
-        if ($body) {
-            echo $body;
+        if ($replace) {
+            $this->headers = $this->headers->set($name, $value);
+        } else {
+            $this->headers = $this->headers->add($name, $value);
         }
+
+        return $this;
     }
 
     /**
-     * Respond the headers to the browser.
+     * Modify the response headers.
      *
+     * @param callable(HttpHeaders):HttpHeaders $fn
+     *
+     * @return $this
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    private function respondHeaders(): void
+    public function withHeaders(callable $fn): static
     {
-        foreach ($this->getHeaders() as $name => $value) {
-            if (is_array($value)) {
-                foreach ($value as $v) {
-                    header("{$name}: {$v}", replace: false);
-                }
-            } else {
-                header("{$name}: {$value}");
+        $this->headers = $fn($this->headers);
+
+        return $this;
+    }
+
+    /**
+     * Modify the response code.
+     *
+     * @param HttpResponseCode $responseCode
+     *
+     * @return $this
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public function withResponseCode(HttpResponseCode $responseCode): static
+    {
+        $this->responseCode = $responseCode;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public function send(): void
+    {
+        $this->sendResponseCode();
+        $this->sendHeaders();
+    }
+
+    /**
+     * Sends the response headers to the browser.
+     *
+     * @return void
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    protected final function sendHeaders(): void
+    {
+        foreach ($this->headers as $name => $values) {
+            foreach ($values as $index => $value) {
+                header("{$name}: {$value}", $index === 0);
             }
         }
+    }
+
+    /**
+     * Sends the response code to the browser.
+     *
+     * @return void
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    protected final function sendResponseCode(): void
+    {
+        http_response_code($this->responseCode->value);
     }
 
 }

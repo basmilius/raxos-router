@@ -6,9 +6,7 @@ namespace Raxos\Router\Error;
 use Exception;
 use Raxos\Foundation\Error\ExceptionId;
 use Raxos\Http\Validate\Error\ValidatorException;
-use Raxos\Router\Controller\Controller;
-use Raxos\Router\MiddlewareInterface;
-use Raxos\Router\Route\RouteFrame;
+use Raxos\Router\Response\ResultResponse;
 use ReflectionException;
 use function sprintf;
 
@@ -17,121 +15,158 @@ use function sprintf;
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Error
- * @since 1.0.17
+ * @since 1.1.0
  */
 final class RuntimeException extends RouterException
 {
 
     /**
-     * Returns a controller error exception.
+     * Returns the exception for when a controller was not instantiated.
      *
-     * @param RouteFrame $frame
-     * @param Exception $err
+     * @param string $controller
      *
      * @return self
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.17
+     * @since 1.1.0
      */
-    public static function controllerError(RouteFrame $frame, Exception $err): self
+    public static function controllerNotInstantiated(string $controller): self
     {
         return new self(
             ExceptionId::for(__METHOD__),
-            'router_controller_error',
-            sprintf('Controller function "%s->%s()" threw an exception.', $frame->class, $frame->method),
-            $err
+            'router_controller_not_instantiated',
+            sprintf('Controller "%s" was not instantiated.', $controller)
         );
     }
 
     /**
-     * Returns a controller instance not found exception.
+     * Returns the exception for an invalid injection.
      *
-     * @param class-string<Controller> $controllerClass
+     * @param string $class
+     * @param string|null $method
+     * @param string $name
+     * @param string $actualType
+     * @param string $expectedType
      *
      * @return self
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.17
+     * @since 1.1.0
      */
-    public static function controllerInstanceNotFound(string $controllerClass): self
+    public static function invalidInjection(string $class, ?string $method, string $name, string $actualType, string $expectedType): self
     {
-        return new self(
-            ExceptionId::for(__METHOD__),
-            'router_controller_instance_not_found',
-            sprintf('Instance of controller "%s" not found.', $controllerClass)
-        );
-    }
+        if ($method !== null) {
+            $message = sprintf('Could not inject parameter "%s" into "%s->%s()", wrong type "%s", expected "%s".', $name, $class, $method, $actualType, $expectedType);
+        } else {
+            $message = sprintf('Could not inject parameter "%s" into "%s", wrong type "%s", expected "%s".', $name, $class, $actualType, $expectedType);
+        }
 
-    /**
-     * Returns an invalid parameter exception.
-     *
-     * @param string $message
-     *
-     * @return self
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.17
-     */
-    public static function invalidParameter(string $message): self
-    {
         return new self(
             ExceptionId::for(__METHOD__),
-            'router_invalid_parameter',
+            'router_invalid_injection',
             $message
         );
     }
 
     /**
-     * Returns a middleware error exception.
+     * Returns the exception for a missing injection.
      *
-     * @param class-string<MiddlewareInterface> $middlewareClass
-     * @param Exception $err
+     * @param string $class
+     * @param string|null $method
+     * @param string $name
+     * @param string $expectedType
      *
      * @return self
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.17
+     * @since 1.1.0
      */
-    public static function middlewareError(string $middlewareClass, Exception $err): self
+    public static function missingInjection(string $class, ?string $method, string $name, string $expectedType): self
     {
-        return new self(
-            ExceptionId::for(__METHOD__),
-            'router_middleware_error',
-            sprintf('Middleware function "%s" threw an exception.', $middlewareClass),
-            $err
-        );
-    }
+        if ($method !== null) {
+            $message = sprintf('Could not inject parameter "%s" into "%s->%s()", because it was missing. Expected one with type "%s".', $name, $class, $method, $expectedType);
+        } else {
+            $message = sprintf('Could not inject parameter "%s" into "%s", because it was missing. Expected one with type "%s".', $name, $class, $expectedType);
+        }
 
-    /**
-     * Returns a missing parameter exception.
-     *
-     * @param string $message
-     *
-     * @return self
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.17
-     */
-    public static function missingParameter(string $message): self
-    {
         return new self(
             ExceptionId::for(__METHOD__),
-            'router_missing_parameter',
+            'router_missing_injection',
             $message
         );
     }
 
     /**
-     * Returns a reflection error exception.
+     * Returns the exception for when an instance is missing.
+     *
+     * @param string $name
+     *
+     * @return self
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public static function missingInstance(string $name): self
+    {
+        return new self(
+            ExceptionId::for(__METHOD__),
+            'router_missing_instance',
+            sprintf('Instance with name "%s" was missing.', $name)
+        );
+    }
+
+    /**
+     * Returns the exception for when result response is trying to send
+     * its response.
+     *
+     * @return self
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public static function resultResponse(): self
+    {
+        return new self(
+            ExceptionId::for(__METHOD__),
+            'router_result_response_unusable',
+            sprintf('A response of type "%s" can not be used directly.', ResultResponse::class)
+        );
+    }
+
+    /**
+     * Returns the exception for when reflection failed.
      *
      * @param ReflectionException $err
-     * @param string $message
      *
      * @return self
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.17
+     * @since 1.1.0
      */
-    public static function reflectionError(ReflectionException $err, string $message): self
+    public static function reflectionError(ReflectionException $err): self
     {
         return new self(
             ExceptionId::for(__METHOD__),
-            'router_reflection_error',
-            $message,
+            'route_reflection_error',
+            'Reflection error.',
+            $err
+        );
+    }
+
+    /**
+     * Returns the exception for when an exception is thrown within a controller.
+     *
+     * @param Exception $err
+     * @param string $call
+     *
+     * @return self
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public static function unexpected(Exception $err, string $call): self
+    {
+        if ($err instanceof self) {
+            return $err;
+        }
+
+        return new self(
+            ExceptionId::for(__METHOD__),
+            'route_unexpected_error',
+            sprintf('Something went wrong while running "%s"', $call),
             $err
         );
     }
@@ -140,14 +175,21 @@ final class RuntimeException extends RouterException
      * Returns a validation error exception.
      *
      * @param ValidatorException $err
-     * @param string $message
+     * @param string $class
+     * @param string|null $method
      *
      * @return self
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.17
+     * @since 1.1.0
      */
-    public static function validationError(ValidatorException $err, string $message): self
+    public static function validationError(ValidatorException $err, string $class, ?string $method): self
     {
+        if ($method !== null) {
+            $message = sprintf('Validation failed for "%s->%s()".', $class, $method);
+        } else {
+            $message = sprintf('Validation failed for "%s".', $class);
+        }
+
         return new self(
             ExceptionId::for(__METHOD__),
             'router_validation_error',

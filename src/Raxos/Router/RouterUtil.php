@@ -3,322 +3,193 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use JetBrains\PhpStorm\{ArrayShape, Pure};
+use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Util\ReflectionUtil;
-use Raxos\Http\{HttpFile, HttpRequest};
-use Raxos\Http\Body\HttpBodyJson;
-use Raxos\Http\Validate\{RequestModel, Validator};
-use Raxos\Http\Validate\Error\ValidatorException;
-use Raxos\Router\Error\{RouterException, RuntimeException};
-use Raxos\Router\Route\RouteFrame;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionParameter;
-use ReflectionProperty;
-use function array_key_exists;
-use function array_map;
-use function get_class;
-use function gettype;
-use function implode;
+use Raxos\Router\Contract\InjectableInterface;
+use Raxos\Router\Definition\Injectable;
+use Raxos\Router\Error\MappingException;
+use ReflectionType;
+use function ctype_alnum;
 use function in_array;
-use function is_a;
 use function is_subclass_of;
-use function sprintf;
+use function str_contains;
+use function strlen;
 
 /**
  * Class RouterUtil
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
- * @since 1.0.0
+ * @since 1.1.0
+ * @internal
+ * @private
  */
 final class RouterUtil
 {
 
-    public const array SIMPLE_TYPES = ['string', 'bool', 'int'];
+    /**
+     * Converts the parameter placeholders in the given path to their
+     * matching regexes.
+     *
+     * @param string $path
+     * @param Injectable[] $injectables
+     *
+     * @return string
+     * @throws MappingException
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public static function convertPath(string $path, array $injectables): string
+    {
+        foreach ($injectables as $injectable) {
+            $name = $injectable->name;
+            $regex = null;
+
+            if (!str_contains($path, "\${$injectable->name}")) {
+                continue;
+            }
+
+            if ($injectable->valueProvider !== null) {
+                $regex = $injectable->valueProvider->getRegex($injectable);
+            } else {
+                foreach ($injectable->types as $type) {
+                    if (is_subclass_of($type, InjectableInterface::class)) {
+                        $regex = self::regex($type::getRouterRegex(), $injectable->name, $injectable->defaultValue->defined);
+                        continue;
+                    }
+
+                    if (!in_array($type, Injector::SIMPLE_TYPES)) {
+                        continue;
+                    }
+
+                    $regex = self::convertPathParam($injectable->name, $type, $injectable->defaultValue->defined);
+                    break;
+                }
+            }
+
+            if ($regex === null) {
+                throw MappingException::invalidPathParameter($injectable->name);
+            }
+
+            $path = strtr($path, [
+                "\${$name}" => $regex
+            ]);
+        }
+
+        return $path;
+    }
 
     /**
-     * Converts the given value to the correct type.
+     * Returns the regexp for the given param.
      *
+     * @param string $name
      * @param string $type
-     * @param string $value
+     * @param bool $isOptional
      *
-     * @return string|int|bool|null
+     * @return string
+     * @throws MappingException
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    #[Pure]
-    public static function convertParameterType(string $type, mixed $value): string|int|bool|null
+    public static function convertPathParam(string $name, string $type, bool $isOptional): string
     {
         return match ($type) {
-            'string' => (string)$value,
-            'int' => (int)$value,
-            'bool' => $value === true || $value === '1' || $value === 'true',
-            default => null
+            'string' => self::regex('[a-zA-Z0-9-_.@=,]+', $name, $isOptional),
+            'int' => self::regex('[0-9]+', $name, $isOptional),
+            'bool' => self::regex('(1|0|true|false)', $name, $isOptional),
+            default => throw MappingException::typeComplex($name)
         };
     }
 
     /**
-     * Gets the injections for the constructor of the given class name.
+     * Normalizes the given path.
      *
-     * @param string $className
+     * @param string $path
      *
-     * @return array
-     * @throws RuntimeException
+     * @return string
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.16
+     * @since 1.1.0
      */
-    public static function getInjectionsForConstructor(string $className): array
+    #[Pure]
+    public static function normalizePath(string $path): string
     {
-        try {
-            $classRef = new ReflectionClass($className);
-            $constructor = $classRef->getConstructor();
-
-            if ($constructor === null) {
-                return [];
-            }
-
-            return array_map(self::normalizeInjectable(...), $constructor->getParameters());
-        } catch (ReflectionException $err) {
-            throw RuntimeException::reflectionError($err, sprintf('Could not get injections for constructor of class "%s".', $className));
+        if ($path === '/') {
+            return '';
         }
+
+        if (!ctype_alnum($path[0])) {
+            return $path;
+        }
+
+        return '/' . $path;
     }
 
     /**
-     * Gets an injection value.
+     * Returns a regex group.
      *
-     * @param Router $router
-     * @param array{'name': string, 'type': string[], 'default': mixed, 'query': array} $injection
-     * @param string $controllerClass
-     * @param string|null $controllerMethod
-     * @param RouteFrame|null $frame
+     * @param string $regex
+     * @param string $name
+     * @param bool $isOptional
      *
-     * @return mixed
-     * @throws RuntimeException
+     * @return string
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.16
+     * @since 1.1.0
      */
-    public static function getInjectionValue(Router $router, array $injection, string $controllerClass, ?string $controllerMethod = null, ?RouteFrame $frame = null): mixed
+    #[Pure]
+    public static function regex(string $regex, string $name, bool $isOptional): string
     {
-        $injectionName = $injection['name'];
-        $injectionType = $injection['type'];
-        $primaryType = $injectionType[0] ?? null;
+        $optional = $isOptional ? '?' : '';
 
-        if (array_key_exists('query', $injection) && !$router->hasParameter($injection['query'])) {
-            $request = self::requireRequest($router, $controllerClass, $controllerMethod);
-            $router->parameter($injection['query'], $request->queryString->get($injection['query'], $injection['default'] ?? null));
-        }
-
-        if (is_a($primaryType, Router::class, true)) {
-            return $router;
-        }
-
-        if (is_a($primaryType, RouteFrame::class, true) && $frame !== null) {
-            return $frame;
-        }
-
-        if ($router->hasParameter($injectionName)) {
-            $value = $router->getParameter($injectionName);
-            $valueType = gettype($value);
-
-            if ($valueType !== 'object') {
-                foreach ($injectionType as $type) {
-                    if (is_subclass_of($type, RouterParameterInterface::class)) {
-                        $value = $type::getRouterValue($value);
-                        break;
-                    }
-
-                    if (!in_array($type, self::SIMPLE_TYPES, true)) {
-                        continue;
-                    }
-
-                    $value = self::convertParameterType($type, $value);
-                    break;
-                }
-
-                return $value;
-            }
-
-            $isCorrectType = false;
-            $valueType = get_class($value);
-
-            foreach ($injectionType as $type) {
-                if ($valueType === $type || is_subclass_of($valueType, $type)) {
-                    $isCorrectType = true;
-                    break;
-                }
-            }
-
-            if (!$isCorrectType) {
-                $injectionType = implode('|', $injectionType);
-
-                if ($controllerMethod !== null) {
-                    throw RuntimeException::invalidParameter(sprintf('Could not invoke controller method "%s->%s()", wrong type "%s" for parameter "%s", should be "%s".', $controllerClass, $controllerMethod, $valueType, $injectionName, $injectionType));
-                }
-
-                throw RuntimeException::invalidParameter(sprintf('Could not instantiate controller "%s", wrong type "%s" for parameter "%s", should be "%s".', $controllerClass, $valueType, $injectionName, $injectionType));
-            }
-
-            return $value;
-        }
-
-        if ($primaryType !== null && is_subclass_of($primaryType, RequestModel::class)) {
-            try {
-                $request = self::requireRequest($router, $controllerClass, $controllerMethod);
-                $body = $request->body();
-                $contentType = $request->contentType();
-
-                if ($contentType === 'application/json' && $body instanceof HttpBodyJson) {
-                    $data = $body->array();
-                } else {
-                    $data = $request->post->array();
-
-                    /**
-                     * @var string $key
-                     * @var HttpFile $file
-                     */
-                    foreach ($request->files as $key => $file) {
-                        if (!$file->isValid()) {
-                            continue;
-                        }
-
-                        $data[$key] = $file;
-                    }
-                }
-
-                /** @var class-string<RequestModel> $requestModel */
-                $requestModel = $injectionType[0];
-
-                return Validator::validate($requestModel, $data);
-            } catch (ValidatorException $err) {
-                throw RuntimeException::validationError($err, sprintf('Validation failed for controller method "%s->%s()".', $controllerClass, $controllerMethod));
-            }
-        }
-
-        if (array_key_exists('default', $injection)) {
-            return $injection['default'];
-        }
-
-        $injectionType = implode('|', $injectionType);
-
-        if ($controllerMethod !== null) {
-            throw RuntimeException::missingParameter(sprintf('Could not invoke controller method "%s->%s()", missing parameter "%s" with type "%s".', $controllerClass, $controllerMethod, $injectionName, $injectionType));
-        }
-
-        throw RuntimeException::missingParameter(sprintf('Could not initialize controller "%s", missing parameter "%s" with type "%s".', $controllerClass, $injectionName, $injectionType));
+        return "{$optional}(?<{$name}>{$regex}){$optional}";
     }
 
     /**
-     * Gets the injection values based on the given injections.
+     * Sorts the given paths.
      *
-     * @param Router $router
-     * @param array{'name': string, 'type': string[], 'default': mixed, 'query': array}[] $injections
-     * @param string $controllerClass
-     * @param string|null $controllerMethod
-     * @param RouteFrame|null $frame
+     * @param string $a
+     * @param string $b
      *
-     * @return array
-     * @throws RouterException
+     * @return int
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.16
+     * @since 1.1.0
      */
-    public static function getInjectionValues(Router $router, array $injections, string $controllerClass, ?string $controllerMethod = null, ?RouteFrame $frame = null): array
+    #[Pure]
+    public static function routeSorter(string $a, string $b): int
     {
-        $results = [];
+        $aParenthesis = str_contains($a, '(');
+        $bParenthesis = str_contains($b, '(');
 
-        foreach ($injections as $injection) {
-            $results[$injection['name']] = self::getInjectionValue($router, $injection, $controllerClass, $controllerMethod, $frame);
+        if ($aParenthesis && $bParenthesis) {
+            return strlen($a) <=> strlen($b);
         }
 
-        return $results;
+        if ($aParenthesis) {
+            return 1;
+        }
+
+        if ($bParenthesis) {
+            return -1;
+        }
+
+        return strlen($a) <=> strlen($b);
     }
 
     /**
-     * Injects the given injections to the given instance.
+     * Returns the given type as an array.
      *
-     * @param object $instance
-     * @param array $injections
+     * @param ReflectionType|null $type
      *
-     * @return void
-     * @throws ReflectionException
+     * @return string[]
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.16
+     * @since 1.1.0
      */
-    public static function injectProperties(object $instance, array $injections): void
+    public static function types(?ReflectionType $type): array
     {
-        $classRef = new ReflectionClass($instance);
-
-        foreach ($injections as $propertyName => $injectionValue) {
-            if (isset($instance->{$propertyName})) {
-                continue;
-            }
-
-            $propertyRef = $classRef->getProperty($propertyName);
-            /** @noinspection PhpExpressionResultUnusedInspection */
-            $propertyRef->setAccessible(true);
-            $propertyRef->setValue($instance, $injectionValue);
-        }
-    }
-
-    /**
-     * Normalizes the given parameter or property.
-     *
-     * @param ReflectionParameter|ReflectionProperty $property
-     *
-     * @return array
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.16
-     */
-    #[ArrayShape([
-        'name' => 'string',
-        'type' => 'string[]',
-        'default' => 'mixed'
-    ])]
-    public static function normalizeInjectable(ReflectionParameter|ReflectionProperty $property): array
-    {
-        $types = ReflectionUtil::getTypes($property->getType()) ?? [];
-        $param = [
-            'name' => $property->getName(),
-            'type' => $types
-        ];
-
-        if ($property instanceof ReflectionParameter && $property->isDefaultValueAvailable()) {
-            $param['default'] = $property->getDefaultValue();
+        if ($type === null) {
+            return [];
         }
 
-        if ($property instanceof ReflectionProperty && $property->hasDefaultValue()) {
-            $param['default'] = $property->getDefaultValue();
-        }
-
-        return $param;
-    }
-
-    /**
-     * Ensures a request instance.
-     *
-     * @param Router $router
-     * @param string $controllerClass
-     * @param string|null $controllerMethod
-     *
-     * @return HttpRequest
-     * @throws RuntimeException
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.16
-     * @see HttpRequest
-     */
-    private static function requireRequest(Router $router, string $controllerClass, ?string $controllerMethod = null): HttpRequest
-    {
-        $request = $router->getParameter('request');
-
-        if ($request === null) {
-            if ($controllerMethod !== null) {
-                throw RuntimeException::missingParameter(sprintf('Controller method "%s->%s()" requires a $request injection of type "%s".', $controllerClass, $controllerMethod, HttpRequest::class));
-            }
-
-            throw RuntimeException::missingParameter(sprintf('Controller "%s" requires a $request injection of type "%s".', $controllerClass, HttpRequest::class));
-        }
-
-        return $request;
+        return ReflectionUtil::getTypes($type) ?? [];
     }
 
 }

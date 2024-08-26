@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
+use JsonException;
+use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
+use Raxos\Router\Error\RuntimeException;
 use function json_encode;
 use const JSON_BIGINT_AS_STRING;
 use const JSON_HEX_AMP;
@@ -16,32 +19,46 @@ use const JSON_THROW_ON_ERROR;
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Response
- * @since 1.0.0
+ * @since 1.1.0
  */
-readonly class JsonResponse extends Response
+final class JsonResponse extends Response
 {
 
-    public const int FLAGS = JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_THROW_ON_ERROR;
-
     /**
-     * {@inheritdoc}
+     * JsonResponse constructor.
+     *
+     * @param mixed $body
+     * @param HttpHeaders $headers
+     * @param HttpResponseCode $responseCode
+     *
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    public function prepareBody(): string
+    public function __construct(
+        public mixed $body,
+        HttpHeaders $headers = new HttpHeaders(),
+        HttpResponseCode $responseCode = HttpResponseCode::OK
+    )
     {
-        return json_encode($this->value, self::FLAGS) ?: '{}';
+        parent::__construct(
+            $headers->set(HttpHeader::CONTENT_TYPE, 'application/json'),
+            $responseCode
+        );
     }
 
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    public function prepareHeaders(): void
+    public function send(): void
     {
-        if (!$this->hasHeader('Content-Type')) {
-            $this->header('Content-Type', 'application/json');
+        parent::send();
+
+        try {
+            echo json_encode($this->body, JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_THROW_ON_ERROR);
+        } catch (JsonException $err) {
+            throw RuntimeException::unexpected($err, __METHOD__);
         }
     }
 

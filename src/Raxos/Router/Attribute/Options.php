@@ -11,10 +11,10 @@ use Raxos\Http\HttpMethod;
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute
- * @since 1.0.0
+ * @since 1.1.0
  */
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-final readonly class Options extends Route
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+final readonly class Options extends AbstractRoute
 {
 
     /**
@@ -23,11 +23,11 @@ final readonly class Options extends Route
      * @param string $path
      *
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function __construct(string $path = '/')
     {
-        parent::__construct($path, HttpMethod::OPTIONS);
+        parent::__construct(HttpMethod::OPTIONS, $path);
     }
 
 }

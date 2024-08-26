@@ -3,159 +3,176 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use JetBrains\PhpStorm\Pure;
-use Raxos\Http\HttpMethod;
-use Raxos\Router\Controller\{Controller, ControllerContainer};
-use Raxos\Router\Effect\{Effect, NotFoundEffect};
-use Raxos\Router\Error\RouterException;
-use Raxos\Router\Response\ResponseRegistry;
+use Raxos\Foundation\Collection\Map;
+use Raxos\Http\{HttpMethod, HttpRequest};
+use Raxos\Http\Store\{HttpCookieStore, HttpFileStore, HttpHeaderStore, HttpPostStore, HttpQueryStore, HttpServerStore};
+use Raxos\Router\Error\{MappingException, RuntimeException};
+use Raxos\Router\Frame\FrameStack;
+use Raxos\Router\Request\Request;
+use Raxos\Router\Response\{NotFoundResponse, Response};
+use function array_filter;
 use function array_key_exists;
+use function array_key_first;
+use function array_keys;
+use function preg_match;
+use function rtrim;
+use function str_starts_with;
+use function strlen;
+use function strpos;
+use function substr;
+use function usort;
+use const ARRAY_FILTER_USE_KEY;
 
 /**
  * Class Router
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
- * @since 1.0.0
+ * @since 1.1.0
  */
-class Router extends Resolver
+readonly class Router
 {
 
-    public readonly ControllerContainer $controllers;
-    public readonly ResponseRegistry $responseRegistry;
-
-    protected bool $isSetupDone = false;
-
-    private array $globals = [];
-    private array $parameters = [];
+    public Map $globals;
 
     /**
      * Router constructor.
      *
+     * @param array<string, array<string, FrameStack>> $mapping
+     *
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    public function __construct()
+    public function __construct(
+        public array $mapping = [],
+    )
     {
-        $this->controllers = new ControllerContainer();
-        $this->responseRegistry = new ResponseRegistry();
+        $this->globals = new Map();
+        $this->globals->set('router', $this);
     }
 
     /**
-     * Gets a parameter value.
+     * Creates a router request.
      *
-     * @param string $name
-     * @param mixed|null $defaultValue
+     * @param HttpCookieStore|null $cookies
+     * @param HttpFileStore|null $files
+     * @param HttpHeaderStore|null $headers
+     * @param HttpPostStore|null $post
+     * @param HttpQueryStore|null $query
+     * @param HttpServerStore|null $server
+     * @param HttpMethod|null $method
+     * @param string|null $uri
      *
-     * @return mixed
+     * @return Request
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     *
-     * @noinspection PhpMixedReturnTypeCanBeReducedInspection
+     * @since 1.1.0
      */
-    public final function getParameter(string $name, mixed $defaultValue = null): mixed
+    public function request(
+        ?HttpCookieStore $cookies = null,
+        ?HttpFileStore $files = null,
+        ?HttpHeaderStore $headers = null,
+        ?HttpPostStore $post = null,
+        ?HttpQueryStore $query = null,
+        ?HttpServerStore $server = null,
+        ?HttpMethod $method = null,
+        ?string $uri = null
+    ): Request
     {
-        if ($name === 'router') {
-            return $this;
+        $request = HttpRequest::fromGlobals();
+
+        $method ??= $request->method;
+        $uri ??= $request->uri;
+
+        return Request::create(
+            method: $method,
+            uri: $uri,
+            cookies: $cookies ?? $request->cookies,
+            files: $files ?? $request->files,
+            headers: $headers ?? $request->headers,
+            post: $post ?? $request->post,
+            query: $query ?? $request->query,
+            server: $server ?? $request->server
+        );
+    }
+
+    /**
+     * Turns the request into a response.
+     *
+     * @param Request $request
+     *
+     * @return Response
+     * @throws RuntimeException
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public function resolve(Request $request): Response
+    {
+        $routes = array_keys($this->mapping);
+        $routes = array_filter($routes, static fn(string $route) => str_starts_with($request->pathName, rtrim(substr($route, 0, strpos($route, '(') ?: strlen($route)), '?')));
+
+        usort($routes, RouterUtil::routeSorter(...));
+
+        foreach ($routes as $route) {
+            $isCandidate = $route === $request->pathName || preg_match("#^{$route}$#", $request->pathName, $parameters);
+
+            if (!$isCandidate) {
+                continue;
+            }
+
+            $methodKey = $request->method->name;
+
+            if (!array_key_exists($methodKey, $this->mapping[$route])) {
+                if ($request->method === HttpMethod::OPTIONS) {
+                    $methodKey = array_key_first($this->mapping[$route]);
+                } else {
+                    $methodKey = HttpMethod::ANY->name;
+                }
+            }
+
+            if (!array_key_exists($methodKey, $this->mapping[$route])) {
+                continue;
+            }
+
+            $parameters ??= [];
+            $parameters = array_filter($parameters, is_string(...), ARRAY_FILTER_USE_KEY);
+            $request->parameters->merge($parameters);
+
+            $stack = $this->mapping[$route][$methodKey];
+            $runner = new Runner($this, $stack);
+
+            return $runner->run($request);
         }
 
-        return $this->parameters[$name] ?? $this->globals[$name] ?? $defaultValue;
+        return new NotFoundResponse();
     }
 
     /**
-     * Returns TRUE if the given parameter exists.
+     * Creates a router with the given controllers.
      *
-     * @param string $name
+     * @param class-string[] $controllers
      *
-     * @return bool
+     * @return self
+     * @throws MappingException
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    #[Pure]
-    public final function hasParameter(string $name): bool
+    public static function fromControllers(array $controllers): self
     {
-        return $name === 'router' || array_key_exists($name, $this->parameters) || array_key_exists($name, $this->globals);
+        return new self(Mapper::for($controllers));
     }
 
     /**
-     * Adds the given controller to the resolver.
+     * Returns a router with the given mapping.
      *
-     * @param Controller|string $controller
+     * @param array<string, array<string, FrameStack>> $mapping
      *
-     * @return $this
-     * @throws RouterException
+     * @return self
      * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
+     * @since 1.1.0
      */
-    public function controller(Controller|string $controller): static
+    public static function fromMapping(array $mapping): self
     {
-        $this->addController($this, $controller);
-
-        return $this;
-    }
-
-    /**
-     * Adds a global parameter.
-     *
-     * @param string $name
-     * @param mixed $value
-     *
-     * @return $this
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public function global(string $name, mixed $value): static
-    {
-        $this->globals[$name] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Adds a parameter.
-     *
-     * @param string $name
-     * @param mixed $value
-     *
-     * @return $this
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public function parameter(string $name, mixed $value): static
-    {
-        $this->parameters[$name] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Resolves the request and returns an effect if a route was found.
-     *
-     * @param HttpMethod $method
-     * @param string $path
-     * @param float $version
-     *
-     * @return Effect
-     * @throws RouterException
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.0.0
-     */
-    public function resolve(HttpMethod $method, string $path, float $version = 1.0): Effect
-    {
-        if (!$this->isSetupDone) {
-            $this->resolveMappings();
-            $this->resolveCallStack();
-
-            $this->isSetupDone = true;
-        }
-
-        $route = $this->resolveRequest($method, $path, $version);
-
-        if ($route === null) {
-            return new NotFoundEffect($this);
-        }
-
-        return $route->execute($this);
+        return new self($mapping);
     }
 
 }

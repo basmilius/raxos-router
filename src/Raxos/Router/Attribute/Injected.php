@@ -10,7 +10,7 @@ use Attribute;
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute
- * @since 29/07/2024
+ * @since 1.1.0
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class Injected {}
+final readonly class Injected implements AttributeInterface {}
