@@ -7,7 +7,8 @@ use Exception;
 use JetBrains\PhpStorm\Language;
 use JsonSerializable;
 use Raxos\Http\{HttpHeaders, HttpResponseCode};
-use Raxos\Router\Response\{ForbiddenResponse, HtmlResponse, JsonResponse, NoContentResponse, RedirectResponse, ResultResponse};
+use Raxos\Router\Request\Request;
+use Raxos\Router\Response\{BinaryResponse, FileResponse, ForbiddenResponse, HtmlResponse, JsonResponse, NoContentResponse, NotFoundResponse, RedirectResponse, ResultResponse};
 
 /**
  * Trait Responds
@@ -20,6 +21,24 @@ trait Responds
 {
 
     /**
+     * Returns a binary response.
+     *
+     * @param string $data
+     * @param HttpHeaders $headers
+     *
+     * @return BinaryResponse
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    protected function binary(
+        string $data,
+        HttpHeaders $headers = new HttpHeaders()
+    ): BinaryResponse
+    {
+        return new BinaryResponse($data, $headers);
+    }
+
+    /**
      * Returns an error response using the given json serializable exception.
      *
      * @param Exception&JsonSerializable $err
@@ -28,7 +47,9 @@ trait Responds
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    protected function error(Exception&JsonSerializable $err): JsonResponse
+    protected function error(
+        Exception&JsonSerializable $err
+    ): JsonResponse
     {
         $responseCode = HttpResponseCode::INTERNAL_SERVER_ERROR;
 
@@ -37,6 +58,26 @@ trait Responds
         }
 
         return $this->json($err, responseCode: $responseCode);
+    }
+
+    /**
+     * Returns a file response.
+     *
+     * @param string $path
+     * @param Request $request
+     * @param HttpHeaders $headers
+     *
+     * @return FileResponse
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    protected function file(
+        string $path,
+        Request $request,
+        HttpHeaders $headers = new HttpHeaders()
+    ): FileResponse
+    {
+        return new FileResponse($path, $request, $headers);
     }
 
     /**
@@ -109,6 +150,18 @@ trait Responds
     ): NoContentResponse
     {
         return new NoContentResponse($headers);
+    }
+
+    /**
+     * Returns a not found response.
+     *
+     * @return NotFoundResponse
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    protected function notFound(): NotFoundResponse
+    {
+        return new NotFoundResponse();
     }
 
     /**

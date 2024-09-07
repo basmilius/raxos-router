@@ -67,6 +67,24 @@ final class RuntimeException extends RouterException
     }
 
     /**
+     * Returns the exception for when a file is missing.
+     *
+     * @param string $path
+     *
+     * @return self
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
+    public static function missingFile(string $path): self
+    {
+        return new self(
+            ExceptionId::for(__METHOD__),
+            'router_missing_file',
+            sprintf('File with path "%s" could not be found.', $path)
+        );
+    }
+
+    /**
      * Returns the exception for a missing injection.
      *
      * @param string $class

@@ -105,6 +105,10 @@ abstract class Response implements ResponseInterface
      */
     protected final function sendHeaders(): void
     {
+        if ($this->headers->has(HttpHeader::CONTENT_DISPOSITION)) {
+            $this->withHeader(HttpHeader::ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeader::CONTENT_DISPOSITION->value);
+        }
+
         foreach ($this->headers as $name => $values) {
             foreach ($values as $index => $value) {
                 header("{$name}: {$value}", $index === 0);

@@ -45,6 +45,10 @@ final readonly class MapModel implements AttributeInterface, ValueProviderInterf
             $model = $injectable->types[0];
             $primaryKey = $request->parameters->get($injectable->name);
 
+            if ($injectable->defaultValue->defined && $primaryKey === null) {
+                return $injectable->defaultValue->value;
+            }
+
             return $model::singleOrFail($primaryKey);
         } catch (DatabaseException $err) {
             throw RuntimeException::unexpected($err, __METHOD__);

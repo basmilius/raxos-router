@@ -117,7 +117,7 @@ final class RouterUtil
             return '';
         }
 
-        if (!ctype_alnum($path[0])) {
+        if ($path[0] !== '$' && !ctype_alnum($path[0])) {
             return $path;
         }
 
