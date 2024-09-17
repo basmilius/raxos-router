@@ -14,6 +14,7 @@ use function in_array;
 use function is_subclass_of;
 use function str_contains;
 use function strlen;
+use function usort;
 
 /**
  * Class RouterUtil
@@ -41,6 +42,12 @@ final class RouterUtil
      */
     public static function convertPath(string $path, array $injectables): string
     {
+        if (empty($injectables)) {
+            return $path;
+        }
+
+        usort($injectables, static fn(Injectable $a, Injectable $b) => strlen($b->name) <=> strlen($a->name));
+
         foreach ($injectables as $injectable) {
             $name = $injectable->name;
             $regex = null;
