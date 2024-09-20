@@ -14,7 +14,7 @@ interface RouterParameterInterface
 {
 
     /**
-     * Gets the regex that is used in the path.
+     * Gets the regex used in the path.
      *
      * @return string
      * @author Bas Milius <bas@mili.us>

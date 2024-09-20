@@ -151,7 +151,7 @@ final readonly class RouteFrame
     }
 
     /**
-     * Invokes a single middleware.
+     * Invokes the given middleware.
      *
      * @param Router $router
      * @param class-string<MiddlewareInterface> $class

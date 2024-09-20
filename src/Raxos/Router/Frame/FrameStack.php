@@ -5,6 +5,7 @@ namespace Raxos\Router\Frame;
 
 use Raxos\Foundation\Contract\DebuggableInterface;
 use Raxos\Http\HttpMethod;
+use Raxos\Router\Contract\FrameInterface;
 use function array_map;
 
 /**

@@ -5,6 +5,7 @@ namespace Raxos\Router\Frame;
 
 use Closure;
 use Raxos\Router\{Injector, Runner};
+use Raxos\Router\Contract\FrameInterface;
 use Raxos\Router\Definition\ControllerClass;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;

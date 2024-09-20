@@ -39,7 +39,7 @@ trait Responds
     }
 
     /**
-     * Returns an error response using the given json serializable exception.
+     * Returns an error response using the given JSON serializable exception.
      *
      * @param Exception&JsonSerializable $err
      *

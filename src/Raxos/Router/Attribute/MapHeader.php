@@ -5,7 +5,7 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use Raxos\Http\HttpHeader;
-use Raxos\Router\Contract\ValueProviderInterface;
+use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;

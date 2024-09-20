@@ -22,8 +22,6 @@ use function usort;
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
  * @since 1.1.0
- * @internal
- * @private
  */
 final class RouterUtil
 {

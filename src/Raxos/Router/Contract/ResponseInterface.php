@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Raxos\Router\Response;
+namespace Raxos\Router\Contract;
 
 use Raxos\Router\Error\RuntimeException;
 
@@ -9,7 +9,7 @@ use Raxos\Router\Error\RuntimeException;
  * Interface ResponseInterface
  *
  * @author Bas Milius <bas@mili.us>
- * @package Raxos\Router\Response
+ * @package Raxos\Router\Contract
  * @since 1.1.0
  */
 interface ResponseInterface

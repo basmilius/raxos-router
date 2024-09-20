@@ -6,7 +6,7 @@ namespace Raxos\Router\Attribute;
 use Attribute;
 use Raxos\Database\Error\DatabaseException;
 use Raxos\Database\Orm\Model;
-use Raxos\Router\Contract\ValueProviderInterface;
+use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;

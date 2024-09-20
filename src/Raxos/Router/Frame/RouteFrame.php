@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace Raxos\Router\Frame;
 
 use Closure;
+use Raxos\Router\Contract\FrameInterface;
 use Raxos\Router\Definition\Route;
+use Raxos\Router\Injector;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{Response, ResultResponse};
-use Raxos\Router\Injector;
 use Raxos\Router\Runner;
 use function array_column;
 use function array_map;

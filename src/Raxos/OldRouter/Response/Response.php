@@ -118,7 +118,7 @@ abstract readonly class Response implements ResponseInterface
     }
 
     /**
-     * Respond the headers to the browser.
+     * Send the headers to the browser.
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.0.0

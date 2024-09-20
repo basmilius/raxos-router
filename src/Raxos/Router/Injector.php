@@ -37,7 +37,7 @@ final class Injector
     public const array SIMPLE_TYPES = ['string', 'int', 'bool'];
 
     /**
-     * Converts the value to the given type, or returns NULL if that
+     * Converts the value to the given type or returns NULL if that
      * could not be done.
      *
      * @param mixed $value

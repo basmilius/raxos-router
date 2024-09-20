@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
-use Raxos\Router\Contract\ValueProviderInterface;
+use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;

@@ -39,7 +39,7 @@ final class ResultResponse extends Response
     }
 
     /**
-     * Turns the result response into a json response.
+     * Turns the result response into a JSON response.
      *
      * @return HtmlResponse
      * @author Bas Milius <bas@mili.us>
@@ -51,7 +51,7 @@ final class ResultResponse extends Response
     }
 
     /**
-     * Turns the result response into a json response.
+     * Turns the result response into a JSON response.
      *
      * @return JsonResponse
      * @author Bas Milius <bas@mili.us>

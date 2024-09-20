@@ -6,7 +6,7 @@ namespace Raxos\Router\Frame;
 use Closure;
 use Exception;
 use Raxos\Router\{Injector, Runner};
-use Raxos\Router\Contract\MiddlewareInterface;
+use Raxos\Router\Contract\{FrameInterface, MiddlewareInterface};
 use Raxos\Router\Definition\Middleware;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;

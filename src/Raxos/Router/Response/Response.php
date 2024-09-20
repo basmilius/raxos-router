@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
+use Raxos\Router\Contract\ResponseInterface;
 use function header;
 use function http_response_code;
 

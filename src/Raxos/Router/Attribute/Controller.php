@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
+use Raxos\Router\Contract\AttributeInterface;
 
 /**
  * Class Controller

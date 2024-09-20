@@ -5,8 +5,8 @@ namespace Raxos\Router;
 
 use Generator;
 use Raxos\Foundation\Util\ArrayUtil;
-use Raxos\Router\Attribute\{AbstractRoute, AttributeInterface, Child, Controller, Injected};
-use Raxos\Router\Contract\{MiddlewareInterface, ValueProviderInterface};
+use Raxos\Router\Attribute\{AbstractRoute, Child, Controller, Injected};
+use Raxos\Router\Contract\{AttributeInterface, MiddlewareInterface, ValueProviderInterface};
 use Raxos\Router\Definition\{ControllerClass, DefaultValue, Injectable, Middleware, Route};
 use Raxos\Router\Error\MappingException;
 use Raxos\Router\Frame\{ControllerFrame, FrameStack, MiddlewareFrame, RouteFrame};
@@ -300,7 +300,7 @@ final class Mapper
     }
 
     /**
-     * Returns a mapped middleware.
+     * Returns the mapped middleware.
      *
      * @param ReflectionAttribute $attribute
      *

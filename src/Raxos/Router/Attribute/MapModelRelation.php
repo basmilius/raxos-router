@@ -8,7 +8,7 @@ use Raxos\Database\Error\DatabaseException;
 use Raxos\Database\Orm\Definition\RelationDefinition;
 use Raxos\Database\Orm\Error\StructureException;
 use Raxos\Database\Orm\Model;
-use Raxos\Router\Contract\ValueProviderInterface;
+use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;

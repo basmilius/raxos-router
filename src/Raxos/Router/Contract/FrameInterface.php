@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Raxos\Router\Frame;
+namespace Raxos\Router\Contract;
 
 use Closure;
 use Raxos\Router\Error\RuntimeException;
@@ -14,7 +14,7 @@ use Stringable;
  * Interface FrameInterface
  *
  * @author Bas Milius <bas@mili.us>
- * @package Raxos\Router\Frame
+ * @package Raxos\Router\Contract
  * @since 1.1.0
  */
 interface FrameInterface extends Stringable

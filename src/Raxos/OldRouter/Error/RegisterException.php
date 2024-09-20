@@ -18,7 +18,7 @@ final class RegisterException extends RouterException
 {
 
     /**
-     * Returns a mapping failed exception.
+     * Returns a mapping-failed exception.
      *
      * @param string $message
      *
@@ -53,7 +53,7 @@ final class RegisterException extends RouterException
     }
 
     /**
-     * Returns a recursion detected exception.
+     * Returns a recursion-detected exception.
      *
      * @param string $controllerClass
      *

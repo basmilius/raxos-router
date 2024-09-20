@@ -121,7 +121,7 @@ class Resolver
     }
 
     /**
-     * Resolves the request into a route, and returns null if nothing is found.
+     * Resolves the request into a route and returns null if nothing is found.
      *
      * @param HttpMethod $method
      * @param string $path

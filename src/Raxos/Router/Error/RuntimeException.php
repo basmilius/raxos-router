@@ -130,7 +130,7 @@ final class RuntimeException extends RouterException
     }
 
     /**
-     * Returns the exception for when result response is trying to send
+     * Returns the exception for when the result response is trying to send
      * its response.
      *
      * @return self
