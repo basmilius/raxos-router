@@ -30,7 +30,7 @@ final readonly class MapModel implements AttributeInterface, ValueProviderInterf
      */
     public function getRegex(Injectable $injectable): string
     {
-        return RouterUtil::regex('\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', $injectable->name, $injectable->defaultValue->defined);
+        return RouterUtil::regex('\d+|\w{26}|\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', $injectable->name, $injectable->defaultValue->defined);
     }
 
     /**
