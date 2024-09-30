@@ -13,8 +13,7 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"Raxos\\Router\\": "src/Raxos/Router",
-			"Raxos\\OldRouter\\": "src/Raxos/OldRouter"
+			"Raxos\\Router\\": "src/Raxos/Router"
 		}
 	},
 	"config": {
