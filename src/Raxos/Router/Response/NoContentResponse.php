@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\{HttpHeaders, HttpResponseCode};
+use Raxos\Http\HttpResponseCode;
+use Raxos\Http\Structure\HttpHeadersMap;
 
 /**
  * Class NoContentResponse
@@ -18,13 +19,13 @@ final class NoContentResponse extends Response
     /**
      * NoContentResponse constructor.
      *
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     public function __construct(
-        HttpHeaders $headers = new HttpHeaders()
+        HttpHeadersMap $headers = new HttpHeadersMap()
     )
     {
         parent::__construct(

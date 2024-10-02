@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\{HttpHeaders, HttpResponseCode};
+use Raxos\Http\HttpResponseCode;
+use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Router\Error\RuntimeException;
 
 /**
@@ -20,7 +21,7 @@ final class ResultResponse extends Response
      * JsonResponse constructor.
      *
      * @param mixed $result
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @author Bas Milius <bas@mili.us>
@@ -28,7 +29,7 @@ final class ResultResponse extends Response
      */
     public function __construct(
         public mixed $result,
-        HttpHeaders $headers = new HttpHeaders(),
+        HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
     )
     {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\HttpHeaders;
+use Raxos\Http\Structure\HttpHeadersMap;
 
 /**
  * Class BinaryResponse
@@ -19,14 +19,14 @@ final class BinaryResponse extends Response
      * BinaryResponse constructor.
      *
      * @param string $data
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     public function __construct(
         public string $data,
-        HttpHeaders $headers = new HttpHeaders()
+        HttpHeadersMap $headers = new HttpHeadersMap()
     )
     {
         parent::__construct($headers);

@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
+use Raxos\Http\{HttpHeader, HttpResponseCode};
+use Raxos\Http\Structure\HttpHeadersMap;
 
 /**
  * Class RedirectResponse
@@ -19,7 +20,7 @@ final class RedirectResponse extends Response
      * RedirectResponse constructor.
      *
      * @param string $destination
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @author Bas Milius <bas@mili.us>
@@ -27,12 +28,14 @@ final class RedirectResponse extends Response
      */
     public function __construct(
         public string $destination,
-        HttpHeaders $headers = new HttpHeaders(),
+        HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::FOUND
     )
     {
+        $headers->set(HttpHeader::LOCATION, $this->destination);
+
         parent::__construct(
-            $headers->set(HttpHeader::LOCATION, $this->destination),
+            $headers,
             $responseCode
         );
     }

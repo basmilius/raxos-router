@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use JsonException;
-use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
+use Raxos\Http\{HttpHeader, HttpResponseCode};
+use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Router\Error\RuntimeException;
 use function json_encode;
 use const JSON_BIGINT_AS_STRING;
@@ -28,7 +29,7 @@ final class JsonResponse extends Response
      * JsonResponse constructor.
      *
      * @param mixed $body
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @author Bas Milius <bas@mili.us>
@@ -36,12 +37,14 @@ final class JsonResponse extends Response
      */
     public function __construct(
         public mixed $body,
-        HttpHeaders $headers = new HttpHeaders(),
+        HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
     )
     {
+        $headers->set(HttpHeader::CONTENT_TYPE, 'application/json');
+
         parent::__construct(
-            $headers->set(HttpHeader::CONTENT_TYPE, 'application/json'),
+            $headers,
             $responseCode
         );
     }

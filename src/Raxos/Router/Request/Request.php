@@ -5,7 +5,7 @@ namespace Raxos\Router\Request;
 
 use Raxos\Foundation\Collection\Map;
 use Raxos\Http\{HttpMethod, HttpRequest};
-use Raxos\Http\Store\{HttpCookieStore, HttpFileStore, HttpHeaderStore, HttpPostStore, HttpQueryStore, HttpServerStore};
+use Raxos\Http\Structure\{HttpCookiesMap, HttpFilesMap, HttpHeadersMap, HttpPostMap, HttpQueryMap, HttpServerMap};
 use function explode;
 use function strstr;
 
@@ -22,12 +22,12 @@ final readonly class Request extends HttpRequest
     /**
      * HttpRequest constructor.
      *
-     * @param HttpCookieStore $cookies
-     * @param HttpFileStore $files
-     * @param HttpHeaderStore $headers
-     * @param HttpPostStore $post
-     * @param HttpQueryStore $queryString
-     * @param HttpServerStore $server
+     * @param HttpCookiesMap $cookies
+     * @param HttpFilesMap $files
+     * @param HttpHeadersMap $headers
+     * @param HttpPostMap $post
+     * @param HttpQueryMap $queryString
+     * @param HttpServerMap $server
      * @param HttpMethod $method
      * @param string $pathName
      * @param string $uri
@@ -37,12 +37,12 @@ final readonly class Request extends HttpRequest
      * @since 1.1.0
      */
     public function __construct(
-        HttpCookieStore $cookies,
-        HttpFileStore $files,
-        HttpHeaderStore $headers,
-        HttpPostStore $post,
-        HttpQueryStore $queryString,
-        HttpServerStore $server,
+        HttpCookiesMap $cookies,
+        HttpFilesMap $files,
+        HttpHeadersMap $headers,
+        HttpPostMap $post,
+        HttpQueryMap $queryString,
+        HttpServerMap $server,
         HttpMethod $method,
         string $pathName,
         string $uri,
@@ -91,12 +91,12 @@ final readonly class Request extends HttpRequest
      * @param HttpMethod $method
      * @param string $uri
      * @param Map $parameters
-     * @param HttpCookieStore|null $cookies
-     * @param HttpFileStore|null $files
-     * @param HttpHeaderStore|null $headers
-     * @param HttpPostStore|null $post
-     * @param HttpQueryStore|null $query
-     * @param HttpServerStore|null $server
+     * @param HttpCookiesMap|null $cookies
+     * @param HttpFilesMap|null $files
+     * @param HttpHeadersMap|null $headers
+     * @param HttpPostMap|null $post
+     * @param HttpQueryMap|null $query
+     * @param HttpServerMap|null $server
      *
      * @return self
      * @author Bas Milius <bas@mili.us>
@@ -106,23 +106,23 @@ final readonly class Request extends HttpRequest
         HttpMethod $method,
         string $uri,
         Map $parameters = new Map(),
-        ?HttpCookieStore $cookies = null,
-        ?HttpFileStore $files = null,
-        ?HttpHeaderStore $headers = null,
-        ?HttpPostStore $post = null,
-        ?HttpQueryStore $query = null,
-        ?HttpServerStore $server = null
+        ?HttpCookiesMap $cookies = null,
+        ?HttpFilesMap $files = null,
+        ?HttpHeadersMap $headers = null,
+        ?HttpPostMap $post = null,
+        ?HttpQueryMap $query = null,
+        ?HttpServerMap $server = null
     ): self
     {
         $pathName = strstr($uri, '?', true) ?: $uri;
         $queryString = explode('?', $uri)[1] ?? '';
 
-        $cookies ??= HttpCookieStore::fromGlobals();
-        $files ??= HttpFileStore::fromGlobals();
-        $headers ??= HttpHeaderStore::fromGlobals();
-        $post ??= HttpPostStore::fromGlobals();
-        $query ??= HttpQueryStore::fromString($queryString);
-        $server ??= HttpServerStore::fromGlobals();
+        $cookies ??= HttpCookiesMap::createFromGlobals();
+        $files ??= HttpFilesMap::createFromGlobals();
+        $headers ??= HttpHeadersMap::createFromGlobals();
+        $post ??= HttpPostMap::createFromGlobals();
+        $query ??= HttpQueryMap::createFromString($queryString);
+        $server ??= HttpServerMap::createFromGlobals();
 
         return new self(
             $cookies,

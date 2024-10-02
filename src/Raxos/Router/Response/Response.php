@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
+use Raxos\Http\{HttpHeader, HttpResponseCode};
+use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Router\Contract\ResponseInterface;
 use function header;
 use function http_response_code;
@@ -21,14 +22,14 @@ abstract class Response implements ResponseInterface
     /**
      * Response constructor.
      *
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     public function __construct(
-        public HttpHeaders $headers = new HttpHeaders(),
+        public HttpHeadersMap $headers = new HttpHeadersMap(),
         public HttpResponseCode $responseCode = HttpResponseCode::OK
     ) {}
 
@@ -46,26 +47,10 @@ abstract class Response implements ResponseInterface
     public function withHeader(HttpHeader|string $name, string $value, bool $replace = false): static
     {
         if ($replace) {
-            $this->headers = $this->headers->set($name, $value);
+            $this->headers->set($name, $value);
         } else {
-            $this->headers = $this->headers->add($name, $value);
+            $this->headers->add($name, $value);
         }
-
-        return $this;
-    }
-
-    /**
-     * Modify the response headers.
-     *
-     * @param callable(HttpHeaders):HttpHeaders $fn
-     *
-     * @return $this
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
-     */
-    public function withHeaders(callable $fn): static
-    {
-        $this->headers = $fn($this->headers);
 
         return $this;
     }

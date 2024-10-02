@@ -6,7 +6,8 @@ namespace Raxos\Router\Mixin;
 use Exception;
 use JetBrains\PhpStorm\Language;
 use JsonSerializable;
-use Raxos\Http\{HttpHeaders, HttpResponseCode};
+use Raxos\Http\HttpResponseCode;
+use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{BinaryResponse, FileResponse, ForbiddenResponse, HtmlResponse, JsonResponse, NoContentResponse, NotFoundResponse, RedirectResponse, ResultResponse};
 
@@ -24,7 +25,7 @@ trait Responds
      * Returns a binary response.
      *
      * @param string $data
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      *
      * @return BinaryResponse
      * @author Bas Milius <bas@mili.us>
@@ -32,7 +33,7 @@ trait Responds
      */
     protected function binary(
         string $data,
-        HttpHeaders $headers = new HttpHeaders()
+        HttpHeadersMap $headers = new HttpHeadersMap()
     ): BinaryResponse
     {
         return new BinaryResponse($data, $headers);
@@ -65,7 +66,7 @@ trait Responds
      *
      * @param string $path
      * @param Request $request
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      *
      * @return FileResponse
      * @author Bas Milius <bas@mili.us>
@@ -74,7 +75,7 @@ trait Responds
     protected function file(
         string $path,
         Request $request,
-        HttpHeaders $headers = new HttpHeaders()
+        HttpHeadersMap $headers = new HttpHeadersMap()
     ): FileResponse
     {
         return new FileResponse($path, $request, $headers);
@@ -83,14 +84,14 @@ trait Responds
     /**
      * Returns a forbidden response.
      *
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      *
      * @return ForbiddenResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     protected function forbidden(
-        HttpHeaders $headers = new HttpHeaders()
+        HttpHeadersMap $headers = new HttpHeadersMap()
     ): ForbiddenResponse
     {
         return new ForbiddenResponse($headers);
@@ -100,7 +101,7 @@ trait Responds
      * Returns a html response.
      *
      * @param string $body
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @return HtmlResponse
@@ -109,7 +110,7 @@ trait Responds
      */
     protected function html(
         #[Language('HTML')] string $body,
-        HttpHeaders $headers = new HttpHeaders(),
+        HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
     ): HtmlResponse
     {
@@ -120,7 +121,7 @@ trait Responds
      * Returns a json response.
      *
      * @param mixed $body
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @return JsonResponse
@@ -129,7 +130,7 @@ trait Responds
      */
     protected function json(
         mixed $body,
-        HttpHeaders $headers = new HttpHeaders(),
+        HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
     ): JsonResponse
     {
@@ -139,14 +140,14 @@ trait Responds
     /**
      * Returns a no content response.
      *
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      *
      * @return NoContentResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     protected function noContent(
-        HttpHeaders $headers = new HttpHeaders()
+        HttpHeadersMap $headers = new HttpHeadersMap()
     ): NoContentResponse
     {
         return new NoContentResponse($headers);
@@ -168,7 +169,7 @@ trait Responds
      * Returns a redirect response.
      *
      * @param string $destination
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @return RedirectResponse
@@ -177,7 +178,7 @@ trait Responds
      */
     protected function redirect(
         string $destination,
-        HttpHeaders $headers = new HttpHeaders(),
+        HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::FOUND
     ): RedirectResponse
     {
@@ -188,7 +189,7 @@ trait Responds
      * Returns a result response.
      *
      * @param mixed $result
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
      * @return ResultResponse
@@ -197,7 +198,7 @@ trait Responds
      */
     protected function result(
         mixed $result,
-        HttpHeaders $headers = new HttpHeaders(),
+        HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
     ): ResultResponse
     {

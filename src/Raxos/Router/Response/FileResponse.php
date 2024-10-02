@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
-use Raxos\Http\{HttpHeader, HttpHeaders, HttpResponseCode};
+use Raxos\Http\{HttpHeader, HttpResponseCode};
+use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;
 use function filemtime;
@@ -29,7 +30,7 @@ final class FileResponse extends Response
      *
      * @param string $path
      * @param Request $request
-     * @param HttpHeaders $headers
+     * @param HttpHeadersMap $headers
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
@@ -37,7 +38,7 @@ final class FileResponse extends Response
     public function __construct(
         public string $path,
         public Request $request,
-        HttpHeaders $headers = new HttpHeaders()
+        HttpHeadersMap $headers = new HttpHeadersMap()
     )
     {
         parent::__construct($headers);

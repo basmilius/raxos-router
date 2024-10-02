@@ -5,7 +5,7 @@ namespace Raxos\Router;
 
 use Raxos\Foundation\Collection\Map;
 use Raxos\Http\{HttpMethod, HttpRequest};
-use Raxos\Http\Store\{HttpCookieStore, HttpFileStore, HttpHeaderStore, HttpPostStore, HttpQueryStore, HttpServerStore};
+use Raxos\Http\Structure\{HttpCookiesMap, HttpFilesMap, HttpHeadersMap, HttpPostMap, HttpQueryMap, HttpServerMap};
 use Raxos\Router\Error\{MappingException, RuntimeException};
 use Raxos\Router\Frame\FrameStack;
 use Raxos\Router\Request\Request;
@@ -54,12 +54,12 @@ readonly class Router
     /**
      * Creates a router request.
      *
-     * @param HttpCookieStore|null $cookies
-     * @param HttpFileStore|null $files
-     * @param HttpHeaderStore|null $headers
-     * @param HttpPostStore|null $post
-     * @param HttpQueryStore|null $query
-     * @param HttpServerStore|null $server
+     * @param HttpCookiesMap|null $cookies
+     * @param HttpFilesMap|null $files
+     * @param HttpHeadersMap|null $headers
+     * @param HttpPostMap|null $post
+     * @param HttpQueryMap|null $query
+     * @param HttpServerMap|null $server
      * @param HttpMethod|null $method
      * @param string|null $uri
      *
@@ -68,17 +68,17 @@ readonly class Router
      * @since 1.1.0
      */
     public function request(
-        ?HttpCookieStore $cookies = null,
-        ?HttpFileStore $files = null,
-        ?HttpHeaderStore $headers = null,
-        ?HttpPostStore $post = null,
-        ?HttpQueryStore $query = null,
-        ?HttpServerStore $server = null,
+        ?HttpCookiesMap $cookies = null,
+        ?HttpFilesMap $files = null,
+        ?HttpHeadersMap $headers = null,
+        ?HttpPostMap $post = null,
+        ?HttpQueryMap $query = null,
+        ?HttpServerMap $server = null,
         ?HttpMethod $method = null,
         ?string $uri = null
     ): Request
     {
-        $request = HttpRequest::fromGlobals();
+        $request = HttpRequest::createFromGlobals();
 
         $method ??= $request->method;
         $uri ??= $request->uri;

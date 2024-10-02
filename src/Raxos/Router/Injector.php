@@ -5,8 +5,8 @@ namespace Raxos\Router;
 
 use Generator;
 use JetBrains\PhpStorm\Pure;
-use Raxos\Foundation\Option\{Option, OptionException};
 use Raxos\Foundation\Collection\Map;
+use Raxos\Foundation\Option\{Option, OptionException};
 use Raxos\Http\Body\HttpBodyJson;
 use Raxos\Http\Validate\{RequestModel, Validator};
 use Raxos\Http\Validate\Error\ValidatorException;
