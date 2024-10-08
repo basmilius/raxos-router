@@ -121,7 +121,7 @@ readonly class Router
 
             $methodKey = $request->method->name;
 
-            if (!array_key_exists($methodKey, $this->mapping[$route])) {
+            if (!isset($this->mapping[$route][$methodKey])) {
                 if ($request->method === HttpMethod::OPTIONS) {
                     $methodKey = array_key_first($this->mapping[$route]);
                 } else {
@@ -129,7 +129,7 @@ readonly class Router
                 }
             }
 
-            if (!array_key_exists($methodKey, $this->mapping[$route])) {
+            if (!isset($this->mapping[$route][$methodKey])) {
                 continue;
             }
 
