@@ -349,13 +349,14 @@ final class Mapper
      * Returns a mapped route.
      *
      * @param ReflectionMethod $method
+     * @param ReflectionClass $class
      *
      * @return Route
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function route(ReflectionMethod $method): Route
+    public static function route(ReflectionMethod $method, ReflectionClass $class): Route
     {
         $attributes = self::attributes($method);
         $middlewares = self::middlewares($method);
@@ -369,7 +370,7 @@ final class Mapper
         }
 
         return new Route(
-            class: $method->class,
+            class: $class->name,
             method: $method->name,
             routes: $routes,
             middlewares: $middlewares,
@@ -392,7 +393,7 @@ final class Mapper
         $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
         $methods = array_filter($methods, static fn(ReflectionMethod $method) => !empty($method->getAttributes(AttributeInterface::class, ReflectionAttribute::IS_INSTANCEOF)));
 
-        return array_map(self::route(...), $methods);
+        return array_map(static fn(ReflectionMethod $method) => self::route($method, $class), $methods);
     }
 
     /**
