@@ -35,12 +35,10 @@ final class BinaryResponse extends Response
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 1.3.1
      */
-    public function send(): void
+    protected function sendBody(): void
     {
-        parent::send();
-
         echo $this->data;
     }
 

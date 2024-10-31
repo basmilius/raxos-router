@@ -78,7 +78,15 @@ final class FileResponse extends Response
         $this->withHeader(HttpHeader::PRAGMA, 'cache');
 
         parent::send();
+    }
 
+    /**
+     * {@inheritdoc}
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.3.1
+     */
+    protected function sendBody(): void
+    {
         if ($this->responseCode === HttpResponseCode::OK) {
             readfile($this->path);
         }

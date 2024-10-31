@@ -51,13 +51,12 @@ final class JsonResponse extends Response
 
     /**
      * {@inheritdoc}
+     * @throws RuntimeException
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 1.3.1
      */
-    public function send(): void
+    protected function sendBody(): void
     {
-        parent::send();
-
         try {
             echo json_encode($this->body, JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_THROW_ON_ERROR);
         } catch (JsonException $err) {

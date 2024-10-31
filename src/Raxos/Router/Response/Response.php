@@ -6,8 +6,13 @@ namespace Raxos\Router\Response;
 use Raxos\Http\{HttpHeader, HttpResponseCode};
 use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Router\Contract\ResponseInterface;
+use function fastcgi_finish_request;
+use function function_exists;
 use function header;
 use function http_response_code;
+use function ob_end_flush;
+use function ob_flush;
+use function ob_start;
 
 /**
  * Class Response
@@ -78,9 +83,28 @@ abstract class Response implements ResponseInterface
      */
     public function send(): void
     {
+        ob_start();
+
         $this->sendResponseCode();
         $this->sendHeaders();
+        ob_flush();
+
+        $this->sendBody();
+        ob_end_flush();
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
     }
+
+    /**
+     * Sends the response body to the browser.
+     *
+     * @return void
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.3.1
+     */
+    protected function sendBody(): void {}
 
     /**
      * Sends the response headers to the browser.
@@ -89,7 +113,7 @@ abstract class Response implements ResponseInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    protected final function sendHeaders(): void
+    protected function sendHeaders(): void
     {
         if ($this->headers->has(HttpHeader::CONTENT_DISPOSITION)) {
             $this->withHeader(HttpHeader::ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeader::CONTENT_DISPOSITION->value);
@@ -109,7 +133,7 @@ abstract class Response implements ResponseInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    protected final function sendResponseCode(): void
+    protected function sendResponseCode(): void
     {
         http_response_code($this->responseCode->value);
     }
