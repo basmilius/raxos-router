@@ -12,7 +12,7 @@ use Raxos\Foundation\Contract\SerializableInterface;
  * @package Raxos\Router\Definition
  * @since 1.1.0
  */
-final class ControllerClass implements SerializableInterface
+final readonly class ControllerClass implements SerializableInterface
 {
 
     /**
