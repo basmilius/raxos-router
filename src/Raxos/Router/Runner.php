@@ -24,7 +24,7 @@ final class Runner
 {
 
     /** @var array<string, object> */
-    public array $controllers = [];
+    public private(set) array $controllers = [];
 
     /**
      * Runner constructor.

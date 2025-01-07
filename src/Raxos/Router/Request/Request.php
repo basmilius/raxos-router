@@ -16,7 +16,7 @@ use function strstr;
  * @package Raxos\Router\Request
  * @since 1.1.0
  */
-final readonly class Request extends HttpRequest
+readonly class Request extends HttpRequest
 {
 
     /**

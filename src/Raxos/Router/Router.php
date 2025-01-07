@@ -155,7 +155,7 @@ readonly class Router
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function fromControllers(array $controllers): self
+    public static function createFromControllers(array $controllers): self
     {
         return new self(Mapper::for($controllers));
     }
@@ -169,7 +169,7 @@ readonly class Router
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function fromMapping(array $mapping): self
+    public static function createFromMapping(array $mapping): self
     {
         return new self($mapping);
     }

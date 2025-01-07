@@ -41,7 +41,7 @@ abstract class Response implements ResponseInterface
     /**
      * Adds the given response header.
      *
-     * @param HttpHeader|string $name
+     * @param string $name
      * @param string $value
      * @param bool $replace
      *
@@ -49,7 +49,7 @@ abstract class Response implements ResponseInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function withHeader(HttpHeader|string $name, string $value, bool $replace = false): static
+    public function withHeader(string $name, string $value, bool $replace = false): static
     {
         if ($replace) {
             $this->headers->set($name, $value);
@@ -116,7 +116,7 @@ abstract class Response implements ResponseInterface
     protected function sendHeaders(): void
     {
         if ($this->headers->has(HttpHeader::CONTENT_DISPOSITION)) {
-            $this->withHeader(HttpHeader::ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeader::CONTENT_DISPOSITION->value);
+            $this->withHeader(HttpHeader::ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeader::CONTENT_DISPOSITION);
         }
 
         foreach ($this->headers as $name => $values) {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
-use Raxos\Http\HttpHeader;
 use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Request\Request;
@@ -24,13 +23,13 @@ final readonly class MapHeader implements AttributeInterface, ValueProviderInter
     /**
      * MapHeader constructor.
      *
-     * @param HttpHeader|string $header
+     * @param string $header
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     public function __construct(
-        public HttpHeader|string $header
+        public string $header
     ) {}
 
     /**

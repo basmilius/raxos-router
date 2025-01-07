@@ -14,7 +14,7 @@ use Raxos\Router\Contract\AttributeInterface;
  * @since 1.1.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-final readonly class Controller implements AttributeInterface
+readonly class Controller implements AttributeInterface
 {
 
     /**

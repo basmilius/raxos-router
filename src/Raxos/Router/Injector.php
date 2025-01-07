@@ -16,6 +16,7 @@ use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;
 use ReflectionClass;
 use ReflectionException;
+use function array_any;
 use function get_class;
 use function gettype;
 use function implode;
@@ -134,8 +135,6 @@ final class Injector
                 }
 
                 $property = $class->getProperty($injectableName);
-                /** @noinspection PhpExpressionResultUnusedInspection */
-                $property->setAccessible(true);
                 $property->setValue($instance, $injectableValue);
             }
         } catch (ReflectionException $err) {
@@ -157,13 +156,7 @@ final class Injector
     {
         $valueType = get_class($value);
 
-        foreach ($types as $type) {
-            if ($valueType === $type || is_subclass_of($valueType, $type)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($types, static fn(string $type) => $valueType === $type || is_subclass_of($valueType, $type));
     }
 
     /**
