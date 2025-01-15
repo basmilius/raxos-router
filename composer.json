@@ -1,26 +1,26 @@
 {
-	"name": "raxos/router",
-	"description": "A fast and simple router, built with php attributes.",
-	"license": "mit",
+    "name": "raxos/router",
+    "description": "A fast and simple router, built with php attributes.",
+    "license": "mit",
     "minimum-stability": "dev",
-    "prefer-stable" : true,
-	"type": "library",
-	"authors": [
-		{
-			"name": "Bas Milius",
-			"email": "bas@mili.us"
-		}
-	],
-	"autoload": {
-		"psr-4": {
-			"Raxos\\Router\\": "src/Raxos/Router"
-		}
-	},
-	"config": {
-		"platform": {
-			"php": "8.4"
-		}
-	},
+    "prefer-stable": true,
+    "type": "library",
+    "authors": [
+        {
+            "name": "Bas Milius",
+            "email": "bas@mili.us"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Raxos\\Router\\": "src/Raxos/Router"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.4"
+        }
+    },
     "repositories": [
         {
             "type": "path",
@@ -28,14 +28,14 @@
             "symlink": true
         }
     ],
-	"require": {
+    "require": {
         "ext-fileinfo": "*",
-		"ext-json": "*",
-		"ext-simplexml": "*",
-		"jetbrains/phpstorm-attributes": "^1.2",
+        "ext-json": "*",
+        "ext-simplexml": "*",
+        "jetbrains/phpstorm-attributes": "^1.2",
         "raxos/foundation": "*",
-		"raxos/http": "*"
-	},
+        "raxos/http": "*"
+    },
     "require-dev": {
         "raxos/database": "*"
     },
