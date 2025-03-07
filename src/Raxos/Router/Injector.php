@@ -21,6 +21,7 @@ use function get_class;
 use function gettype;
 use function implode;
 use function in_array;
+use function is_object;
 use function is_subclass_of;
 
 /**
@@ -197,21 +198,18 @@ final class Injector
         }
 
         $value = $parameters->get($injectable->name);
-        $valueType = gettype($value);
 
-        if ($valueType !== 'object') {
+        if (!is_object($value)) {
             foreach ($injectable->types as $type) {
                 if (is_subclass_of($type, InjectableInterface::class)) {
-                    $value = $type::getRouterValue($value);
-                    break;
+                    return Option::some($type::getRouterValue($value));
                 }
 
                 if (!in_array($type, self::SIMPLE_TYPES)) {
                     continue;
                 }
 
-                $value = self::convertValue($value, $type);
-                break;
+                return Option::some(self::convertValue($value, $type));
             }
 
             return Option::some($value);
@@ -223,7 +221,7 @@ final class Injector
 
         $types = implode(', ', $injectable->types);
 
-        throw RuntimeException::invalidInjection($class, $method, $injectable->name, $valueType, $types);
+        throw RuntimeException::invalidInjection($class, $method, $injectable->name, gettype($value), $types);
     }
 
     /**

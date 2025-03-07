@@ -18,6 +18,8 @@ use function array_map;
 final readonly class FrameStack implements DebuggableInterface
 {
 
+    public bool $isDynamic;
+
     /**
      * FrameStack constructor.
      *
@@ -32,7 +34,10 @@ final readonly class FrameStack implements DebuggableInterface
         public HttpMethod $method,
         public string $path,
         public array $frames
-    ) {}
+    )
+    {
+        $this->isDynamic = str_contains($this->path, '<');
+    }
 
     /**
      * {@inheritdoc}

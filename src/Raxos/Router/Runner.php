@@ -6,12 +6,11 @@ namespace Raxos\Router;
 use Closure;
 use Exception;
 use Raxos\Http\HttpRequest;
-use Raxos\Router\Contract\FrameInterface;
+use Raxos\Router\Contract\{FrameInterface, RouterInterface};
 use Raxos\Router\Error\{RouterException, RuntimeException};
 use Raxos\Router\Frame\FrameStack;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
-use function array_shift;
 
 /**
  * Class Runner
@@ -33,7 +32,7 @@ final class Runner
      * @since 1.1.0
      */
     public function __construct(
-        public readonly Router $router,
+        public readonly RouterInterface $router,
         public readonly FrameStack $stack
     ) {}
 
@@ -49,12 +48,10 @@ final class Runner
      */
     public function run(Request $request): Response
     {
-        $frames = $this->stack->frames;
-
         try {
             $this->router->globals->set('request', $request);
 
-            return $this->closure($frames)($request);
+            return $this->closure($this->stack->frames)($request);
         } catch (Exception $err) {
             if ($err instanceof RouterException) {
                 throw $err;
@@ -104,11 +101,11 @@ final class Runner
      */
     private function closure(array $frames): Closure
     {
-        $frame = array_shift($frames);
-
-        if ($frame === null) {
+        if (empty($frames)) {
             return static fn() => new NotFoundResponse();
         }
+
+        $frame = array_shift($frames);
 
         return function (Request $request) use ($frame, $frames): Response {
             $this->router->globals->set('frame', $frame);

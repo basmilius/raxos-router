@@ -20,7 +20,7 @@ readonly class Request extends HttpRequest
 {
 
     /**
-     * HttpRequest constructor.
+     * Request constructor.
      *
      * @param HttpCookiesMap $cookies
      * @param HttpFilesMap $files
@@ -90,13 +90,13 @@ readonly class Request extends HttpRequest
      *
      * @param HttpMethod $method
      * @param string $uri
-     * @param Map $parameters
-     * @param HttpCookiesMap|null $cookies
-     * @param HttpFilesMap|null $files
-     * @param HttpHeadersMap|null $headers
-     * @param HttpPostMap|null $post
+     * @param HttpCookiesMap $cookies
+     * @param HttpFilesMap $files
+     * @param HttpHeadersMap $headers
+     * @param HttpPostMap $post
      * @param HttpQueryMap|null $query
-     * @param HttpServerMap|null $server
+     * @param HttpServerMap $server
+     * @param Map $parameters
      *
      * @return self
      * @author Bas Milius <bas@mili.us>
@@ -105,24 +105,19 @@ readonly class Request extends HttpRequest
     public static function create(
         HttpMethod $method,
         string $uri,
-        Map $parameters = new Map(),
-        ?HttpCookiesMap $cookies = null,
-        ?HttpFilesMap $files = null,
-        ?HttpHeadersMap $headers = null,
-        ?HttpPostMap $post = null,
-        ?HttpQueryMap $query = null,
-        ?HttpServerMap $server = null
+        HttpCookiesMap $cookies,
+        HttpFilesMap $files,
+        HttpHeadersMap $headers,
+        HttpPostMap $post,
+        ?HttpQueryMap $query,
+        HttpServerMap $server,
+        Map $parameters = new Map()
     ): self
     {
         $pathName = strstr($uri, '?', true) ?: $uri;
         $queryString = explode('?', $uri)[1] ?? '';
 
-        $cookies ??= HttpCookiesMap::createFromGlobals();
-        $files ??= HttpFilesMap::createFromGlobals();
-        $headers ??= HttpHeadersMap::createFromGlobals();
-        $post ??= HttpPostMap::createFromGlobals();
         $query ??= HttpQueryMap::createFromString($queryString);
-        $server ??= HttpServerMap::createFromGlobals();
 
         return new self(
             $cookies,

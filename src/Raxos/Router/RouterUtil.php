@@ -13,6 +13,7 @@ use function ctype_alnum;
 use function in_array;
 use function is_subclass_of;
 use function str_contains;
+use function str_replace;
 use function strlen;
 use function usort;
 
@@ -50,7 +51,7 @@ final class RouterUtil
             $name = $injectable->name;
             $regex = null;
 
-            if (!str_contains($path, "\${$injectable->name}")) {
+            if (!str_contains($path, "\${$name}")) {
                 continue;
             }
 
@@ -59,7 +60,7 @@ final class RouterUtil
             } else {
                 foreach ($injectable->types as $type) {
                     if (is_subclass_of($type, InjectableInterface::class)) {
-                        $regex = self::regex($type::getRouterRegex(), $injectable->name, $injectable->defaultValue->defined);
+                        $regex = self::regex($type::getRouterRegex(), $name, $injectable->defaultValue->defined);
                         continue;
                     }
 
@@ -67,18 +68,16 @@ final class RouterUtil
                         continue;
                     }
 
-                    $regex = self::convertPathParam($injectable->name, $type, $injectable->defaultValue->defined);
+                    $regex = self::convertPathParam($name, $type, $injectable->defaultValue->defined);
                     break;
                 }
             }
 
             if ($regex === null) {
-                throw MappingException::invalidPathParameter($injectable->name);
+                throw MappingException::invalidPathParameter($name);
             }
 
-            $path = strtr($path, [
-                "\${$name}" => $regex
-            ]);
+            $path = str_replace("\${$name}", $regex, $path);
         }
 
         return $path;
@@ -99,9 +98,9 @@ final class RouterUtil
     public static function convertPathParam(string $name, string $type, bool $isOptional): string
     {
         return match ($type) {
-            'string' => self::regex('[a-zA-Z0-9-_.@=,]+', $name, $isOptional),
-            'int' => self::regex('[0-9]+', $name, $isOptional),
-            'bool' => self::regex('(1|0|true|false)', $name, $isOptional),
+            'string' => self::regex('[\w.@=,-]+', $name, $isOptional),
+            'int' => self::regex('\d+', $name, $isOptional),
+            'bool' => self::regex('true|false|[01]', $name, $isOptional),
             default => throw MappingException::typeComplex($name)
         };
     }
@@ -145,7 +144,7 @@ final class RouterUtil
     {
         $optional = $isOptional ? '?' : '';
 
-        return "{$optional}(?<{$name}>{$regex}){$optional}";
+        return $optional . '(?<' . $name . '>' . $regex . ')' . $optional;
     }
 
     /**
@@ -168,11 +167,11 @@ final class RouterUtil
             return strlen($a) <=> strlen($b);
         }
 
-        if ($aParenthesis) {
+        if (!$aParenthesis) {
             return 1;
         }
 
-        if ($bParenthesis) {
+        if (!$bParenthesis) {
             return -1;
         }
 

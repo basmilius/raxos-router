@@ -13,16 +13,17 @@ use Raxos\Router\Frame\{ControllerFrame, FrameStack, MiddlewareFrame, RouteFrame
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionFunctionAbstract;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 use function array_filter;
-use function array_keys;
 use function array_map;
-use function array_multisort;
+use function iterator_to_array;
 use function ltrim;
 use function rtrim;
-use const SORT_DESC;
+use function strlen;
+use function uksort;
 
 /**
  * Class Mapper
@@ -39,24 +40,31 @@ final class Mapper
      *
      * @param array $controllers
      *
-     * @return array<string, array<string, FrameStack>>
+     * @return array<array<string, array<string, FrameStack>>>
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     public static function for(array $controllers): array
     {
-        $result = [];
+        $dynamicRoutes = [];
+        $staticRoutes = [];
 
         foreach (self::generate($controllers) as $stack) {
-            $result[$stack->path] ??= [];
-            $result[$stack->path][$stack->method->name] ??= $stack;
+            if ($stack->isDynamic) {
+                $dynamicRoutes[$stack->path][$stack->method->name] = $stack;
+            } else {
+                $staticRoutes[$stack->path][$stack->method->name] = $stack;
+            }
         }
 
-        $paths = array_map(\strlen(...), array_keys($result));
-        array_multisort($paths, SORT_DESC, $result);
+        uksort($dynamicRoutes, static fn(string $a, string $b) => strlen($b) <=> strlen($a));
+        uksort($staticRoutes, static fn(string $a, string $b) => strlen($b) <=> strlen($a));
 
-        return $result;
+        return [
+            $dynamicRoutes,
+            $staticRoutes
+        ];
     }
 
     /**
@@ -145,17 +153,21 @@ final class Mapper
     /**
      * Returns the attributes of the given class, method, parameter or property.
      *
-     * @param ReflectionClass|ReflectionMethod|ReflectionParameter|ReflectionProperty $attributable
+     * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionParameter|ReflectionProperty $attributable
      *
      * @return AttributeInterface[]
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function attributes(ReflectionClass|ReflectionMethod|ReflectionParameter|ReflectionProperty $attributable): array
+    public static function attributes(ReflectionClass|ReflectionFunctionAbstract|ReflectionParameter|ReflectionProperty $attributable): array
     {
         $attributes = $attributable->getAttributes(AttributeInterface::class, ReflectionAttribute::IS_INSTANCEOF);
 
-        return array_map(static fn(ReflectionAttribute $attribute) => $attribute->newInstance(), $attributes);
+        foreach ($attributes as &$attribute) {
+            $attribute = $attribute->newInstance();
+        }
+
+        return $attributes;
     }
 
     /**
@@ -170,6 +182,12 @@ final class Mapper
      */
     public static function controller(string $controller): ControllerClass
     {
+        static $cache = [];
+
+        if (isset($cache[$controller])) {
+            return $cache[$controller];
+        }
+
         try {
             $class = new ReflectionClass($controller);
 
@@ -180,16 +198,16 @@ final class Mapper
             $children = array_map(static fn(Child $child) => self::controller($child->controller), $children);
 
             $constructor = $class->getConstructor();
-            $parameters = $constructor !== null ? self::injectablesForMethod($constructor) : [];
+            $parameters = $constructor !== null ? iterator_to_array(self::injectablesForMethod($constructor)) : [];
 
-            return new ControllerClass(
+            return $cache[$controller] = new ControllerClass(
                 prefix: $prefix,
                 class: $class->name,
                 children: $children,
-                injectables: self::injectablesForClass($class),
-                middlewares: self::middlewares($class),
+                injectables: iterator_to_array(self::injectablesForClass($class)),
+                middlewares: iterator_to_array(self::middlewares($class)),
                 parameters: $parameters,
-                routes: self::routes($class)
+                routes: iterator_to_array(self::routes($class))
             );
         } catch (ReflectionException $err) {
             throw MappingException::reflectionError($err);
@@ -201,14 +219,16 @@ final class Mapper
      *
      * @param class-string[] $controllers
      *
-     * @return ControllerClass[]
+     * @return Generator<ControllerClass>
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function controllers(array $controllers): array
+    public static function controllers(array $controllers): Generator
     {
-        return array_map(self::controller(...), $controllers);
+        foreach ($controllers as $controller) {
+            yield self::controller($controller);
+        }
     }
 
     /**
@@ -273,34 +293,38 @@ final class Mapper
      *
      * @param ReflectionClass $class
      *
-     * @return Injectable[]
+     * @return Generator<Injectable>
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function injectablesForClass(ReflectionClass $class): array
+    public static function injectablesForClass(ReflectionClass $class): Generator
     {
         $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC);
         $properties = array_filter($properties, static fn(ReflectionProperty $property) => !empty($property->getAttributes(Injected::class)));
 
-        return array_map(self::injectable(...), $properties);
+        foreach ($properties as $property) {
+            yield self::injectable($property);
+        }
     }
 
     /**
      * Returns the injectables for the given method.
      *
-     * @param ReflectionMethod $method
+     * @param ReflectionFunctionAbstract $method
      *
-     * @return Injectable[]
+     * @return Generator<Injectable>
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function injectablesForMethod(ReflectionMethod $method): array
+    public static function injectablesForMethod(ReflectionFunctionAbstract $method): Generator
     {
         $parameters = $method->getParameters();
 
-        return array_map(self::injectable(...), $parameters);
+        foreach ($parameters as $parameter) {
+            yield self::injectable($parameter);
+        }
     }
 
     /**
@@ -315,13 +339,22 @@ final class Mapper
      */
     public static function middleware(ReflectionAttribute $attribute): Middleware
     {
-        try {
-            $class = new ReflectionClass($attribute->getName());
+        static $cache = [];
 
-            return new Middleware(
+        $arguments = $attribute->getArguments();
+        $name = $attribute->getName();
+
+        if (empty($arguments) && isset($cache[$name])) {
+            return $cache[$name];
+        }
+
+        try {
+            $class = new ReflectionClass($name);
+
+            return $cache[$name] = new Middleware(
                 class: $class->name,
-                arguments: $attribute->getArguments(),
-                injectables: self::injectablesForClass($class)
+                arguments: $arguments,
+                injectables: iterator_to_array(self::injectablesForClass($class))
             );
         } catch (ReflectionException $err) {
             throw MappingException::reflectionError($err);
@@ -331,18 +364,20 @@ final class Mapper
     /**
      * Returns the middlewares for the given class or method.
      *
-     * @param ReflectionClass|ReflectionMethod $classOrMethod
+     * @param ReflectionClass|ReflectionFunctionAbstract $classOrMethod
      *
-     * @return Middleware[]
+     * @return Generator<Middleware>
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function middlewares(ReflectionClass|ReflectionMethod $classOrMethod): array
+    public static function middlewares(ReflectionClass|ReflectionFunctionAbstract $classOrMethod): Generator
     {
         $middlewares = $classOrMethod->getAttributes(MiddlewareInterface::class, ReflectionAttribute::IS_INSTANCEOF);
 
-        return array_map(self::middleware(...), $middlewares);
+        foreach ($middlewares as $middleware) {
+            yield self::middleware($middleware);
+        }
     }
 
     /**
@@ -358,9 +393,17 @@ final class Mapper
      */
     public static function route(ReflectionMethod $method, ReflectionClass $class): Route
     {
+        static $cache = [];
+
+        $key = $class->name . '@' . $method->name;
+
+        if (isset($cache[$key])) {
+            return $cache[$key];
+        }
+
         $attributes = self::attributes($method);
-        $middlewares = self::middlewares($method);
-        $parameters = self::injectablesForMethod($method);
+        $middlewares = iterator_to_array(self::middlewares($method));
+        $parameters = iterator_to_array(self::injectablesForMethod($method));
         $routes = self::attributesOf($attributes, AbstractRoute::class);
 
         $returnType = RouterUtil::types($method->getReturnType());
@@ -369,7 +412,7 @@ final class Mapper
             throw MappingException::invalidReturnType($method->class, $method->name);
         }
 
-        return new Route(
+        return $cache[$key] = new Route(
             class: $class->name,
             method: $method->name,
             routes: $routes,
@@ -383,17 +426,19 @@ final class Mapper
      *
      * @param ReflectionClass $class
      *
-     * @return Route[]
+     * @return Generator<Route>
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function routes(ReflectionClass $class): array
+    public static function routes(ReflectionClass $class): Generator
     {
         $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
         $methods = array_filter($methods, static fn(ReflectionMethod $method) => !empty($method->getAttributes(AttributeInterface::class, ReflectionAttribute::IS_INSTANCEOF)));
 
-        return array_map(static fn(ReflectionMethod $method) => self::route($method, $class), $methods);
+        foreach ($methods as $method) {
+            yield self::route($method, $class);
+        }
     }
 
     /**
