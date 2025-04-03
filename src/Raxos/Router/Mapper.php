@@ -7,7 +7,7 @@ use Generator;
 use Raxos\Foundation\Util\ArrayUtil;
 use Raxos\Router\Attribute\{AbstractRoute, Child, Controller, Injected};
 use Raxos\Router\Contract\{AttributeInterface, MiddlewareInterface, ValueProviderInterface};
-use Raxos\Router\Definition\{ControllerClass, DefaultValue, Injectable, Middleware, Route};
+use Raxos\Router\Definition\{ControllerClass, DefaultValue, Injectable, Middleware, Prefix, Route};
 use Raxos\Router\Error\MappingException;
 use Raxos\Router\Frame\{ControllerFrame, FrameStack, MiddlewareFrame, RouteFrame};
 use ReflectionAttribute;
@@ -82,7 +82,7 @@ final class Mapper
         $controllers = self::controllers($controllers);
 
         foreach ($controllers as $controller) {
-            yield from self::generateController($controller);
+            yield from self::generateController($controller, new Prefix());
         }
     }
 
@@ -90,7 +90,7 @@ final class Mapper
      * Generates the given controller.
      *
      * @param ControllerClass $controller
-     * @param string $prefix
+     * @param Prefix $prefix
      * @param array $frames
      *
      * @return Generator<FrameStack>
@@ -98,10 +98,13 @@ final class Mapper
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function generateController(ControllerClass $controller, string $prefix = '', array $frames = []): Generator
+    public static function generateController(ControllerClass $controller, Prefix $prefix, array $frames = []): Generator
     {
-        $controllerPrefix = RouterUtil::convertPath($controller->prefix, $controller->parameters);
-        $prefix = rtrim($prefix . $controllerPrefix, '/');
+        $prefix = new Prefix(
+            plain: rtrim($prefix->plain . $controller->prefix, '/'),
+            regex: rtrim($prefix->regex . RouterUtil::convertPath($controller->prefix, $controller->parameters), '/')
+        );
+
         $frames[] = new ControllerFrame($controller);
 
         foreach ($controller->middlewares as $middleware) {
@@ -121,7 +124,7 @@ final class Mapper
      * Generates the given route.
      *
      * @param Route $route
-     * @param string $prefix
+     * @param Prefix $prefix
      * @param array $frames
      *
      * @return Generator<FrameStack>
@@ -129,7 +132,7 @@ final class Mapper
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function generateRoute(Route $route, string $prefix = '', array $frames = []): Generator
+    public static function generateRoute(Route $route, Prefix $prefix, array $frames = []): Generator
     {
         foreach ($route->middlewares as $middleware) {
             $frames[] = new MiddlewareFrame($middleware);
@@ -139,14 +142,21 @@ final class Mapper
 
         foreach ($route->routes as $r) {
             $path = RouterUtil::normalizePath($r->path);
+
+            $pathPlain = $prefix->plain . $path;
+
+            if ($pathPlain === '') {
+                $pathPlain = '/';
+            }
+
             $path = RouterUtil::convertPath($path, $route->parameters);
-            $path = $prefix . $path;
+            $path = $prefix->regex . $path;
 
             if ($path === '') {
                 $path = '/';
             }
 
-            yield new FrameStack($r->method, $path, $frames);
+            yield new FrameStack($r->method, $path, $pathPlain, $frames);
         }
     }
 

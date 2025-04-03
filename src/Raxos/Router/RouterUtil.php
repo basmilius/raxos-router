@@ -114,7 +114,6 @@ final class RouterUtil
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    #[Pure]
     public static function normalizePath(string $path): string
     {
         if ($path === '/') {

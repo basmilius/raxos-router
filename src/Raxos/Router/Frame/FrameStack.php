@@ -25,6 +25,7 @@ final readonly class FrameStack implements DebuggableInterface
      *
      * @param HttpMethod $method
      * @param string $path
+     * @param string $pathPlain
      * @param FrameInterface[] $frames
      *
      * @author Bas Milius <bas@mili.us>
@@ -33,6 +34,7 @@ final readonly class FrameStack implements DebuggableInterface
     public function __construct(
         public HttpMethod $method,
         public string $path,
+        public string $pathPlain,
         public array $frames
     )
     {
@@ -47,7 +49,7 @@ final readonly class FrameStack implements DebuggableInterface
     public function __debugInfo(): array
     {
         return [
-            'route' => "{$this->method->name} {$this->path}",
+            'route' => "{$this->method->name} {$this->pathPlain}",
             'stack' => array_map(\strval(...), $this->frames)
         ];
     }
