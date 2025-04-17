@@ -7,10 +7,6 @@ use Generator;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Collection\Map;
 use Raxos\Foundation\Option\{Option, OptionException};
-use Raxos\Http\Body\HttpBodyJson;
-use Raxos\Http\HttpFile;
-use Raxos\Http\Validate\{RequestModel, Validator};
-use Raxos\Http\Validate\Error\ValidatorException;
 use Raxos\Router\Contract\InjectableInterface;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\RuntimeException;
@@ -85,7 +81,6 @@ final class Injector
                 ->orElse(static fn() => self::getValueProviderValue($request, $injectable, $valueKey))
                 ->orElse(static fn() => self::getParameterValue($runner->router->globals, $injectable, $class, $method))
                 ->orElse(static fn() => self::getParameterValue($request->parameters, $injectable, $class, $method))
-                ->orElse(static fn() => self::getRequestValidatorValue($request, $injectable, $class, $method))
                 ->orElse(static fn() => self::getDefaultValue($injectable))
                 ->orThrow(static fn() => RuntimeException::missingInjection($class, $method, $injectable->name, implode(', ', $injectable->types)))
                 ->get();
@@ -223,67 +218,6 @@ final class Injector
         $types = implode(', ', $injectable->types);
 
         throw RuntimeException::invalidInjection($class, $method, $injectable->name, gettype($value), $types);
-    }
-
-    /**
-     * Returns a validated request model.
-     *
-     * @param Request $request
-     * @param Injectable $injectable
-     * @param string $class
-     * @param string|null $method
-     *
-     * @return Option<RequestModel>
-     * @throws RuntimeException
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
-     */
-    private static function getRequestValidatorValue(Request $request, Injectable $injectable, string $class, ?string $method): Option
-    {
-        if (!is_subclass_of($injectable->types[0], RequestModel::class)) {
-            return Option::none();
-        }
-
-        try {
-            $body = $request->body();
-            $contentType = $request->contentType();
-
-            if ($contentType === 'application/json' && $body instanceof HttpBodyJson) {
-                $data = $body->array();
-            } else {
-                $data = $request->post->toArray();
-
-                /**
-                 * @var string $key
-                 * @var HttpFile[] $files
-                 */
-                foreach ($request->files as $key => $files) {
-                    foreach ($files as $file) {
-                        if (!$file->isValid) {
-                            continue;
-                        }
-
-                        $data[$key] ??= [];
-                        $data[$key][] = $file;
-                    }
-
-                    if (!isset($data[$key])) {
-                        continue;
-                    }
-
-                    if (!isset($data[$key][1])) {
-                        $data[$key] = $data[$key][0];
-                    }
-                }
-            }
-
-            /** @var class-string<RequestModel> $requestModel */
-            $requestModel = $injectable->types[0];
-
-            return Option::some(Validator::validate($requestModel, $data));
-        } catch (ValidatorException $err) {
-            throw RuntimeException::validationError($err, $class, $method);
-        }
     }
 
     /**

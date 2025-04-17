@@ -8,6 +8,7 @@ use JetBrains\PhpStorm\Language;
 use JsonSerializable;
 use Raxos\Http\HttpResponseCode;
 use Raxos\Http\Structure\HttpHeadersMap;
+use Raxos\Http\Validate\Error\{HttpConstraintException, HttpValidatorException};
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{BinaryResponse, FileResponse, ForbiddenResponse, HtmlResponse, JsonResponse, NoContentResponse, NotFoundResponse, RedirectResponse, ResultResponse};
 
@@ -203,6 +204,54 @@ trait Responds
     ): ResultResponse
     {
         return new ResultResponse($result, $headers, $responseCode);
+    }
+
+    /**
+     * Returns a validation error for a single constraint.
+     *
+     * @param string $field
+     * @param string $constraint
+     * @param string $message
+     * @param array|null $params
+     *
+     * @return JsonResponse
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.7.0
+     */
+    protected function validationError(string $field, string $constraint, string $message, ?array $params = []): JsonResponse
+    {
+        return $this->json(
+            HttpValidatorException::errors([
+                $field => HttpConstraintException::of($constraint, $message, $params)
+            ])
+        );
+    }
+
+    /**
+     * Returns a validation error for multiple constraints.
+     *
+     * @param array $errors
+     *
+     * @return JsonResponse
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.7.0
+     */
+    protected function validationErrors(array ...$errors): JsonResponse
+    {
+        $result = [];
+
+        foreach ($errors as $field => $constraintErrors) {
+            foreach ($constraintErrors as $constraint => $message) {
+                $result[$field] = HttpConstraintException::of(
+                    $constraint,
+                    $message
+                );
+            }
+        }
+
+        return $this->json(
+            HttpValidatorException::errors($result)
+        );
     }
 
 }

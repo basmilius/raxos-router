@@ -5,12 +5,12 @@ namespace Raxos\Router;
 
 use Closure;
 use Exception;
-use Raxos\Http\HttpRequest;
 use Raxos\Router\Contract\{FrameInterface, RouterInterface};
 use Raxos\Router\Error\{RouterException, RuntimeException};
 use Raxos\Router\Frame\FrameStack;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
+use function array_shift;
 
 /**
  * Class Runner
@@ -95,7 +95,7 @@ final class Runner
      *
      * @param FrameInterface[] $frames
      *
-     * @return Closure(HttpRequest):Response
+     * @return Closure(Request):Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

@@ -5,7 +5,7 @@ namespace Raxos\Router\Error;
 
 use Exception;
 use Raxos\Foundation\Error\ExceptionId;
-use Raxos\Http\Validate\Error\ValidatorException;
+use Raxos\Http\Validate\Error\HttpValidatorException;
 use Raxos\Router\Response\ResultResponse;
 use ReflectionException;
 use function sprintf;
@@ -192,7 +192,7 @@ final class RuntimeException extends RouterException
     /**
      * Returns a validation error exception.
      *
-     * @param ValidatorException $err
+     * @param HttpValidatorException $err
      * @param string $class
      * @param string|null $method
      *
@@ -200,7 +200,7 @@ final class RuntimeException extends RouterException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function validationError(ValidatorException $err, string $class, ?string $method): self
+    public static function validationError(HttpValidatorException $err, string $class, ?string $method): self
     {
         if ($method !== null) {
             $message = sprintf('Validation failed for "%s->%s()".', $class, $method);

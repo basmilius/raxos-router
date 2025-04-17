@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use Raxos\Http\{HttpMethod, HttpRequest};
+use Raxos\Http\HttpMethod;
 use Raxos\Http\Structure\{HttpCookiesMap, HttpFilesMap, HttpHeadersMap, HttpPostMap, HttpQueryMap, HttpServerMap};
 use Raxos\Router\Contract\RouterInterface;
 use Raxos\Router\Error\RuntimeException;
@@ -60,7 +60,7 @@ trait Resolvable
     {
         static $request = null;
 
-        $request ??= HttpRequest::createFromGlobals();
+        $request ??= Request::createFromGlobals();
 
         return Request::create(
             method: $method ?? $request->method,

@@ -182,6 +182,7 @@ class DynamicRouter implements RouterInterface
             $parameters = iterator_to_array(Mapper::injectablesForMethod($reflector));
 
             $path = RouterUtil::normalizePath($path);
+            $pathPlain = $path;
             $path = RouterUtil::convertPath($path, $parameters);
 
             $middlewares = [];
@@ -190,7 +191,7 @@ class DynamicRouter implements RouterInterface
                 $middlewares[] = new MiddlewareFrame($middleware);
             }
 
-            $stack = new FrameStack($method, $path, [
+            $stack = new FrameStack($method, $path, $pathPlain, [
                 ...$middlewares,
                 new ClosureFrame($handler, $parameters)
             ]);
