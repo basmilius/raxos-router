@@ -6,6 +6,7 @@ namespace Raxos\Router;
 use Generator;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Collection\Map;
+use Raxos\Foundation\Contract\OptionInterface;
 use Raxos\Foundation\Option\{Option, OptionException};
 use Raxos\Router\Contract\InjectableInterface;
 use Raxos\Router\Definition\Injectable;
@@ -161,11 +162,11 @@ final class Injector
      *
      * @param Injectable $injectable
      *
-     * @return Option<mixed>
+     * @return OptionInterface<mixed>
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    private static function getDefaultValue(Injectable $injectable): Option
+    private static function getDefaultValue(Injectable $injectable): OptionInterface
     {
         if ($injectable->defaultValue->defined) {
             return Option::some($injectable->defaultValue->value);
@@ -182,12 +183,12 @@ final class Injector
      * @param string $class
      * @param string|null $method
      *
-     * @return Option<mixed>
+     * @return OptionInterface<mixed>
      * @throws RuntimeException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    private static function getParameterValue(Map $parameters, Injectable $injectable, string $class, ?string $method): Option
+    private static function getParameterValue(Map $parameters, Injectable $injectable, string $class, ?string $method): OptionInterface
     {
         if (!$parameters->has($injectable->name)) {
             return Option::none();
@@ -226,11 +227,11 @@ final class Injector
      * @param Request $request
      * @param string $valueKey
      *
-     * @return Option<mixed>
+     * @return OptionInterface<mixed>
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    private static function getValueProviderCachedValue(Request $request, string $valueKey): Option
+    private static function getValueProviderCachedValue(Request $request, string $valueKey): OptionInterface
     {
         if ($request->parameters->has($valueKey)) {
             return Option::some($request->parameters->get($valueKey));
@@ -246,12 +247,12 @@ final class Injector
      * @param Injectable $injectable
      * @param string $valueKey
      *
-     * @return Option<mixed>
+     * @return OptionInterface<mixed>
      * @throws RuntimeException
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    private static function getValueProviderValue(Request $request, Injectable $injectable, string $valueKey): Option
+    private static function getValueProviderValue(Request $request, Injectable $injectable, string $valueKey): OptionInterface
     {
         if ($injectable->valueProvider !== null) {
             $value = $injectable->valueProvider->getValue($request, $injectable);
