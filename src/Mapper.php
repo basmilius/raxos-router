@@ -61,7 +61,6 @@ final class Mapper
         }
 
         uksort($dynamicRoutes, static fn(string $a, string $b) => strlen($b) <=> strlen($a));
-        uksort($staticRoutes, static fn(string $a, string $b) => strlen($b) <=> strlen($a));
 
         $groupedDynamicRoutes = [];
 
