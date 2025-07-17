@@ -19,6 +19,7 @@ use ReflectionParameter;
 use ReflectionProperty;
 use function array_filter;
 use function array_map;
+use function count;
 use function iterator_to_array;
 use function ltrim;
 use function rtrim;
@@ -52,6 +53,7 @@ final class Mapper
 
         foreach (self::generate($controllers) as $stack) {
             if ($stack->isDynamic) {
+                $dynamicRoutes[$stack->path]['segments'] ??= RouterUtil::pathToSegments($stack->path);
                 $dynamicRoutes[$stack->path][$stack->method->name] = $stack;
             } else {
                 $staticRoutes[$stack->path][$stack->method->name] = $stack;
@@ -61,8 +63,15 @@ final class Mapper
         uksort($dynamicRoutes, static fn(string $a, string $b) => strlen($b) <=> strlen($a));
         uksort($staticRoutes, static fn(string $a, string $b) => strlen($b) <=> strlen($a));
 
+        $groupedDynamicRoutes = [];
+
+        foreach ($dynamicRoutes as $route => $data) {
+            $segmentCount = count($data['segments']);
+            $groupedDynamicRoutes[$segmentCount][$route] = $data;
+        }
+
         return [
-            $dynamicRoutes,
+            $groupedDynamicRoutes,
             $staticRoutes
         ];
     }

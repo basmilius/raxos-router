@@ -9,7 +9,7 @@ use Raxos\Router\Contract\InjectableInterface;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\MappingException;
 use ReflectionType;
-use function ctype_alnum;
+use function explode;
 use function in_array;
 use function is_subclass_of;
 use function str_contains;
@@ -26,6 +26,12 @@ use function usort;
  */
 final class RouterUtil
 {
+
+    private const array SIMPLE_TYPE_PATTERNS = [
+        'string' => '[\w.@=,-]+',
+        'int' => '\d+',
+        'bool' => 'true|false|[01]'
+    ];
 
     /**
      * Converts the parameter placeholders in the given path to their
@@ -48,36 +54,37 @@ final class RouterUtil
         usort($injectables, static fn(Injectable $a, Injectable $b) => strlen($b->name) <=> strlen($a->name));
 
         foreach ($injectables as $injectable) {
-            $name = $injectable->name;
-            $regex = null;
-
-            if (!str_contains($path, "\${$name}")) {
+            if (!str_contains($path, "\${$injectable->name}")) {
                 continue;
             }
 
-            if ($injectable->valueProvider !== null) {
-                $regex = $injectable->valueProvider->getRegex($injectable);
-            } else {
-                foreach ($injectable->types as $type) {
-                    if (is_subclass_of($type, InjectableInterface::class)) {
-                        $regex = self::regex($type::getRouterRegex(), $name, $injectable->defaultValue->defined);
-                        continue;
-                    }
+            $regex = $injectable->valueProvider?->getRegex($injectable);
 
-                    if (!in_array($type, Injector::SIMPLE_TYPES)) {
-                        continue;
-                    }
+            if ($regex !== null) {
+                $path = str_replace("\${$injectable->name}", $regex, $path);
 
-                    $regex = self::convertPathParam($name, $type, $injectable->defaultValue->defined);
-                    break;
+                continue;
+            }
+
+            foreach ($injectable->types as $type) {
+                if (is_subclass_of($type, InjectableInterface::class)) {
+                    $regex = self::regex($type::getRouterRegex(), $injectable->name, $injectable->defaultValue->defined);
+                    continue;
                 }
+
+                if (!in_array($type, Injector::SIMPLE_TYPES, true)) {
+                    continue;
+                }
+
+                $regex = self::convertPathParam($injectable->name, $type, $injectable->defaultValue->defined);
+                break;
             }
 
             if ($regex === null) {
-                throw MappingException::invalidPathParameter($name);
+                throw MappingException::invalidPathParameter($injectable->name);
             }
 
-            $path = str_replace("\${$name}", $regex, $path);
+            $path = str_replace("\${$injectable->name}", $regex, $path);
         }
 
         return $path;
@@ -97,12 +104,9 @@ final class RouterUtil
      */
     public static function convertPathParam(string $name, string $type, bool $isOptional): string
     {
-        return match ($type) {
-            'string' => self::regex('[\w.@=,-]+', $name, $isOptional),
-            'int' => self::regex('\d+', $name, $isOptional),
-            'bool' => self::regex('true|false|[01]', $name, $isOptional),
-            default => throw MappingException::typeComplex($name)
-        };
+        $pattern = self::SIMPLE_TYPE_PATTERNS[$type] ?? throw MappingException::typeComplex($name);
+
+        return self::regex($pattern, $name, $isOptional);
     }
 
     /**
@@ -128,6 +132,20 @@ final class RouterUtil
     }
 
     /**
+     * Converts a path into segments.
+     *
+     * @param string $path
+     *
+     * @return string[]
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.0
+     */
+    public static function pathToSegments(string $path): array
+    {
+        return explode('/', $path);
+    }
+
+    /**
      * Returns a regex group.
      *
      * @param string $regex
@@ -141,9 +159,11 @@ final class RouterUtil
     #[Pure]
     public static function regex(string $regex, string $name, bool $isOptional): string
     {
-        $optional = $isOptional ? '?' : '';
+        if ($isOptional) {
+            return "?(?<{$name}>{$regex})?";
+        }
 
-        return $optional . '(?<' . $name . '>' . $regex . ')' . $optional;
+        return "(?<{$name}>{$regex})";
     }
 
     /**
@@ -162,19 +182,11 @@ final class RouterUtil
         $aParenthesis = str_contains($a, '(');
         $bParenthesis = str_contains($b, '(');
 
-        if ($aParenthesis && $bParenthesis) {
+        if ($aParenthesis === $bParenthesis) {
             return strlen($a) <=> strlen($b);
         }
 
-        if (!$aParenthesis) {
-            return 1;
-        }
-
-        if (!$bParenthesis) {
-            return -1;
-        }
-
-        return strlen($a) <=> strlen($b);
+        return $aParenthesis ? 1 : -1;
     }
 
     /**

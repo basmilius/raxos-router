@@ -9,15 +9,10 @@ use Raxos\Router\Contract\RouterInterface;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
-use function array_filter;
 use function array_key_first;
-use function min;
+use function count;
 use function preg_match;
-use function str_starts_with;
-use function strlen;
-use function strpos;
 use function strtoupper;
-use function substr;
 
 /**
  * Trait Resolvable
@@ -86,34 +81,56 @@ trait Resolvable
      */
     public function resolve(Request $request): Response
     {
-        $routes = [];
+        static $resolved = [];
 
         if (isset($this->staticRoutes[$request->pathName])) {
             return $this->handle($request, $this->staticRoutes[$request->pathName]);
         }
 
-        foreach ($this->dynamicRoutes as $route => $_) {
-            $pos = array_filter([
-                strpos($route, '?'),
-                strpos($route, '/'),
-                strlen($route)
-            ]);
+        if (isset($resolved[$request->method->name . $request->pathName])) {
+            [$segmentCount, $route] = $resolved[$request->method->name . $request->pathName];
 
-            $static = substr($route, 0, min($pos) - 1);
-
-            if (!str_starts_with($request->pathName, $static)) {
-                continue;
+            if (!preg_match("#^{$route}\$#", $request->pathName, $parameters)) {
+                return new NotFoundResponse();
             }
 
-            $routes[] = $route;
+            return $this->handle($request, $this->dynamicRoutes[$segmentCount][$route], $parameters);
         }
 
-        foreach ($routes as $route) {
-            if (!preg_match('#^' . $route . '$#', $request->pathName, $parameters)) {
+        if (empty($this->dynamicRoutes)) {
+            return new NotFoundResponse();
+        }
+
+        $segments = RouterUtil::pathToSegments($request->pathName);
+        $segmentCount = count($segments);
+
+        if (!isset($this->dynamicRoutes[$segmentCount]) || empty($this->dynamicRoutes[$segmentCount])) {
+            return new NotFoundResponse();
+        }
+
+        $candidates = $this->dynamicRoutes[$segmentCount];
+        $matches = [];
+
+        if (empty($candidates)) {
+            return new NotFoundResponse();
+        }
+
+        foreach ($candidates as $candidate => $route) {
+            if (!$this->isCandidate($segments, $route['segments'])) {
                 continue;
             }
 
-            return $this->handle($request, $this->dynamicRoutes[$route], $parameters);
+            $matches[$candidate] = $route;
+        }
+
+        foreach ($matches as $route => $data) {
+            if (!preg_match("#^{$route}\$#", $request->pathName, $parameters)) {
+                continue;
+            }
+
+            $resolved[$request->method->name . $request->pathName] = [$segmentCount, $route];
+
+            return $this->handle($request, $data, $parameters);
         }
 
         return new NotFoundResponse();
@@ -147,10 +164,40 @@ trait Resolvable
             }
         }
 
-        $request->parameters->merge($parameters);
+        if (!empty($parameters)) {
+            $request->parameters->merge($parameters);
+        }
 
         return new Runner($this, $mapping[$methodKey])
             ->run($request);
+    }
+
+    /**
+     * Returns TRUE if the request segments are a proper candidate.
+     *
+     * @param string[] $requestSegments
+     * @param string[] $routeSegments
+     *
+     * @return bool
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.0
+     */
+    private function isCandidate(array $requestSegments, array $routeSegments): bool
+    {
+        for ($i = 0; $i < count($requestSegments); ++$i) {
+            $requestSegment = $requestSegments[$i];
+            $routeSegment = $routeSegments[$i];
+
+            if (($routeSegment[0] ?? null) === '(') {
+                continue;
+            }
+
+            if ($requestSegment !== $routeSegment) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

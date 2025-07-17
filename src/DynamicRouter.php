@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use Closure;
 use Raxos\Foundation\Collection\Map;
 use Raxos\Http\HttpMethod;
 use Raxos\Router\Contract\RouterInterface;
@@ -11,6 +10,7 @@ use Raxos\Router\Error\MappingException;
 use Raxos\Router\Frame\{ClosureFrame, FrameStack, MiddlewareFrame};
 use ReflectionException;
 use ReflectionFunction;
+use function count;
 use function iterator_to_array;
 
 /**
@@ -45,7 +45,7 @@ class DynamicRouter implements RouterInterface
      * Registers a GET route.
      *
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
@@ -54,7 +54,7 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function get(string $path, Closure $handler): void
+    public function get(string $path, callable $handler): void
     {
         $this->route(HttpMethod::GET, $path, $handler);
     }
@@ -63,7 +63,7 @@ class DynamicRouter implements RouterInterface
      * Registers a POST route.
      *
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
@@ -72,7 +72,7 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function post(string $path, Closure $handler): void
+    public function post(string $path, callable $handler): void
     {
         $this->route(HttpMethod::POST, $path, $handler);
     }
@@ -81,7 +81,7 @@ class DynamicRouter implements RouterInterface
      * Registers a PUT route.
      *
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
@@ -89,7 +89,7 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function put(string $path, Closure $handler): void
+    public function put(string $path, callable $handler): void
     {
         $this->route(HttpMethod::PUT, $path, $handler);
     }
@@ -98,7 +98,7 @@ class DynamicRouter implements RouterInterface
      * Registers a DELETE route.
      *
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
@@ -106,7 +106,7 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function delete(string $path, Closure $handler): void
+    public function delete(string $path, callable $handler): void
     {
         $this->route(HttpMethod::DELETE, $path, $handler);
     }
@@ -115,7 +115,7 @@ class DynamicRouter implements RouterInterface
      * Registers a PATCH route.
      *
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
@@ -123,7 +123,7 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function patch(string $path, Closure $handler): void
+    public function patch(string $path, callable $handler): void
     {
         $this->route(HttpMethod::PATCH, $path, $handler);
     }
@@ -132,7 +132,7 @@ class DynamicRouter implements RouterInterface
      * Registers an OPTIONS route.
      *
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
@@ -140,7 +140,7 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function options(string $path, Closure $handler): void
+    public function options(string $path, callable $handler): void
     {
         $this->route(HttpMethod::OPTIONS, $path, $handler);
     }
@@ -149,7 +149,7 @@ class DynamicRouter implements RouterInterface
      * Registers a HEAD route.
      *
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
@@ -157,7 +157,7 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function head(string $path, Closure $handler): void
+    public function head(string $path, callable $handler): void
     {
         $this->route(HttpMethod::HEAD, $path, $handler);
     }
@@ -167,14 +167,14 @@ class DynamicRouter implements RouterInterface
      *
      * @param HttpMethod $method
      * @param string $path
-     * @param Closure $handler
+     * @param callable $handler
      *
      * @return void
      * @throws MappingException
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      */
-    public function route(HttpMethod $method, string $path, Closure $handler): void
+    public function route(HttpMethod $method, string $path, callable $handler): void
     {
         try {
             $reflector = new ReflectionFunction($handler);
@@ -183,7 +183,10 @@ class DynamicRouter implements RouterInterface
 
             $path = RouterUtil::normalizePath($path);
             $pathPlain = $path;
-            $path = RouterUtil::convertPath($path, $parameters);
+
+            if (!empty($parameters)) {
+                $path = RouterUtil::convertPath($path, $parameters);
+            }
 
             $middlewares = [];
 
@@ -193,13 +196,17 @@ class DynamicRouter implements RouterInterface
 
             $stack = new FrameStack($method, $path, $pathPlain, [
                 ...$middlewares,
-                new ClosureFrame($handler, $parameters)
+                new ClosureFrame($reflector->getClosure(), $parameters)
             ]);
 
             if (empty($parameters)) {
                 $this->staticRoutes[$path][$method->value] = $stack;
             } else {
-                $this->dynamicRoutes[$path][$method->value] = $stack;
+                $segments = RouterUtil::pathToSegments($path);
+                $segmentCount = count($segments);
+
+                $this->dynamicRoutes[$segmentCount][$path]['segments'] ??= $segments;
+                $this->dynamicRoutes[$segmentCount][$path][$method->value] = $stack;
             }
         } catch (ReflectionException $err) {
             throw MappingException::reflectionError($err);
