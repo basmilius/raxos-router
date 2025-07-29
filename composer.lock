@@ -583,7 +583,7 @@
             "dist": {
                 "type": "path",
                 "url": "../foundation",
-                "reference": "e16bc864d6d3405874bdbacd2a21ef78720000cc"
+                "reference": "e0721f683de17130c7a67d8c901e8db4f2e96c0a"
             },
             "require": {
                 "ext-dom": "*",
@@ -597,10 +597,10 @@
             "type": "library",
             "autoload": {
                 "files": [
-                    "src/Raxos/Foundation/functions.php"
+                    "src/functions.php"
                 ],
                 "psr-4": {
-                    "Raxos\\Foundation\\": "src/Raxos/Foundation"
+                    "Raxos\\Foundation\\": "src/"
                 }
             },
             "license": [
@@ -623,7 +623,7 @@
             "dist": {
                 "type": "path",
                 "url": "../http",
-                "reference": "a956aaf8c23a804645de06a50bd89fb44ca7e334"
+                "reference": "1f93168bf7062aaec5a331700b38157e7f97ec57"
             },
             "require": {
                 "ext-ctype": "*",
@@ -641,7 +641,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Raxos\\Http\\": "src/Raxos/Http"
+                    "Raxos\\Http\\": "src/"
                 }
             },
             "license": [
@@ -733,7 +733,7 @@
             "dist": {
                 "type": "path",
                 "url": "../database",
-                "reference": "0d232091e636f3dc3e172f0ca04cea54089a74f1"
+                "reference": "5ecc1c51f7ad089d1e7b2645c47646489e72d160"
             },
             "require": {
                 "ext-pdo": "*",
@@ -743,10 +743,10 @@
             "type": "library",
             "autoload": {
                 "files": [
-                    "src/Raxos/Database/Query/functions.php"
+                    "src/Query/functions.php"
                 ],
                 "psr-4": {
-                    "Raxos\\Database\\": "src/Raxos/Database"
+                    "Raxos\\Database\\": "src/"
                 }
             },
             "license": [
