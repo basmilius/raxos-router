@@ -7,8 +7,8 @@ use Generator;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Collection\Map;
 use Raxos\Foundation\Contract\OptionInterface;
+use Raxos\Foundation\Contract\StringParsableInterface;
 use Raxos\Foundation\Option\{Option, OptionException};
-use Raxos\Router\Contract\InjectableInterface;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;
@@ -198,8 +198,8 @@ final class Injector
 
         if (!is_object($value)) {
             foreach ($injectable->types as $type) {
-                if (is_subclass_of($type, InjectableInterface::class)) {
-                    return Option::some($type::getRouterValue($value));
+                if (is_subclass_of($type, StringParsableInterface::class)) {
+                    return Option::some($type::fromString($value));
                 }
 
                 if (!in_array($type, self::SIMPLE_TYPES)) {

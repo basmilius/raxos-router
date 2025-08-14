@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use JetBrains\PhpStorm\Pure;
+use Raxos\Foundation\Contract\StringParsableInterface;
 use Raxos\Foundation\Util\ReflectionUtil;
-use Raxos\Router\Contract\InjectableInterface;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\MappingException;
 use ReflectionType;
@@ -67,8 +67,8 @@ final class RouterUtil
             }
 
             foreach ($injectable->types as $type) {
-                if (is_subclass_of($type, InjectableInterface::class)) {
-                    $regex = self::regex($type::getRouterRegex(), $injectable->name, $injectable->defaultValue->defined);
+                if (is_subclass_of($type, StringParsableInterface::class)) {
+                    $regex = self::regex($type::pattern(), $injectable->name, $injectable->defaultValue->defined);
                     continue;
                 }
 
