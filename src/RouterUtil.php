@@ -176,7 +176,6 @@ final class RouterUtil
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    #[Pure]
     public static function routeSorter(string $a, string $b): int
     {
         $aParenthesis = str_contains($a, '(');
