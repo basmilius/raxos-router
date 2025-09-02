@@ -33,6 +33,18 @@ interface RouterInterface
     }
 
     /**
+     * Returns the path of a route.
+     *
+     * @param array $handler
+     *
+     * @return string
+     * @throws RuntimeException
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.0
+     */
+    public function path(array $handler): string;
+
+    /**
      * Returns a router request.
      *
      * @param HttpCookiesMap|null $cookies

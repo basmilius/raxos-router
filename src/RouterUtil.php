@@ -3,13 +3,17 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
+use BackedEnum;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Contract\StringParsableInterface;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\MappingException;
 use ReflectionType;
+use UnitEnum;
+use function array_map;
 use function explode;
+use function implode;
 use function in_array;
 use function is_subclass_of;
 use function str_contains;
@@ -69,6 +73,11 @@ final class RouterUtil
             foreach ($injectable->types as $type) {
                 if (is_subclass_of($type, StringParsableInterface::class)) {
                     $regex = self::regex($type::pattern(), $injectable->name, $injectable->defaultValue->defined);
+                    continue;
+                }
+
+                if (is_subclass_of($type, BackedEnum::class)) {
+                    $regex = self::regex(implode('|', array_map(fn(UnitEnum $enum) => $enum->value, $type::cases())), $injectable->name, $injectable->defaultValue->defined);
                     continue;
                 }
 

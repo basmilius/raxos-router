@@ -7,10 +7,14 @@ use Raxos\Http\HttpMethod;
 use Raxos\Http\Structure\{HttpCookiesMap, HttpFilesMap, HttpHeadersMap, HttpPostMap, HttpQueryMap, HttpServerMap};
 use Raxos\Router\Contract\RouterInterface;
 use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Frame\RouteFrame;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
 use function array_key_first;
+use function array_merge;
+use function class_exists;
 use function count;
+use function method_exists;
 use function preg_match;
 use function strtoupper;
 
@@ -25,6 +29,57 @@ use function strtoupper;
  */
 trait Resolvable
 {
+
+    /**
+     * Returns the path of a route.
+     *
+     * @param array $handler
+     *
+     * @return string
+     * @throws RuntimeException
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.0
+     */
+    public function path(array $handler): string
+    {
+        if (!isset($handler[0]) || !isset($handler[1]) || !class_exists($handler[0]) || !method_exists($handler[0], $handler[1])) {
+            throw RuntimeException::invalidHandler();
+        }
+
+        foreach ($this->staticRoutes as $path => $routes) {
+            foreach ($routes as $route) {
+                foreach ($route->frames as $frame) {
+                    if (!($frame instanceof RouteFrame)) {
+                        continue;
+                    }
+
+                    if ($frame->route->class === $handler[0] && $frame->route->method === $handler[1]) {
+                        return $path;
+                    }
+                }
+            }
+        }
+
+        $dynamicRoutes = array_merge(...$this->dynamicRoutes);
+
+        foreach ($dynamicRoutes as $path => $routes) {
+            unset($routes['segments']);
+
+            foreach ($routes as $route) {
+                foreach ($route->frames as $frame) {
+                    if (!($frame instanceof RouteFrame)) {
+                        continue;
+                    }
+
+                    if ($frame->route->class === $handler[0] && $frame->route->method === $handler[1]) {
+                        return $path;
+                    }
+                }
+            }
+        }
+
+        throw RuntimeException::invalidHandler();
+    }
 
     /**
      * Returns a router request.
@@ -187,8 +242,9 @@ trait Resolvable
         for ($i = 0; $i < count($requestSegments); ++$i) {
             $requestSegment = $requestSegments[$i];
             $routeSegment = $routeSegments[$i];
+            $char = $routeSegment[0] ?? null;
 
-            if (($routeSegment[0] ?? null) === '(') {
+            if ($char === '(' || $char === '?') {
                 continue;
             }
 

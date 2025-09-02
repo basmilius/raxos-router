@@ -39,6 +39,22 @@ final class RuntimeException extends RouterException
     }
 
     /**
+     * Returns the exception for when an invalid handler is provided to redirect.
+     *
+     * @return self
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.0
+     */
+    public static function invalidHandler(): self
+    {
+        return new self(
+            ExceptionId::for(__METHOD__),
+            'router_invalid_handler',
+            'Route handler could not be found or is invalid.'
+        );
+    }
+
+    /**
      * Returns the exception for an invalid injection.
      *
      * @param string $class

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
+use BackedEnum;
 use Generator;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Foundation\Collection\Map;
@@ -200,6 +201,10 @@ final class Injector
             foreach ($injectable->types as $type) {
                 if (is_subclass_of($type, StringParsableInterface::class)) {
                     return Option::some($type::fromString($value));
+                }
+
+                if (is_subclass_of($type, BackedEnum::class)) {
+                    return Option::some($type::tryFrom($value));
                 }
 
                 if (!in_array($type, self::SIMPLE_TYPES)) {
