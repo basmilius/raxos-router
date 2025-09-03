@@ -20,6 +20,7 @@ use function get_class;
 use function gettype;
 use function implode;
 use function in_array;
+use function is_numeric;
 use function is_object;
 use function is_subclass_of;
 
@@ -53,7 +54,7 @@ final class Injector
     {
         return match ($type) {
             'string' => (string)$value,
-            'int' => (int)$value,
+            'int' => is_numeric($value) ? (int)$value : null,
             'bool' => $value === true || (int)$value === 1 || $value === 'true',
             default => null
         };

@@ -6,8 +6,10 @@ namespace Raxos\Router\Attribute;
 use Attribute;
 use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
+use Raxos\Router\Injector;
 use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
+use function in_array;
 use function is_array;
 
 /**
@@ -54,6 +56,10 @@ final readonly class MapQuery implements AttributeInterface, ValueProviderInterf
 
         if ($injectable->types[0] === 'array' && !is_array($result)) {
             return [$result];
+        }
+
+        if ($result !== null && in_array($injectable->types[0], Injector::SIMPLE_TYPES)) {
+            return Injector::convertValue($result, $injectable->types[0]);
         }
 
         return $result;
