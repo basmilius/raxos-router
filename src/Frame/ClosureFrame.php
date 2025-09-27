@@ -4,12 +4,11 @@ declare(strict_types=1);
 namespace Raxos\Router\Frame;
 
 use Closure;
-use Raxos\Router\Contract\FrameInterface;
+use Raxos\Contract\Router\FrameInterface;
+use Raxos\Router\{Injector, Runner};
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Injector;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{Response, ResultResponse};
-use Raxos\Router\Runner;
 use ReflectionException;
 use ReflectionFunction;
 use function call_user_func_array;

@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use Generator;
+use Raxos\Contract\Router\{AttributeInterface, MappingExceptionInterface, MiddlewareInterface, ValueProviderInterface};
 use Raxos\Foundation\Util\ArrayUtil;
 use Raxos\Router\Attribute\{AbstractRoute, Child, Controller, Injected};
-use Raxos\Router\Contract\{AttributeInterface, MiddlewareInterface, ValueProviderInterface};
 use Raxos\Router\Definition\{ControllerClass, DefaultValue, Injectable, Middleware, Prefix, Route};
-use Raxos\Router\Error\MappingException;
+use Raxos\Router\Error\InvalidReturnTypeException;
+use Raxos\Router\Error\MappingReflectionErrorException;
+use Raxos\Router\Error\MissingTypeException;
 use Raxos\Router\Frame\{ControllerFrame, FrameStack, MiddlewareFrame, RouteFrame};
 use ReflectionAttribute;
 use ReflectionClass;
@@ -42,7 +44,7 @@ final class Mapper
      * @param array $controllers
      *
      * @return array<array<string, array<string, FrameStack>>>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -81,7 +83,7 @@ final class Mapper
      * @param class-string[] $controllers
      *
      * @return Generator<FrameStack>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -102,7 +104,7 @@ final class Mapper
      * @param array $frames
      *
      * @return Generator<FrameStack>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -136,7 +138,7 @@ final class Mapper
      * @param array $frames
      *
      * @return Generator<FrameStack>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -194,7 +196,7 @@ final class Mapper
      * @param string $controller
      *
      * @return ControllerClass
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -228,7 +230,7 @@ final class Mapper
                 routes: iterator_to_array(self::routes($class))
             );
         } catch (ReflectionException $err) {
-            throw MappingException::reflectionError($err);
+            throw new MappingReflectionErrorException($err);
         }
     }
 
@@ -238,7 +240,7 @@ final class Mapper
      * @param class-string[] $controllers
      *
      * @return Generator<ControllerClass>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -255,7 +257,7 @@ final class Mapper
      * @param ReflectionParameter|ReflectionProperty $property
      *
      * @return DefaultValue
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -274,7 +276,7 @@ final class Mapper
 
             return DefaultValue::of($property->getDefaultValue());
         } catch (ReflectionException $err) {
-            throw MappingException::reflectionError($err);
+            throw new MappingReflectionErrorException($err);
         }
     }
 
@@ -284,7 +286,7 @@ final class Mapper
      * @param ReflectionParameter|ReflectionProperty $property
      *
      * @return Injectable
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -293,7 +295,7 @@ final class Mapper
         $types = RouterUtil::types($property->getType());
 
         if (empty($types)) {
-            throw MappingException::typeRequired($property->class, $property->name);
+            throw new MissingTypeException($property->class, $property->name);
         }
 
         $attributes = self::attributes($property);
@@ -312,7 +314,7 @@ final class Mapper
      * @param ReflectionClass $class
      *
      * @return Generator<Injectable>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -332,7 +334,7 @@ final class Mapper
      * @param ReflectionFunctionAbstract $method
      *
      * @return Generator<Injectable>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -351,7 +353,7 @@ final class Mapper
      * @param ReflectionAttribute $attribute
      *
      * @return Middleware
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -375,7 +377,7 @@ final class Mapper
                 injectables: iterator_to_array(self::injectablesForClass($class))
             );
         } catch (ReflectionException $err) {
-            throw MappingException::reflectionError($err);
+            throw new MappingReflectionErrorException($err);
         }
     }
 
@@ -385,7 +387,7 @@ final class Mapper
      * @param ReflectionClass|ReflectionFunctionAbstract $classOrMethod
      *
      * @return Generator<Middleware>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -405,7 +407,7 @@ final class Mapper
      * @param ReflectionClass $class
      *
      * @return Route
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -427,7 +429,7 @@ final class Mapper
         $returnType = RouterUtil::types($method->getReturnType());
 
         if (empty($returnType)) {
-            throw MappingException::invalidReturnType($method->class, $method->name);
+            throw new InvalidReturnTypeException($method->class, $method->name);
         }
 
         return $cache[$key] = new Route(
@@ -445,7 +447,7 @@ final class Mapper
      * @param ReflectionClass $class
      *
      * @return Generator<Route>
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use Raxos\Foundation\Collection\Map;
-use Raxos\Router\Contract\RouterInterface;
-use Raxos\Router\Error\MappingException;
+use Raxos\Collection\Map;
+use Raxos\Contract\Router\MappingExceptionInterface;
+use Raxos\Contract\Router\RouterInterface;
 use Raxos\Router\Frame\FrameStack;
 
 /**
@@ -46,7 +46,7 @@ readonly class Router implements RouterInterface
      * @param class-string[] $controllers
      *
      * @return self
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

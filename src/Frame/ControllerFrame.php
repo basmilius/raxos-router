@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace Raxos\Router\Frame;
 
 use Closure;
+use Raxos\Contract\Router\{FrameInterface, RuntimeExceptionInterface};
 use Raxos\Router\{Injector, Runner};
-use Raxos\Router\Contract\FrameInterface;
 use Raxos\Router\Definition\ControllerClass;
-use Raxos\Router\Error\RuntimeException;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\Response;
 use function array_column;
@@ -52,7 +51,7 @@ final readonly class ControllerFrame implements FrameInterface
      * Sets up the controller if needed.
      *
      * @return mixed
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Frame;
 
-use Raxos\Foundation\Contract\DebuggableInterface;
+use Raxos\Contract\DebuggableInterface;
+use Raxos\Contract\Router\FrameInterface;
 use Raxos\Http\HttpMethod;
-use Raxos\Router\Contract\FrameInterface;
 use function array_map;
 
 /**

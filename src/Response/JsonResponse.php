@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace Raxos\Router\Response;
 
 use JsonException;
+use Raxos\Contract\Router\RuntimeExceptionInterface;
 use Raxos\Http\{HttpHeader, HttpResponseCode};
 use Raxos\Http\Structure\HttpHeadersMap;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\UnexpectedException;
 use function json_encode;
 use const JSON_BIGINT_AS_STRING;
 use const JSON_HEX_AMP;
@@ -51,7 +52,7 @@ final class JsonResponse extends Response
 
     /**
      * {@inheritdoc}
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.3.1
      */
@@ -60,7 +61,7 @@ final class JsonResponse extends Response
         try {
             echo json_encode($this->body, JSON_BIGINT_AS_STRING | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_THROW_ON_ERROR);
         } catch (JsonException $err) {
-            throw RuntimeException::unexpected($err, __METHOD__);
+            throw new UnexpectedException($err, __METHOD__);
         }
     }
 

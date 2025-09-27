@@ -5,7 +5,7 @@ namespace Raxos\Router\Response;
 
 use Raxos\Http\HttpResponseCode;
 use Raxos\Http\Structure\HttpHeadersMap;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\EmptyResultResponseException;
 
 /**
  * Class ResultResponse
@@ -70,7 +70,7 @@ final class ResultResponse extends Response
      */
     public function send(): void
     {
-        throw RuntimeException::resultResponse();
+        throw new EmptyResultResponseException();
     }
 
 }

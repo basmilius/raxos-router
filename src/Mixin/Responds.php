@@ -8,7 +8,7 @@ use JetBrains\PhpStorm\Language;
 use JsonSerializable;
 use Raxos\Http\HttpResponseCode;
 use Raxos\Http\Structure\HttpHeadersMap;
-use Raxos\Http\Validate\Error\{HttpConstraintException, HttpValidatorException};
+use Raxos\Http\Validate\Error\{ConstraintErrorException, ValidationNotOkException};
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{BinaryResponse, FileResponse, ForbiddenResponse, HtmlResponse, JsonResponse, NoContentResponse, NotFoundResponse, RedirectResponse, ResultResponse};
 
@@ -212,17 +212,17 @@ trait Responds
      * @param string $field
      * @param string $constraint
      * @param string $message
-     * @param array|null $params
+     * @param array $params
      *
      * @return JsonResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
-    protected function validationError(string $field, string $constraint, string $message, ?array $params = []): JsonResponse
+    protected function validationError(string $field, string $constraint, string $message, array $params = []): JsonResponse
     {
         return $this->json(
-            HttpValidatorException::errors([
-                $field => HttpConstraintException::of($constraint, $message, $params)
+            new ValidationNotOkException([
+                $field => new ConstraintErrorException($constraint, $message, $params)
             ])
         );
     }
@@ -242,15 +242,12 @@ trait Responds
 
         foreach ($errors as $field => $constraintErrors) {
             foreach ($constraintErrors as $constraint => $message) {
-                $result[$field] = HttpConstraintException::of(
-                    $constraint,
-                    $message
-                );
+                $result[$field] = new ConstraintErrorException($constraint, $message);
             }
         }
 
         return $this->json(
-            HttpValidatorException::errors($result)
+            new ValidationNotOkException($result)
         );
     }
 

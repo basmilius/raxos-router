@@ -5,8 +5,8 @@ namespace Raxos\Router;
 
 use Closure;
 use Exception;
-use Raxos\Router\Contract\{FrameInterface, RouterInterface};
-use Raxos\Router\Error\{RouterException, RuntimeException};
+use Raxos\Contract\Router\{FrameInterface, RouterInterface, RuntimeExceptionInterface};
+use Raxos\Router\Error\{ControllerNotInstantiatedException, UnexpectedException};
 use Raxos\Router\Frame\FrameStack;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
@@ -42,7 +42,7 @@ final class Runner
      * @param Request $request
      *
      * @return Response
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -53,14 +53,14 @@ final class Runner
 
             return $this->closure($this->stack->frames)($request);
         } catch (Exception $err) {
-            if ($err instanceof RouterException) {
+            if ($err instanceof RuntimeExceptionInterface) {
                 throw $err;
             }
 
             /** @var FrameInterface $frame */
             $frame = $this->router->globals->get('frame');
 
-            throw RuntimeException::unexpected($err, (string)$frame);
+            throw new UnexpectedException($err, (string)$frame);
         }
     }
 
@@ -73,7 +73,7 @@ final class Runner
      * @param callable():TController|null $setup
      *
      * @return TController|null
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -84,7 +84,7 @@ final class Runner
         }
 
         if ($setup === null) {
-            throw RuntimeException::controllerNotInstantiated($controller);
+            throw new ControllerNotInstantiatedException($controller);
         }
 
         return $this->controllers[$controller] ??= $setup();

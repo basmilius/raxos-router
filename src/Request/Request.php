@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Request;
 
-use Raxos\Foundation\Collection\Map;
+use Raxos\Collection\Map;
 use Raxos\Http\{HttpMethod, HttpRequest};
 use Raxos\Http\Structure\{HttpCookiesMap, HttpFilesMap, HttpHeadersMap, HttpPostMap, HttpQueryMap, HttpServerMap};
 use function explode;

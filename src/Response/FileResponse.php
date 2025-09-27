@@ -5,7 +5,7 @@ namespace Raxos\Router\Response;
 
 use Raxos\Http\{HttpHeader, HttpResponseCode};
 use Raxos\Http\Structure\HttpHeadersMap;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\MissingFileException;
 use Raxos\Router\Request\Request;
 use function filemtime;
 use function gmdate;
@@ -52,7 +52,7 @@ final class FileResponse extends Response
     public function send(): void
     {
         if (!is_file($this->path)) {
-            throw RuntimeException::missingFile($this->path);
+            throw new MissingFileException($this->path);
         }
 
         if (!$this->headers->has(HttpHeader::CONTENT_TYPE)) {

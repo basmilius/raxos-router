@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
+use Raxos\Contract\Router\{RouterInterface, RuntimeExceptionInterface};
 use Raxos\Http\HttpMethod;
 use Raxos\Http\Structure\{HttpCookiesMap, HttpFilesMap, HttpHeadersMap, HttpPostMap, HttpQueryMap, HttpServerMap};
-use Raxos\Router\Contract\RouterInterface;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\InvalidHandlerException;
 use Raxos\Router\Frame\RouteFrame;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
@@ -36,14 +36,14 @@ trait Resolvable
      * @param array $handler
      *
      * @return string
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 2.0.0
      */
     public function path(array $handler): string
     {
         if (!isset($handler[0]) || !isset($handler[1]) || !class_exists($handler[0]) || !method_exists($handler[0], $handler[1])) {
-            throw RuntimeException::invalidHandler();
+            throw new InvalidHandlerException();
         }
 
         foreach ($this->staticRoutes as $path => $routes) {
@@ -78,7 +78,7 @@ trait Resolvable
             }
         }
 
-        throw RuntimeException::invalidHandler();
+        throw new InvalidHandlerException();
     }
 
     /**
@@ -130,7 +130,7 @@ trait Resolvable
      * @param Request $request
      *
      * @return Response
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      */
@@ -199,7 +199,7 @@ trait Resolvable
      * @param array $parameters
      *
      * @return Response
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      */

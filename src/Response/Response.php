@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Response;
 
+use Raxos\Contract\Router\ResponseInterface;
 use Raxos\Http\{HttpHeader, HttpResponseCode};
 use Raxos\Http\Structure\HttpHeadersMap;
-use Raxos\Router\Contract\ResponseInterface;
 use function fastcgi_finish_request;
 use function function_exists;
 use function header;

@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use Raxos\Foundation\Collection\Map;
+use Raxos\Collection\Map;
+use Raxos\Contract\Router\{MappingExceptionInterface, RouterInterface};
 use Raxos\Http\HttpMethod;
-use Raxos\Router\Contract\RouterInterface;
-use Raxos\Router\Error\MappingException;
+use Raxos\Router\Error\MappingReflectionErrorException;
 use Raxos\Router\Frame\{ClosureFrame, FrameStack, MiddlewareFrame};
 use ReflectionException;
 use ReflectionFunction;
@@ -48,7 +48,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
@@ -66,7 +66,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
@@ -84,7 +84,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      * @see self::route()
@@ -101,7 +101,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      * @see self::route()
@@ -118,7 +118,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      * @see self::route()
@@ -135,7 +135,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      * @see self::route()
@@ -152,7 +152,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      * @see self::route()
@@ -170,7 +170,7 @@ class DynamicRouter implements RouterInterface
      * @param callable $handler
      *
      * @return void
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      */
@@ -209,7 +209,7 @@ class DynamicRouter implements RouterInterface
                 $this->dynamicRoutes[$segmentCount][$path][$method->value] = $stack;
             }
         } catch (ReflectionException $err) {
-            throw MappingException::reflectionError($err);
+            throw new MappingReflectionErrorException($err);
         }
     }
 

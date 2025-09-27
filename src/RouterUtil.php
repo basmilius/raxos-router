@@ -5,10 +5,12 @@ namespace Raxos\Router;
 
 use BackedEnum;
 use JetBrains\PhpStorm\Pure;
+use Raxos\Contract\Router\MappingExceptionInterface;
 use Raxos\Foundation\Contract\StringParsableInterface;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\MappingException;
+use Raxos\Router\Error\InvalidPathParameterException;
+use Raxos\Router\Error\TypeTooComplexException;
 use ReflectionType;
 use UnitEnum;
 use function array_map;
@@ -45,7 +47,7 @@ final class RouterUtil
      * @param Injectable[] $injectables
      *
      * @return string
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -90,7 +92,7 @@ final class RouterUtil
             }
 
             if ($regex === null) {
-                throw MappingException::invalidPathParameter($injectable->name);
+                throw new InvalidPathParameterException($injectable->name);
             }
 
             $path = str_replace("\${$injectable->name}", $regex, $path);
@@ -107,13 +109,13 @@ final class RouterUtil
      * @param bool $isOptional
      *
      * @return string
-     * @throws MappingException
+     * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     public static function convertPathParam(string $name, string $type, bool $isOptional): string
     {
-        $pattern = self::SIMPLE_TYPE_PATTERNS[$type] ?? throw MappingException::typeComplex($name);
+        $pattern = self::SIMPLE_TYPE_PATTERNS[$type] ?? throw new TypeTooComplexException($name);
 
         return self::regex($pattern, $name, $isOptional);
     }

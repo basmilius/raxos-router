@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Definition;
 
-use Raxos\Foundation\Contract\SerializableInterface;
+use Raxos\Contract\SerializableInterface;
 
 /**
  * Class DefaultValue

@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
-use Raxos\Database\Error\DatabaseException;
+use Raxos\Contract\Database\DatabaseExceptionInterface;
+use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
 use Raxos\Database\Orm\Model;
-use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\UnexpectedException;
 use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
 
@@ -50,8 +50,8 @@ final readonly class MapModel implements AttributeInterface, ValueProviderInterf
             }
 
             return $model::singleOrFail($primaryKey);
-        } catch (DatabaseException $err) {
-            throw RuntimeException::unexpected($err, __METHOD__);
+        } catch (DatabaseExceptionInterface $err) {
+            throw new UnexpectedException($err, __METHOD__);
         }
     }
 

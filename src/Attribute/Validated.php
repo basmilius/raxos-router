@@ -5,13 +5,13 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use JsonException;
-use Raxos\Http\Contract\HttpRequestModelInterface;
+use Raxos\Contract\Http\HttpRequestModelInterface;
+use Raxos\Contract\Http\Validate\ValidatorExceptionInterface;
+use Raxos\Contract\Router\{AttributeInterface, RuntimeExceptionInterface, ValueProviderInterface};
 use Raxos\Http\HttpFile;
-use Raxos\Http\Validate\Error\HttpValidatorException;
 use Raxos\Http\Validate\HttpClassValidator;
-use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\UnexpectedException;
 use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
 use function file_get_contents;
@@ -56,8 +56,8 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
             $validator->validate($data);
 
             return $validator->get();
-        } catch (HttpValidatorException $err) {
-            throw RuntimeException::unexpected($err, __METHOD__);
+        } catch (ValidatorExceptionInterface $err) {
+            throw new UnexpectedException($err, __METHOD__);
         }
     }
 
@@ -67,7 +67,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
      * @param Request $request
      *
      * @return array
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
@@ -86,7 +86,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
                 $data = file_get_contents($dataFile[0]->temporaryFile);
 
                 if (!json_validate($data)) {
-                    throw RuntimeException::unexpected(new JsonException('Invalid JSON'), __METHOD__);
+                    throw new UnexpectedException(new JsonException('Invalid JSON'), __METHOD__);
                 }
 
                 $data = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
@@ -118,7 +118,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
 
             return $data;
         } catch (JsonException $err) {
-            throw RuntimeException::unexpected($err, __METHOD__);
+            throw new UnexpectedException($err, __METHOD__);
         }
     }
 

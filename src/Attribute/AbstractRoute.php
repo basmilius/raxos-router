@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Attribute;
 
+use Raxos\Contract\Router\AttributeInterface;
 use Raxos\Http\HttpMethod;
-use Raxos\Router\Contract\AttributeInterface;
 
 /**
  * Class AbstractRoute

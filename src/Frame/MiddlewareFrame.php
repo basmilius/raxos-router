@@ -5,10 +5,10 @@ namespace Raxos\Router\Frame;
 
 use Closure;
 use Exception;
+use Raxos\Contract\Router\{FrameInterface, MiddlewareInterface};
 use Raxos\Router\{Injector, Runner};
-use Raxos\Router\Contract\{FrameInterface, MiddlewareInterface};
 use Raxos\Router\Definition\Middleware;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\UnexpectedException;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\Response;
 use function array_column;
@@ -53,7 +53,7 @@ final readonly class MiddlewareFrame implements FrameInterface
 
             return $instance->handle($request, $next);
         } catch (Exception $err) {
-            throw RuntimeException::unexpected($err, (string)$this);
+            throw new UnexpectedException($err, (string)$this);
         }
     }
 

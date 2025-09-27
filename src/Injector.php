@@ -6,12 +6,12 @@ namespace Raxos\Router;
 use BackedEnum;
 use Generator;
 use JetBrains\PhpStorm\Pure;
-use Raxos\Foundation\Collection\Map;
-use Raxos\Foundation\Contract\OptionInterface;
-use Raxos\Foundation\Contract\StringParsableInterface;
+use Raxos\Collection\Map;
+use Raxos\Contract\Router\RuntimeExceptionInterface;
+use Raxos\Foundation\Contract\{OptionInterface, StringParsableInterface};
 use Raxos\Foundation\Option\{Option, OptionException};
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\{InvalidInjectionException, MissingInjectionException, ReflectionErrorException, UnexpectedException};
 use Raxos\Router\Request\Request;
 use ReflectionClass;
 use ReflectionException;
@@ -70,7 +70,7 @@ final class Injector
      * @param string|null $method
      *
      * @return mixed
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -85,10 +85,10 @@ final class Injector
                 ->orElse(static fn() => self::getParameterValue($runner->router->globals, $injectable, $class, $method))
                 ->orElse(static fn() => self::getParameterValue($request->parameters, $injectable, $class, $method))
                 ->orElse(static fn() => self::getDefaultValue($injectable))
-                ->orThrow(static fn() => RuntimeException::missingInjection($class, $method, $injectable->name, implode(', ', $injectable->types)))
+                ->orThrow(static fn() => new MissingInjectionException($class, $method, $injectable->name, implode(', ', $injectable->types)))
                 ->get();
         } catch (OptionException $err) {
-            throw RuntimeException::unexpected($err, __METHOD__);
+            throw new UnexpectedException($err, __METHOD__);
         }
     }
 
@@ -102,7 +102,7 @@ final class Injector
      * @param string|null $method
      *
      * @return Generator
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -120,7 +120,7 @@ final class Injector
      * @param Generator<string, mixed> $injectables
      *
      * @return void
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -138,7 +138,7 @@ final class Injector
                 $property->setValue($instance, $injectableValue);
             }
         } catch (ReflectionException $err) {
-            throw RuntimeException::reflectionError($err);
+            throw new ReflectionErrorException($err);
         }
     }
 
@@ -186,7 +186,7 @@ final class Injector
      * @param string|null $method
      *
      * @return OptionInterface<mixed>
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -224,7 +224,7 @@ final class Injector
 
         $types = implode(', ', $injectable->types);
 
-        throw RuntimeException::invalidInjection($class, $method, $injectable->name, gettype($value), $types);
+        throw new InvalidInjectionException($class, $method, $injectable->name, gettype($value), $types);
     }
 
     /**
@@ -254,7 +254,7 @@ final class Injector
      * @param string $valueKey
      *
      * @return OptionInterface<mixed>
-     * @throws RuntimeException
+     * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

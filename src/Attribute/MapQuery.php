@@ -4,11 +4,10 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
-use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
+use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
+use Raxos\Router\{Injector, RouterUtil};
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Injector;
 use Raxos\Router\Request\Request;
-use Raxos\Router\RouterUtil;
 use function in_array;
 use function is_array;
 

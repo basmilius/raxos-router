@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Definition;
 
-use Raxos\Foundation\Contract\SerializableInterface;
-use Raxos\Router\Contract\ValueProviderInterface;
+use Raxos\Contract\Router\ValueProviderInterface;
+use Raxos\Contract\SerializableInterface;
 
 /**
  * Class Injectable

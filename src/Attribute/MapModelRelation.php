@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Raxos\Router\Attribute;
 
 use Attribute;
-use Raxos\Database\Error\DatabaseException;
+use Raxos\Contract\Database\DatabaseExceptionInterface;
+use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
 use Raxos\Database\Orm\Definition\RelationDefinition;
-use Raxos\Database\Orm\Error\StructureException;
+use Raxos\Database\Orm\Error\InvalidRelationException;
 use Raxos\Database\Orm\Model;
-use Raxos\Router\Contract\{AttributeInterface, ValueProviderInterface};
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\RuntimeException;
+use Raxos\Router\Error\{MissingInstanceException, UnexpectedException};
 use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
 
@@ -58,7 +58,7 @@ final readonly class MapModelRelation implements AttributeInterface, ValueProvid
     {
         try {
             /** @var Model $parentInstance */
-            $parentInstance = $request->parameters->get("{$this->parentInstanceName}:value") ?? throw RuntimeException::missingInstance($this->parentInstanceName);
+            $parentInstance = $request->parameters->get("{$this->parentInstanceName}:value") ?? throw new MissingInstanceException($this->parentInstanceName);
 
             /** @var class-string<Model> $model */
             $model = $injectable->types[0];
@@ -67,7 +67,7 @@ final readonly class MapModelRelation implements AttributeInterface, ValueProvid
             $property = $parentInstance->backbone->structure->getProperty($this->relationKey);
 
             if (!($property instanceof RelationDefinition)) {
-                throw StructureException::invalidRelation($parentInstance::class, $property->name);
+                throw new InvalidRelationException($parentInstance::class, $property->name);
             }
 
             $relation = $parentInstance->backbone->structure->getRelation($property);
@@ -76,8 +76,8 @@ final readonly class MapModelRelation implements AttributeInterface, ValueProvid
                 ->query($parentInstance)
                 ->wherePrimaryKey($model, $primaryKey)
                 ->singleOrFail();
-        } catch (DatabaseException $err) {
-            throw RuntimeException::unexpected($err, __METHOD__);
+        } catch (DatabaseExceptionInterface $err) {
+            throw new UnexpectedException($err, __METHOD__);
         }
     }
 

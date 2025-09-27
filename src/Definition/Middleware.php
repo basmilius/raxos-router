@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\Router\Definition;
 
-use Raxos\Foundation\Contract\SerializableInterface;
-use Raxos\Router\Contract\MiddlewareInterface;
+use Raxos\Contract\Router\MiddlewareInterface;
+use Raxos\Contract\SerializableInterface;
 
 /**
  * Class Middleware
