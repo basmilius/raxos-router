@@ -11,6 +11,7 @@ use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Http\Validate\Error\{ConstraintErrorException, ValidationNotOkException};
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{BinaryResponse, FileResponse, ForbiddenResponse, HtmlResponse, JsonResponse, NoContentResponse, NotFoundResponse, RedirectResponse, ResultResponse};
+use Throwable;
 
 /**
  * Trait Responds
@@ -50,7 +51,7 @@ trait Responds
      * @since 1.1.0
      */
     protected function error(
-        Exception&JsonSerializable $err
+        Throwable&JsonSerializable $err
     ): JsonResponse
     {
         $responseCode = HttpResponseCode::INTERNAL_SERVER_ERROR;

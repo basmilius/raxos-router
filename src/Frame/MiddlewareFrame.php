@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Raxos\Router\Frame;
 
 use Closure;
-use Exception;
-use Raxos\Contract\Router\{FrameInterface, MiddlewareInterface};
+use Raxos\Contract\Router\{FrameInterface, MiddlewareInterface, RuntimeExceptionInterface};
 use Raxos\Router\{Injector, Runner};
 use Raxos\Router\Definition\Middleware;
 use Raxos\Router\Error\UnexpectedException;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\Response;
+use Throwable;
 use function array_column;
 use function array_map;
 use function implode;
@@ -52,7 +52,11 @@ final readonly class MiddlewareFrame implements FrameInterface
             Injector::injectClassProperties($instance, $injectables);
 
             return $instance->handle($request, $next);
-        } catch (Exception $err) {
+        } catch (Throwable $err) {
+            if ($err instanceof RuntimeExceptionInterface) {
+                throw $err;
+            }
+
             throw new UnexpectedException($err, (string)$this);
         }
     }

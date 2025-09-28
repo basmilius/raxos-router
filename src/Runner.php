@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use Closure;
-use Exception;
 use Raxos\Contract\Router\{FrameInterface, RouterInterface, RuntimeExceptionInterface};
 use Raxos\Router\Error\{ControllerNotInstantiatedException, UnexpectedException};
 use Raxos\Router\Frame\FrameStack;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
+use Throwable;
 use function array_shift;
 
 /**
@@ -52,7 +52,7 @@ final class Runner
             $this->router->globals->set('request', $request);
 
             return $this->closure($this->stack->frames)($request);
-        } catch (Exception $err) {
+        } catch (Throwable $err) {
             if ($err instanceof RuntimeExceptionInterface) {
                 throw $err;
             }
