@@ -223,7 +223,7 @@ trait Responds
     {
         return $this->json(
             new ValidationNotOkException([
-                $field => new ConstraintErrorException($constraint, $message, $params)
+                $field => new ConstraintErrorException("http_validation_constraint_{$constraint}", $message, $params)
             ])
         );
     }
@@ -243,7 +243,7 @@ trait Responds
 
         foreach ($errors as $field => $constraintErrors) {
             foreach ($constraintErrors as $constraint => $message) {
-                $result[$field] = new ConstraintErrorException($constraint, $message);
+                $result[$field] = new ConstraintErrorException("http_validation_constraint_{$constraint}", $message);
             }
         }
 
