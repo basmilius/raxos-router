@@ -14,7 +14,6 @@ use Raxos\Router\Error\TypeTooComplexException;
 use ReflectionType;
 use UnitEnum;
 use function array_map;
-use function explode;
 use function implode;
 use function in_array;
 use function is_subclass_of;
@@ -153,7 +152,34 @@ final class RouterUtil
      */
     public static function pathToSegments(string $path): array
     {
-        return explode('/', $path);
+        $segments = [];
+        $current = '';
+        $depth = 0;
+
+        for ($i = 0, $len = strlen($path); $i < $len; $i++) {
+            $char = $path[$i];
+
+            if ($char === '(') {
+                $depth++;
+                $current .= $char;
+            } elseif ($char === ')') {
+                $depth--;
+                $current .= $char;
+            } elseif ($char === '/' && $depth === 0) {
+                if ($current !== '') {
+                    $segments[] = $current;
+                    $current = '';
+                }
+            } else {
+                $current .= $char;
+            }
+        }
+
+        if ($current !== '') {
+            $segments[] = $current;
+        }
+
+        return $segments;
     }
 
     /**
