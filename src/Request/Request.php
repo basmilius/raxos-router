@@ -26,7 +26,7 @@ readonly class Request extends HttpRequest
      * @param HttpFilesMap $files
      * @param HttpHeadersMap $headers
      * @param HttpPostMap $post
-     * @param HttpQueryMap $queryString
+     * @param HttpQueryMap $query
      * @param HttpServerMap $server
      * @param HttpMethod $method
      * @param string $pathName
@@ -41,7 +41,7 @@ readonly class Request extends HttpRequest
         HttpFilesMap $files,
         HttpHeadersMap $headers,
         HttpPostMap $post,
-        HttpQueryMap $queryString,
+        HttpQueryMap $query,
         HttpServerMap $server,
         HttpMethod $method,
         string $pathName,
@@ -49,7 +49,7 @@ readonly class Request extends HttpRequest
         public Map $parameters
     )
     {
-        parent::__construct($cookies, $files, $headers, $post, $queryString, $server, $method, $pathName, $uri);
+        parent::__construct($cookies, $files, $headers, $post, $query, $server, $method, $pathName, $uri);
     }
 
     /**
@@ -88,14 +88,14 @@ readonly class Request extends HttpRequest
     /**
      * Creates a request for the router.
      *
-     * @param HttpMethod $method
-     * @param string $uri
-     * @param HttpCookiesMap $cookies
-     * @param HttpFilesMap $files
-     * @param HttpHeadersMap $headers
-     * @param HttpPostMap $post
+     * @param HttpCookiesMap|null $cookies
+     * @param HttpFilesMap|null $files
+     * @param HttpHeadersMap|null $headers
+     * @param HttpPostMap|null $post
      * @param HttpQueryMap|null $query
-     * @param HttpServerMap $server
+     * @param HttpServerMap|null $server
+     * @param HttpMethod|null $method
+     * @param string|null $uri
      * @param Map $parameters
      *
      * @return self
@@ -103,33 +103,46 @@ readonly class Request extends HttpRequest
      * @since 1.1.0
      */
     public static function create(
-        HttpMethod $method,
-        string $uri,
-        HttpCookiesMap $cookies,
-        HttpFilesMap $files,
-        HttpHeadersMap $headers,
-        HttpPostMap $post,
-        ?HttpQueryMap $query,
-        HttpServerMap $server,
+        ?HttpCookiesMap $cookies = null,
+        ?HttpFilesMap $files = null,
+        ?HttpHeadersMap $headers = null,
+        ?HttpPostMap $post = null,
+        ?HttpQueryMap $query = null,
+        ?HttpServerMap $server = null,
+        ?HttpMethod $method = null,
+        ?string $uri = null,
         Map $parameters = new Map()
     ): self
     {
+        static $request = null;
+
+        $request ??= Request::createFromGlobals();
+
+        $cookies = $cookies ?? $request->cookies;
+        $files = $files ?? $request->files;
+        $headers = $headers ?? $request->headers;
+        $post = $post ?? $request->post;
+        $query = $query ?? $request->query;
+        $server = $server ?? $request->server;
+        $method = $method ?? $request->method;
+        $uri = $uri ?? $request->uri;
+
         $pathName = strstr($uri, '?', true) ?: $uri;
         $queryString = explode('?', $uri)[1] ?? '';
 
         $query ??= HttpQueryMap::createFromString($queryString);
 
         return new self(
-            $cookies,
-            $files,
-            $headers,
-            $post,
-            $query,
-            $server,
-            $method,
-            $pathName,
-            $uri,
-            $parameters
+            cookies: $cookies,
+            files: $files,
+            headers: $headers,
+            post: $post,
+            query: $query,
+            server: $server,
+            method: $method,
+            pathName: $pathName,
+            uri: $uri,
+            parameters: $parameters
         );
     }
 

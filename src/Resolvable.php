@@ -5,7 +5,6 @@ namespace Raxos\Router;
 
 use Raxos\Contract\Router\{RouterInterface, RuntimeExceptionInterface};
 use Raxos\Http\HttpMethod;
-use Raxos\Http\Structure\{HttpCookiesMap, HttpFilesMap, HttpHeadersMap, HttpPostMap, HttpQueryMap, HttpServerMap};
 use Raxos\Router\Error\InvalidHandlerException;
 use Raxos\Router\Frame\RouteFrame;
 use Raxos\Router\Request\Request;
@@ -79,49 +78,6 @@ trait Resolvable
         }
 
         throw new InvalidHandlerException();
-    }
-
-    /**
-     * Returns a router request.
-     *
-     * @param HttpCookiesMap|null $cookies
-     * @param HttpFilesMap|null $files
-     * @param HttpHeadersMap|null $headers
-     * @param HttpPostMap|null $post
-     * @param HttpQueryMap|null $query
-     * @param HttpServerMap|null $server
-     * @param HttpMethod|null $method
-     * @param string|null $uri
-     *
-     * @return Request
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.5.0
-     */
-    public function request(
-        ?HttpCookiesMap $cookies = null,
-        ?HttpFilesMap $files = null,
-        ?HttpHeadersMap $headers = null,
-        ?HttpPostMap $post = null,
-        ?HttpQueryMap $query = null,
-        ?HttpServerMap $server = null,
-        ?HttpMethod $method = null,
-        ?string $uri = null
-    ): Request
-    {
-        static $request = null;
-
-        $request ??= Request::createFromGlobals();
-
-        return Request::create(
-            method: $method ?? $request->method,
-            uri: $uri ?? $request->uri,
-            cookies: $cookies ?? $request->cookies,
-            files: $files ?? $request->files,
-            headers: $headers ?? $request->headers,
-            post: $post ?? $request->post,
-            query: $query ?? $request->query,
-            server: $server ?? $request->server
-        );
     }
 
     /**

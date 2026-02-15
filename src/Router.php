@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use Raxos\Collection\Map;
-use Raxos\Contract\Router\MappingExceptionInterface;
-use Raxos\Contract\Router\RouterInterface;
+use Raxos\Contract\Container\ContainerInterface;
+use Raxos\Contract\Router\{MappingExceptionInterface, RouterInterface};
 use Raxos\Router\Frame\FrameStack;
 
 /**
@@ -25,6 +25,7 @@ readonly class Router implements RouterInterface
     /**
      * Router constructor.
      *
+     * @param ContainerInterface|null $container
      * @param array<string, array<string, FrameStack>> $dynamicRoutes
      * @param array<string, array<string, FrameStack>> $staticRoutes
      *
@@ -32,6 +33,7 @@ readonly class Router implements RouterInterface
      * @since 1.1.0
      */
     public function __construct(
+        public ?ContainerInterface $container,
         public array $dynamicRoutes = [],
         public array $staticRoutes = []
     )
@@ -43,6 +45,7 @@ readonly class Router implements RouterInterface
     /**
      * Creates a router with the given controllers.
      *
+     * @param ContainerInterface|null $container
      * @param class-string[] $controllers
      *
      * @return self
@@ -50,14 +53,15 @@ readonly class Router implements RouterInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function createFromControllers(array $controllers): self
+    public static function createFromControllers(?ContainerInterface $container, array $controllers): self
     {
-        return new self(...Mapper::for($controllers));
+        return new self($container, ...Mapper::for($controllers));
     }
 
     /**
      * Returns a router with the given mapping.
      *
+     * @param ContainerInterface|null $container
      * @param array<string, array<string, FrameStack>> $dynamicRoutes
      * @param array<string, array<string, FrameStack>> $staticRoutes
      *
@@ -65,9 +69,9 @@ readonly class Router implements RouterInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function createFromMapping(array $dynamicRoutes, array $staticRoutes): self
+    public static function createFromMapping(?ContainerInterface $container, array $dynamicRoutes, array $staticRoutes): self
     {
-        return new self($dynamicRoutes, $staticRoutes);
+        return new self($container, $dynamicRoutes, $staticRoutes);
     }
 
 }

@@ -36,7 +36,7 @@ final class MissingInjectionException extends Exception implements RuntimeExcept
     {
         $message = $this->method !== null
             ? "Could not inject parameter {$this->name} into {$this->class}->{$this->method}(), because it was missing. Expected one with type {$this->expectedType}."
-            : "Could nog inject parameter {$this->name} into {$this->class}, because it was missing. Expected one with type {$this->expectedType}.";
+            : "Could not inject parameter {$this->name} into {$this->class}, because it was missing. Expected one with type {$this->expectedType}.";
 
         parent::__construct(
             'router_missing_injection',

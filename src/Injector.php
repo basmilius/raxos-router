@@ -7,6 +7,8 @@ use BackedEnum;
 use Generator;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Collection\Map;
+use Raxos\Contract\Container\ContainerExceptionInterface;
+use Raxos\Contract\Router\RouterInterface;
 use Raxos\Contract\Router\RuntimeExceptionInterface;
 use Raxos\Foundation\Contract\{OptionInterface, StringParsableInterface};
 use Raxos\Foundation\Option\{Option, OptionException};
@@ -85,6 +87,7 @@ final class Injector
                 ->orElse(static fn() => self::getParameterValue($runner->router->globals, $injectable, $class, $method))
                 ->orElse(static fn() => self::getParameterValue($request->parameters, $injectable, $class, $method))
                 ->orElse(static fn() => self::getDefaultValue($injectable))
+                ->orElse(static fn() => self::getContainerDependency($runner->router, $injectable))
                 ->orThrow(static fn() => new MissingInjectionException($class, $method, $injectable->name, implode(', ', $injectable->types)))
                 ->get();
         } catch (OptionException $err) {
@@ -157,6 +160,28 @@ final class Injector
         $valueType = get_class($value);
 
         return array_any($types, static fn(string $type) => $valueType === $type || is_subclass_of($valueType, $type));
+    }
+
+    /**
+     * Returns a dependency from the container.
+     *
+     * @param RouterInterface $router
+     * @param Injectable $injectable
+     *
+     * @return OptionInterface
+     * @throws ContainerExceptionInterface
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.1.0
+     *
+     * @todo(Bas): Add support for container tags.
+     */
+    private static function getContainerDependency(RouterInterface $router, Injectable $injectable): OptionInterface
+    {
+        if ($router->container === null) {
+            return Option::none();
+        }
+
+        return Option::some($router->container->get($injectable->primaryType));
     }
 
     /**

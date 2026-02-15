@@ -38,7 +38,7 @@ final class InvalidInjectionException extends Exception implements RuntimeExcept
     {
         $message = $this->method !== null
             ? "Could not inject parameter {$this->name} into {$this->class}->{$this->method}(). Wrong type {$this->actualType}, expected {$this->expectedType}."
-            : "Could nog inject parameter {$this->name} into {$this->class}. Wrong type {$this->actualType}, expected {$this->expectedType}.";
+            : "Could not inject parameter {$this->name} into {$this->class}. Wrong type {$this->actualType}, expected {$this->expectedType}.";
 
         parent::__construct(
             'router_invalid_injection',
