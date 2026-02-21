@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use Raxos\Collection\Map;
+use Raxos\Contract\Container\ContainerInterface;
 use Raxos\Contract\Router\{MappingExceptionInterface, RouterInterface};
 use Raxos\Http\HttpMethod;
 use Raxos\Router\Error\MappingReflectionErrorException;
@@ -32,10 +33,14 @@ class DynamicRouter implements RouterInterface
     /**
      * DynamicRouter constructor.
      *
+     * @param ContainerInterface|null $container
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      */
-    public function __construct()
+    public function __construct(
+        public ?ContainerInterface $container = null
+    )
     {
         $this->globals = new Map();
         $this->globals->set('router', $this);
