@@ -30,6 +30,9 @@ class DynamicRouter implements RouterInterface
     public private(set) array $dynamicRoutes = [];
     public private(set) array $staticRoutes = [];
 
+    /** @var array<int, array{0: string, 1: string[]}> */
+    public private(set) array $combinedDynamicRegexes = [];
+
     /**
      * DynamicRouter constructor.
      *
@@ -212,6 +215,7 @@ class DynamicRouter implements RouterInterface
 
                 $this->dynamicRoutes[$segmentCount][$path]['segments'] ??= $segments;
                 $this->dynamicRoutes[$segmentCount][$path][$method->value] = $stack;
+                $this->combinedDynamicRegexes[$segmentCount] = RouterUtil::buildGroupedRegex($this->dynamicRoutes[$segmentCount]);
             }
         } catch (ReflectionException $err) {
             throw new MappingReflectionErrorException($err);
