@@ -67,6 +67,8 @@ final readonly class Injectable implements SerializableInterface
             $this->defaultValue,
             $this->valueProvider
         ] = $data;
+
+        $this->primaryType = $this->types[0];
     }
 
 }
