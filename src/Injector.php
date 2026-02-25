@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use BackedEnum;
-use Generator;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Collection\Map;
 use Raxos\Contract\Router\RuntimeExceptionInterface;
@@ -75,37 +74,36 @@ final class Injector
      */
     public static function getValue(Runner $runner, Request $request, Injectable $injectable, string $class, ?string $method = null): mixed
     {
-        $valueKey = "{$injectable->name}:value";
-
-        // 1. Cached value from a value provider.
-        if ($request->parameters->has($valueKey)) {
-            return $request->parameters->get($valueKey);
-        }
-
-        // 2. Value from a value provider (cached for this request).
+        // 1. Value provider (and its per-request cache).
         if ($injectable->valueProvider !== null) {
+            $valueKey = $injectable->name . ':value';
+
+            if ($request->parameters->has($valueKey)) {
+                return $request->parameters->get($valueKey);
+            }
+
             $value = $injectable->valueProvider->getValue($request, $injectable);
             $request->parameters->set($valueKey, $value);
 
             return $value;
         }
 
-        // 3. Global parameters.
+        // 2. Global parameters.
         if ($runner->router->globals->has($injectable->name)) {
             return self::resolveValue($runner->router->globals, $injectable, $class, $method);
         }
 
-        // 4. Request parameters.
+        // 3. Request parameters.
         if ($request->parameters->has($injectable->name)) {
             return self::resolveValue($request->parameters, $injectable, $class, $method);
         }
 
-        // 5. Default value.
+        // 4. Default value.
         if ($injectable->defaultValue->defined) {
             return $injectable->defaultValue->value;
         }
 
-        // 6. Container dependency.
+        // 5. Container dependency.
         if ($runner->router->container !== null) {
             return $runner->router->container->get($injectable->primaryType);
         }
@@ -122,30 +120,34 @@ final class Injector
      * @param string $class
      * @param string|null $method
      *
-     * @return Generator
+     * @return array<string, mixed>
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function getValues(Runner $runner, Request $request, array $injectables, string $class, ?string $method = null): Generator
+    public static function getValues(Runner $runner, Request $request, array $injectables, string $class, ?string $method = null): array
     {
+        $values = [];
+
         foreach ($injectables as $injectable) {
-            yield $injectable->name => self::getValue($runner, $request, $injectable, $class, $method);
+            $values[$injectable->name] = self::getValue($runner, $request, $injectable, $class, $method);
         }
+
+        return $values;
     }
 
     /**
      * Injects the given injectables as properties into the given instance.
      *
      * @param object $instance
-     * @param Generator<string, mixed> $injectables
+     * @param array<string, mixed> $injectables
      *
      * @return void
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function injectClassProperties(object $instance, Generator $injectables): void
+    public static function injectClassProperties(object $instance, array $injectables): void
     {
         static $classes = [];
 
