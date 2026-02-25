@@ -4,21 +4,17 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use BackedEnum;
-use Generator;
 use JetBrains\PhpStorm\Pure;
 use Raxos\Collection\Map;
 use Raxos\Contract\Container\ContainerExceptionInterface;
-use Raxos\Contract\Router\RouterInterface;
 use Raxos\Contract\Router\RuntimeExceptionInterface;
-use Raxos\Foundation\Contract\{OptionInterface, StringParsableInterface};
-use Raxos\Foundation\Option\{Option, OptionException};
+use Raxos\Foundation\Contract\StringParsableInterface;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\{InvalidInjectionException, MissingInjectionException, ReflectionErrorException, UnexpectedException};
 use Raxos\Router\Request\Request;
 use ReflectionClass;
 use ReflectionException;
 use function array_any;
-use function get_class;
 use function gettype;
 use function implode;
 use function in_array;
@@ -78,21 +74,46 @@ final class Injector
      */
     public static function getValue(Runner $runner, Request $request, Injectable $injectable, string $class, ?string $method = null): mixed
     {
-        try {
-            $valueKey = "{$injectable->name}:value";
+        $valueKey = $injectable->name . ':value';
 
-            return Option::none()
-                ->orElse(static fn() => self::getValueProviderCachedValue($request, $valueKey))
-                ->orElse(static fn() => self::getValueProviderValue($request, $injectable, $valueKey))
-                ->orElse(static fn() => self::getParameterValue($runner->router->globals, $injectable, $class, $method))
-                ->orElse(static fn() => self::getParameterValue($request->parameters, $injectable, $class, $method))
-                ->orElse(static fn() => self::getDefaultValue($injectable))
-                ->orElse(static fn() => self::getContainerDependency($runner->router, $injectable))
-                ->orThrow(static fn() => new MissingInjectionException($class, $method, $injectable->name, implode(', ', $injectable->types)))
-                ->get();
-        } catch (OptionException $err) {
-            throw new UnexpectedException($err, __METHOD__);
+        // 1. Cached value from a value provider.
+        if ($request->parameters->has($valueKey)) {
+            return $request->parameters->get($valueKey);
         }
+
+        // 2. Value from a value provider.
+        if ($injectable->valueProvider !== null) {
+            $value = $injectable->valueProvider->getValue($request, $injectable);
+            $request->parameters->set($valueKey, $value);
+
+            return $value;
+        }
+
+        // 3. Global parameters.
+        if ($runner->router->globals->has($injectable->name)) {
+            return self::resolveValue($runner->router->globals, $injectable, $class, $method);
+        }
+
+        // 4. Request parameters.
+        if ($request->parameters->has($injectable->name)) {
+            return self::resolveValue($request->parameters, $injectable, $class, $method);
+        }
+
+        // 5. Default value.
+        if ($injectable->defaultValue->defined) {
+            return $injectable->defaultValue->value;
+        }
+
+        // 6. Container dependency.
+        if ($runner->router->container !== null) {
+            try {
+                return $runner->router->container->get($injectable->primaryType);
+            } catch (ContainerExceptionInterface $err) {
+                throw new UnexpectedException($err, __METHOD__);
+            }
+        }
+
+        throw new MissingInjectionException($class, $method, $injectable->name, implode(', ', $injectable->types));
     }
 
     /**
@@ -104,40 +125,49 @@ final class Injector
      * @param string $class
      * @param string|null $method
      *
-     * @return Generator
+     * @return array<string, mixed>
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function getValues(Runner $runner, Request $request, array $injectables, string $class, ?string $method = null): Generator
+    public static function getValues(Runner $runner, Request $request, array $injectables, string $class, ?string $method = null): array
     {
+        $values = [];
+
         foreach ($injectables as $injectable) {
-            yield $injectable->name => self::getValue($runner, $request, $injectable, $class, $method);
+            $values[$injectable->name] = self::getValue($runner, $request, $injectable, $class, $method);
         }
+
+        return $values;
     }
 
     /**
      * Injects the given injectables as properties into the given instance.
      *
      * @param object $instance
-     * @param Generator<string, mixed> $injectables
+     * @param array<string, mixed> $injectables
      *
      * @return void
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function injectClassProperties(object $instance, Generator $injectables): void
+    public static function injectClassProperties(object $instance, array $injectables): void
     {
+        static $classes = [];
+        static $properties = [];
+
         try {
-            $class = new ReflectionClass($instance);
+            $className = $instance::class;
+            $class = $classes[$className] ??= new ReflectionClass($className);
 
             foreach ($injectables as $injectableName => $injectableValue) {
                 if (isset($instance->{$injectableName})) {
                     continue;
                 }
 
-                $property = $class->getProperty($injectableName);
+                $propertyKey = $className . '::' . $injectableName;
+                $property = $properties[$propertyKey] ??= $class->getProperty($injectableName);
                 $property->setValue($instance, $injectableValue);
             }
         } catch (ReflectionException $err) {
@@ -157,142 +187,53 @@ final class Injector
      */
     public static function isCorrectType(mixed $value, array $types): bool
     {
-        $valueType = get_class($value);
+        $valueType = $value::class;
 
-        return array_any($types, static fn(string $type) => $valueType === $type || is_subclass_of($valueType, $type));
+        return array_any($types, fn($type) => $valueType === $type || is_subclass_of($valueType, $type));
     }
 
     /**
-     * Returns a dependency from the container.
-     *
-     * @param RouterInterface $router
-     * @param Injectable $injectable
-     *
-     * @return OptionInterface
-     * @throws ContainerExceptionInterface
-     * @author Bas Milius <bas@mili.us>
-     * @since 2.1.0
-     *
-     * @todo(Bas): Add support for container tags.
-     */
-    private static function getContainerDependency(RouterInterface $router, Injectable $injectable): OptionInterface
-    {
-        if ($router->container === null) {
-            return Option::none();
-        }
-
-        return Option::some($router->container->get($injectable->primaryType));
-    }
-
-    /**
-     * Returns the default value.
-     *
-     * @param Injectable $injectable
-     *
-     * @return OptionInterface<mixed>
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
-     */
-    private static function getDefaultValue(Injectable $injectable): OptionInterface
-    {
-        if ($injectable->defaultValue->defined) {
-            return Option::some($injectable->defaultValue->value);
-        }
-
-        return Option::none();
-    }
-
-    /**
-     * Returns a value from within the given set of parameters.
+     * Resolves the value from the given parameters map for the given injectable.
      *
      * @param Map $parameters
      * @param Injectable $injectable
      * @param string $class
      * @param string|null $method
      *
-     * @return OptionInterface<mixed>
+     * @return mixed
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    private static function getParameterValue(Map $parameters, Injectable $injectable, string $class, ?string $method): OptionInterface
+    private static function resolveValue(Map $parameters, Injectable $injectable, string $class, ?string $method): mixed
     {
-        if (!$parameters->has($injectable->name)) {
-            return Option::none();
-        }
-
         $value = $parameters->get($injectable->name);
 
         if (!is_object($value)) {
             foreach ($injectable->types as $type) {
                 if (is_subclass_of($type, StringParsableInterface::class)) {
-                    return Option::some($type::fromString($value));
+                    return $type::fromString($value);
                 }
 
                 if (is_subclass_of($type, BackedEnum::class)) {
-                    return Option::some($type::tryFrom($value));
+                    return $type::tryFrom($value);
                 }
 
                 if (!in_array($type, self::SIMPLE_TYPES)) {
                     continue;
                 }
 
-                return Option::some(self::convertValue($value, $type));
+                return self::convertValue($value, $type);
             }
 
-            return Option::some($value);
+            return $value;
         }
 
         if (self::isCorrectType($value, $injectable->types)) {
-            return Option::some($value);
+            return $value;
         }
 
-        $types = implode(', ', $injectable->types);
-
-        throw new InvalidInjectionException($class, $method, $injectable->name, gettype($value), $types);
-    }
-
-    /**
-     * Returns a cached value from a value provider.
-     *
-     * @param Request $request
-     * @param string $valueKey
-     *
-     * @return OptionInterface<mixed>
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
-     */
-    private static function getValueProviderCachedValue(Request $request, string $valueKey): OptionInterface
-    {
-        if ($request->parameters->has($valueKey)) {
-            return Option::some($request->parameters->get($valueKey));
-        }
-
-        return Option::none();
-    }
-
-    /**
-     * Returns an uncached value from a value provider.
-     *
-     * @param Request $request
-     * @param Injectable $injectable
-     * @param string $valueKey
-     *
-     * @return OptionInterface<mixed>
-     * @throws RuntimeExceptionInterface
-     * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
-     */
-    private static function getValueProviderValue(Request $request, Injectable $injectable, string $valueKey): OptionInterface
-    {
-        if ($injectable->valueProvider !== null) {
-            $value = $injectable->valueProvider->getValue($request, $injectable);
-            $request->parameters->set($valueKey, $value);
-
-            return Option::some($value);
-        }
-
-        return Option::none();
+        throw new InvalidInjectionException($class, $method, $injectable->name, gettype($value), implode(', ', $injectable->types));
     }
 
 }

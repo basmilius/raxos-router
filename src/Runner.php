@@ -10,7 +10,7 @@ use Raxos\Router\Frame\FrameStack;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
 use Throwable;
-use function array_shift;
+use function count;
 
 /**
  * Class Runner
@@ -101,17 +101,18 @@ final class Runner
      */
     private function closure(array $frames): Closure
     {
-        if (empty($frames)) {
-            return static fn() => new NotFoundResponse();
+        $next = static fn() => new NotFoundResponse();
+
+        for ($i = count($frames) - 1; $i >= 0; $i--) {
+            $frame = $frames[$i];
+            $next = function (Request $request) use ($frame, $next): Response {
+                $this->router->globals->set('frame', $frame);
+
+                return $frame->handle($this, $request, $next);
+            };
         }
 
-        $frame = array_shift($frames);
-
-        return function (Request $request) use ($frame, $frames): Response {
-            $this->router->globals->set('frame', $frame);
-
-            return $frame->handle($this, $request, $this->closure($frames));
-        };
+        return $next;
     }
 
 }

@@ -12,7 +12,6 @@ use Raxos\Router\Response\{Response, ResultResponse};
 use function array_column;
 use function array_map;
 use function implode;
-use function iterator_to_array;
 
 /**
  * Class RouteFrame
@@ -44,9 +43,7 @@ final readonly class RouteFrame implements FrameInterface
     public function handle(Runner $runner, Request $request, Closure $next): Response
     {
         $controller = $runner->singleton($this->route->class);
-
         $parameters = Injector::getValues($runner, $request, $this->route->parameters, $this->route->class, $this->route->method);
-        $parameters = iterator_to_array($parameters);
 
         $response = $controller->{$this->route->method}(...$parameters);
 

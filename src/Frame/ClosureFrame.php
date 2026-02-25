@@ -11,8 +11,6 @@ use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{Response, ResultResponse};
 use ReflectionException;
 use ReflectionFunction;
-use function call_user_func_array;
-use function iterator_to_array;
 
 /**
  * Class ClosureFrame
@@ -46,9 +44,8 @@ final readonly class ClosureFrame implements FrameInterface
     public function handle(Runner $runner, Request $request, Closure $next): Response
     {
         $parameters = Injector::getValues($runner, $request, $this->parameters, 'closure');
-        $parameters = iterator_to_array($parameters);
 
-        $response = call_user_func_array($this->closure, $parameters);
+        $response = ($this->closure)(...$parameters);
 
         if ($response instanceof Response) {
             return $response;

@@ -102,10 +102,12 @@ trait Resolvable
             return $this->handle($request, $this->staticRoutes[$request->pathName]);
         }
 
-        if (isset($resolved[$request->method->name . $request->pathName])) {
-            [$segmentCount, $route] = $resolved[$request->method->name . $request->pathName];
+        $cacheKey = $request->method->name . $request->pathName;
 
-            if (!preg_match("#^{$route}\$#", $request->pathName, $parameters)) {
+        if (isset($resolved[$cacheKey])) {
+            [$segmentCount, $route, $regex] = $resolved[$cacheKey];
+
+            if (!preg_match($regex, $request->pathName, $parameters)) {
                 return new NotFoundResponse();
             }
 
@@ -134,7 +136,7 @@ trait Resolvable
         // Remove MARK (PCRE control verb) and empty strings produced by
         // non-matching alternatives in the combined pattern.
         $parameters = array_filter($parameters, static fn($v, $k) => $k !== 'MARK' && (!is_string($k) || $v !== ''), ARRAY_FILTER_USE_BOTH);
-        $resolved[$request->method->name . $request->pathName] = [$segmentCount, $route];
+        $resolved[$cacheKey] = [$segmentCount, $route, "#^{$route}\$#"];
 
         return $this->handle($request, $this->dynamicRoutes[$segmentCount][$route], $parameters);
     }
