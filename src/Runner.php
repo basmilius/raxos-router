@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
-use Closure;
 use Raxos\Contract\Router\{FrameInterface, RouterInterface, RuntimeExceptionInterface};
 use Raxos\Router\Error\{ControllerNotInstantiatedException, UnexpectedException};
 use Raxos\Router\Frame\FrameStack;
@@ -24,6 +23,8 @@ final class Runner
 
     /** @var array<string, object> */
     public private(set) array $controllers = [];
+
+    private int $dispatchIndex = 0;
 
     /**
      * Runner constructor.
@@ -50,8 +51,9 @@ final class Runner
     {
         try {
             $this->router->globals->set('request', $request);
+            $this->dispatchIndex = 0;
 
-            return $this->closure($this->stack->frames)($request);
+            return $this->dispatch($request);
         } catch (Throwable $err) {
             if ($err instanceof RuntimeExceptionInterface) {
                 throw $err;
@@ -91,28 +93,26 @@ final class Runner
     }
 
     /**
-     * Creates a callable frame stack.
+     * Dispatches the request to the next frame in the pipeline.
      *
-     * @param FrameInterface[] $frames
+     * @param Request $request
      *
-     * @return Closure(Request):Response
+     * @return Response
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    private function closure(array $frames): Closure
+    private function dispatch(Request $request): Response
     {
-        $next = static fn() => new NotFoundResponse();
+        $frames = $this->stack->frames;
 
-        for ($i = count($frames) - 1; $i >= 0; $i--) {
-            $frame = $frames[$i];
-            $next = function (Request $request) use ($frame, $next): Response {
-                $this->router->globals->set('frame', $frame);
-
-                return $frame->handle($this, $request, $next);
-            };
+        if ($this->dispatchIndex >= count($frames)) {
+            return new NotFoundResponse();
         }
 
-        return $next;
+        $frame = $frames[$this->dispatchIndex++];
+        $this->router->globals->set('frame', $frame);
+
+        return $frame->handle($this, $request, $this->dispatch(...));
     }
 
 }
