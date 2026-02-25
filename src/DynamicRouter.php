@@ -205,13 +205,13 @@ class DynamicRouter implements RouterInterface
             ]);
 
             if (empty($parameters)) {
-                $this->staticRoutes[$path][$method->value] = $stack;
+                $this->staticRoutes[$path][$method->name] = $stack;
             } else {
                 $segments = RouterUtil::pathToSegments($path);
                 $segmentCount = count($segments);
 
                 $this->dynamicRoutes[$segmentCount][$path]['segments'] ??= $segments;
-                $this->dynamicRoutes[$segmentCount][$path][$method->value] = $stack;
+                $this->dynamicRoutes[$segmentCount][$path][$method->name] = $stack;
             }
         } catch (ReflectionException $err) {
             throw new MappingReflectionErrorException($err);

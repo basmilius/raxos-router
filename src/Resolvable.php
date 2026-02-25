@@ -9,6 +9,7 @@ use Raxos\Router\Error\InvalidHandlerException;
 use Raxos\Router\Frame\RouteFrame;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
+use function array_diff_key;
 use function array_key_first;
 use function array_merge;
 use function class_exists;
@@ -165,7 +166,7 @@ trait Resolvable
 
         if (!isset($mapping[$methodKey])) {
             if ($request->method === HttpMethod::OPTIONS) {
-                $methodKey = strtoupper($request->headers->get('access-control-request-method') ?? array_key_first($mapping));
+                $methodKey = strtoupper($request->headers->get('access-control-request-method') ?? array_key_first(array_diff_key($mapping, ['segments' => null])));
             } else {
                 $methodKey = HttpMethod::ANY->name;
             }
