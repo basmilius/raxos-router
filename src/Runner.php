@@ -6,7 +6,7 @@ namespace Raxos\Router;
 use Closure;
 use Raxos\Contract\Router\{FrameInterface, RouterInterface, RuntimeExceptionInterface};
 use Raxos\Router\Error\{ControllerNotInstantiatedException, UnexpectedException};
-use Raxos\Router\Frame\FrameStack;
+use Raxos\Router\Frame\{FrameRunner, FrameStack};
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
 use Throwable;
@@ -104,12 +104,7 @@ final class Runner
         $next = static fn() => new NotFoundResponse();
 
         for ($i = count($frames) - 1; $i >= 0; $i--) {
-            $frame = $frames[$i];
-            $next = function (Request $request) use ($frame, $next): Response {
-                $this->router->globals->set('frame', $frame);
-
-                return $frame->handle($this, $request, $next);
-            };
+            $next = Closure::fromCallable(new FrameRunner($this, $frames[$i], $next));
         }
 
         return $next;
