@@ -13,8 +13,6 @@ use Raxos\Router\Error\{InvalidInjectionException, MissingInjectionException, Re
 use Raxos\Router\Request\Request;
 use ReflectionClass;
 use ReflectionException;
-use function array_any;
-use function get_class;
 use function gettype;
 use function implode;
 use function in_array;
@@ -74,36 +72,37 @@ final class Injector
      */
     public static function getValue(Runner $runner, Request $request, Injectable $injectable, string $class, ?string $method = null): mixed
     {
-        // 1. Value provider (and its per-request cache).
+        $valueKey = $injectable->name . ':value';
+
+        // 1. Cached value from a value provider.
+        if ($request->parameters->has($valueKey)) {
+            return $request->parameters->get($valueKey);
+        }
+
+        // 2. Value from a value provider (cached for this request).
         if ($injectable->valueProvider !== null) {
-            $valueKey = $injectable->name . ':value';
-
-            if ($request->parameters->has($valueKey)) {
-                return $request->parameters->get($valueKey);
-            }
-
             $value = $injectable->valueProvider->getValue($request, $injectable);
             $request->parameters->set($valueKey, $value);
 
             return $value;
         }
 
-        // 2. Global parameters.
+        // 3. Global parameters.
         if ($runner->router->globals->has($injectable->name)) {
             return self::resolveValue($runner->router->globals, $injectable, $class, $method);
         }
 
-        // 3. Request parameters.
+        // 4. Request parameters.
         if ($request->parameters->has($injectable->name)) {
             return self::resolveValue($request->parameters, $injectable, $class, $method);
         }
 
-        // 4. Default value.
+        // 5. Default value.
         if ($injectable->defaultValue->defined) {
             return $injectable->defaultValue->value;
         }
 
-        // 5. Container dependency.
+        // 6. Container dependency.
         if ($runner->router->container !== null) {
             return $runner->router->container->get($injectable->primaryType);
         }
@@ -150,6 +149,7 @@ final class Injector
     public static function injectClassProperties(object $instance, array $injectables): void
     {
         static $classes = [];
+        static $properties = [];
 
         try {
             $className = $instance::class;
@@ -160,7 +160,8 @@ final class Injector
                     continue;
                 }
 
-                $property = $class->getProperty($injectableName);
+                $propertyKey = $className . '::' . $injectableName;
+                $property = $properties[$propertyKey] ??= $class->getProperty($injectableName);
                 $property->setValue($instance, $injectableValue);
             }
         } catch (ReflectionException $err) {
@@ -180,9 +181,15 @@ final class Injector
      */
     public static function isCorrectType(mixed $value, array $types): bool
     {
-        $valueType = get_class($value);
+        $valueType = $value::class;
 
-        return array_any($types, static fn(string $type) => $valueType === $type || is_subclass_of($valueType, $type));
+        foreach ($types as $type) {
+            if ($valueType === $type || is_subclass_of($valueType, $type)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
