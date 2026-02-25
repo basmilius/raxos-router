@@ -22,6 +22,9 @@ readonly class Router implements RouterInterface
 
     public Map $globals;
 
+    /** @var array<int, array{0: string, 1: string[]}> */
+    public array $combinedDynamicRegexes;
+
     /**
      * Router constructor.
      *
@@ -38,6 +41,7 @@ readonly class Router implements RouterInterface
         public array $staticRoutes = []
     )
     {
+        $this->combinedDynamicRegexes = RouterUtil::buildGroupedRegexes($this->dynamicRoutes);
         $this->globals = new Map();
         $this->globals->set('router', $this);
     }

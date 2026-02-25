@@ -10,13 +10,16 @@ use Raxos\Router\Frame\RouteFrame;
 use Raxos\Router\Request\Request;
 use Raxos\Router\Response\{NotFoundResponse, Response};
 use function array_diff_key;
+use function array_filter;
 use function array_key_first;
 use function array_merge;
 use function class_exists;
 use function count;
+use function is_string;
 use function method_exists;
 use function preg_match;
 use function strtoupper;
+use const ARRAY_FILTER_USE_BOTH;
 
 /**
  * Trait Resolvable
@@ -120,32 +123,20 @@ trait Resolvable
             return new NotFoundResponse();
         }
 
-        $candidates = $this->dynamicRoutes[$segmentCount];
-        $matches = [];
+        [$combinedRegex, $keys] = $this->combinedDynamicRegexes[$segmentCount];
 
-        if (empty($candidates)) {
+        if (!preg_match($combinedRegex, $request->pathName, $parameters)) {
             return new NotFoundResponse();
         }
 
-        foreach ($candidates as $candidate => $route) {
-            if (!$this->isCandidate($segments, $route['segments'])) {
-                continue;
-            }
+        $route = $keys[(int)$parameters['MARK']];
 
-            $matches[$candidate] = $route;
-        }
+        // Remove MARK (PCRE control verb) and empty strings produced by
+        // non-matching alternatives in the combined pattern.
+        $parameters = array_filter($parameters, static fn($v, $k) => $k !== 'MARK' && (!is_string($k) || $v !== ''), ARRAY_FILTER_USE_BOTH);
+        $resolved[$request->method->name . $request->pathName] = [$segmentCount, $route];
 
-        foreach ($matches as $route => $data) {
-            if (!preg_match("#^{$route}\$#", $request->pathName, $parameters)) {
-                continue;
-            }
-
-            $resolved[$request->method->name . $request->pathName] = [$segmentCount, $route];
-
-            return $this->handle($request, $data, $parameters);
-        }
-
-        return new NotFoundResponse();
+        return $this->handle($request, $this->dynamicRoutes[$segmentCount][$route], $parameters);
     }
 
     /**
@@ -182,35 +173,6 @@ trait Resolvable
 
         return new Runner($this, $mapping[$methodKey])
             ->run($request);
-    }
-
-    /**
-     * Returns TRUE if the request segments are a proper candidate.
-     *
-     * @param string[] $requestSegments
-     * @param string[] $routeSegments
-     *
-     * @return bool
-     * @author Bas Milius <bas@mili.us>
-     * @since 2.0.0
-     */
-    private function isCandidate(array $requestSegments, array $routeSegments): bool
-    {
-        for ($i = 0; $i < count($requestSegments); ++$i) {
-            $requestSegment = $requestSegments[$i];
-            $routeSegment = $routeSegments[$i];
-            $char = $routeSegment[0] ?? null;
-
-            if ($char === '(' || $char === '?') {
-                continue;
-            }
-
-            if ($requestSegment !== $routeSegment) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
 }

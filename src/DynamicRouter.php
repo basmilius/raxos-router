@@ -27,6 +27,8 @@ class DynamicRouter implements RouterInterface
     use Resolvable;
 
     public private(set) Map $globals;
+    /** @var array<int, array{0: string, 1: string[]}> */
+    public private(set) array $combinedDynamicRegexes = [];
     public private(set) array $dynamicRoutes = [];
     public private(set) array $staticRoutes = [];
 
@@ -165,6 +167,18 @@ class DynamicRouter implements RouterInterface
     public function head(string $path, callable $handler): void
     {
         $this->route(HttpMethod::HEAD, $path, $handler);
+    }
+
+    /**
+     * Compiles the router.
+     *
+     * @return void
+     * @author Bas Milius <bas@mili.us>
+     * @since 25-02-2026
+     */
+    public function compile(): void
+    {
+        $this->combinedDynamicRegexes = RouterUtil::buildGroupedRegexes($this->dynamicRoutes);
     }
 
     /**

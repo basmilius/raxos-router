@@ -39,6 +39,54 @@ final class RouterUtil
     ];
 
     /**
+     * Builds a combined regex and key-index map for a single segment-count
+     * group of dynamic routes. The resulting pattern uses PCRE alternation
+     * so that all routes are tested with one {@see preg_match} call. Each
+     * alternative ends with `(*MARK:N)` — a PCRE backtracking-control verb
+     * placed after the route sub-pattern so that, upon a successful match,
+     * `$matches['MARK']` is set to the index `N` of the winning alternative.
+     * The `J` flag (PCRE_DUPNAMES) is applied to allow routes that share
+     * the same named sub-pattern (e.g. `(?<id>\d+)`) without triggering a
+     * PCRE compilation error; only the named group from the matching
+     * alternative will be non-empty in the result.
+     *
+     * @param array<string, mixed> $routes
+     *
+     * @return array{0: string, 1: string[]}
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.1
+     */
+    public static function buildGroupedRegex(array $routes): array
+    {
+        $keys = [];
+        $patterns = [];
+
+        foreach (array_keys($routes) as $route) {
+            $index = count($keys);
+            $keys[] = $route;
+            $patterns[] = "(?:{$route})(*MARK:{$index})";
+        }
+
+        return ['#^(?:' . implode('|', $patterns) . ')$#J', $keys];
+    }
+
+    /**
+     * Builds a combined regex and key-index map for every segment-count
+     * group in the given dynamic routes map.
+     *
+     * @param array<int, array<string, mixed>> $dynamicRoutes
+     *
+     * @return array<int, array{0: string, 1: string[]}>
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.0.1
+     */
+    public static function buildGroupedRegexes(array $dynamicRoutes): array
+    {
+
+        return array_map(self::buildGroupedRegex(...), $dynamicRoutes);
+    }
+
+    /**
      * Converts the parameter placeholders in the given path to their
      * matching regexes.
      *
