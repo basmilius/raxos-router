@@ -5,10 +5,10 @@ namespace Raxos\Router\Frame;
 
 use Closure;
 use Raxos\Contract\Router\{FrameInterface, RuntimeExceptionInterface};
+use Raxos\Http\HttpRequest;
+use Raxos\Http\HttpResponse;
 use Raxos\Router\{Injector, Runner};
 use Raxos\Router\Definition\ControllerClass;
-use Raxos\Router\Request\Request;
-use Raxos\Router\Response\Response;
 use function array_column;
 use function array_map;
 use function implode;
@@ -40,7 +40,7 @@ final readonly class ControllerFrame implements FrameInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function handle(Runner $runner, Request $request, Closure $next): Response
+    public function handle(Runner $runner, HttpRequest $request, Closure $next): HttpResponse
     {
         $runner->singleton($this->controller->class, fn() => $this->setup($runner, $request));
 
@@ -55,7 +55,7 @@ final readonly class ControllerFrame implements FrameInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    private function setup(Runner $runner, Request $request): object
+    private function setup(Runner $runner, HttpRequest $request): object
     {
         $parameters = Injector::getValues($runner, $request, $this->controller->parameters, $this->controller->class);
 

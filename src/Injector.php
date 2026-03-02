@@ -9,9 +9,9 @@ use Raxos\Collection\Map;
 use Raxos\Contract\Container\ContainerExceptionInterface;
 use Raxos\Contract\Router\RuntimeExceptionInterface;
 use Raxos\Foundation\Contract\StringParsableInterface;
+use Raxos\Http\HttpRequest;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\{InvalidInjectionException, MissingInjectionException, ReflectionErrorException, UnexpectedException};
-use Raxos\Router\Request\Request;
 use ReflectionClass;
 use ReflectionException;
 use function array_any;
@@ -62,7 +62,7 @@ final class Injector
      * Returns the value for the given injectable.
      *
      * @param Runner $runner
-     * @param Request $request
+     * @param HttpRequest $request
      * @param Injectable $injectable
      * @param string $class
      * @param string|null $method
@@ -72,7 +72,7 @@ final class Injector
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function getValue(Runner $runner, Request $request, Injectable $injectable, string $class, ?string $method = null): mixed
+    public static function getValue(Runner $runner, HttpRequest $request, Injectable $injectable, string $class, ?string $method = null): mixed
     {
         $valueKey = $injectable->name . ':value';
 
@@ -120,7 +120,7 @@ final class Injector
      * Returns the values for the given injectables.
      *
      * @param Runner $runner
-     * @param Request $request
+     * @param HttpRequest $request
      * @param Injectable[] $injectables
      * @param string $class
      * @param string|null $method
@@ -130,7 +130,7 @@ final class Injector
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function getValues(Runner $runner, Request $request, array $injectables, string $class, ?string $method = null): array
+    public static function getValues(Runner $runner, HttpRequest $request, array $injectables, string $class, ?string $method = null): array
     {
         $values = [];
 

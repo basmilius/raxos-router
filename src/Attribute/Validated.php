@@ -9,10 +9,10 @@ use Raxos\Contract\Http\HttpRequestModelInterface;
 use Raxos\Contract\Http\Validate\ValidatorExceptionInterface;
 use Raxos\Contract\Router\{AttributeInterface, RuntimeExceptionInterface, ValueProviderInterface};
 use Raxos\Http\HttpFile;
+use Raxos\Http\HttpRequest;
 use Raxos\Http\Validate\HttpClassValidator;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\UnexpectedException;
-use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
 use function file_get_contents;
 use function json_decode;
@@ -45,7 +45,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
-    public function getValue(Request $request, Injectable $injectable): HttpRequestModelInterface
+    public function getValue(HttpRequest $request, Injectable $injectable): HttpRequestModelInterface
     {
         try {
             /** @var class-string<HttpRequestModelInterface> $model */
@@ -64,14 +64,14 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
     /**
      * Returns the data to validate.
      *
-     * @param Request $request
+     * @param HttpRequest $request
      *
      * @return array
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
-    private function getData(Request $request): array
+    private function getData(HttpRequest $request): array
     {
         try {
             $contentType = $request->contentType();

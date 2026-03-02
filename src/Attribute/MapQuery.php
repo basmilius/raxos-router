@@ -5,9 +5,9 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
+use Raxos\Http\HttpRequest;
 use Raxos\Router\{Injector, RouterUtil};
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Request\Request;
 use function in_array;
 use function is_array;
 
@@ -49,7 +49,7 @@ final readonly class MapQuery implements AttributeInterface, ValueProviderInterf
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function getValue(Request $request, Injectable $injectable): mixed
+    public function getValue(HttpRequest $request, Injectable $injectable): mixed
     {
         $result = $request->query->get($this->key ?? $injectable->name) ?? $injectable->defaultValue->value;
 

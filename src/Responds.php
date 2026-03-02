@@ -1,24 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace Raxos\Router\Mixin;
+namespace Raxos\Router;
 
 use Exception;
 use JetBrains\PhpStorm\Language;
 use JsonSerializable;
-use Raxos\Http\HttpResponseCode;
+use Raxos\Http\{HttpRequest, HttpResponse, HttpResponseCode};
+use Raxos\Http\Response\{BinaryHttpResponse, FileHttpResponse, ForbiddenHttpResponse, HtmlHttpResponse, JsonHttpResponse, NoContentHttpResponse, NotFoundHttpResponse, RedirectHttpResponse, ResultHttpResponse};
 use Raxos\Http\Structure\HttpHeadersMap;
 use Raxos\Http\Validate\Error\{ConstraintErrorException, ValidationNotOkException};
-use Raxos\Router\Request\Request;
-use Raxos\Router\Response\{BinaryResponse, FileResponse, ForbiddenResponse, HtmlResponse, JsonResponse, NoContentResponse, NotFoundResponse, RedirectResponse, ResultResponse};
 use Throwable;
 
 /**
  * Trait Responds
  *
  * @author Bas Milius <bas@mili.us>
- * @package Raxos\Router\Mixin
- * @since 1.1.0
+ * @package Raxos\Router
+ * @since 2.1.0
  */
 trait Responds
 {
@@ -29,16 +28,16 @@ trait Responds
      * @param string $data
      * @param HttpHeadersMap $headers
      *
-     * @return BinaryResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function binary(
         string $data,
         HttpHeadersMap $headers = new HttpHeadersMap()
-    ): BinaryResponse
+    ): HttpResponse
     {
-        return new BinaryResponse($data, $headers);
+        return new BinaryHttpResponse($data, $headers);
     }
 
     /**
@@ -46,13 +45,13 @@ trait Responds
      *
      * @param Exception&JsonSerializable $err
      *
-     * @return JsonResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function error(
         Throwable&JsonSerializable $err
-    ): JsonResponse
+    ): HttpResponse
     {
         $responseCode = HttpResponseCode::INTERNAL_SERVER_ERROR;
 
@@ -67,20 +66,20 @@ trait Responds
      * Returns a file response.
      *
      * @param string $path
-     * @param Request $request
+     * @param HttpRequest $request
      * @param HttpHeadersMap $headers
      *
-     * @return FileResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function file(
         string $path,
-        Request $request,
+        HttpRequest $request,
         HttpHeadersMap $headers = new HttpHeadersMap()
-    ): FileResponse
+    ): HttpResponse
     {
-        return new FileResponse($path, $request, $headers);
+        return new FileHttpResponse($path, $request, $headers);
     }
 
     /**
@@ -88,35 +87,35 @@ trait Responds
      *
      * @param HttpHeadersMap $headers
      *
-     * @return ForbiddenResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function forbidden(
         HttpHeadersMap $headers = new HttpHeadersMap()
-    ): ForbiddenResponse
+    ): HttpResponse
     {
-        return new ForbiddenResponse($headers);
+        return new ForbiddenHttpResponse($headers);
     }
 
     /**
-     * Returns a html response.
+     * Returns an HTML response.
      *
      * @param string $body
      * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
-     * @return HtmlResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function html(
         #[Language('HTML')] string $body,
         HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
-    ): HtmlResponse
+    ): HttpResponse
     {
-        return new HtmlResponse($body, $headers, $responseCode);
+        return new HtmlHttpResponse($body, $headers, $responseCode);
     }
 
     /**
@@ -126,45 +125,45 @@ trait Responds
      * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
-     * @return JsonResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function json(
         mixed $body,
         HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
-    ): JsonResponse
+    ): HttpResponse
     {
-        return new JsonResponse($body, $headers, $responseCode);
+        return new JsonHttpResponse($body, $headers, $responseCode);
     }
 
     /**
-     * Returns a no content response.
+     * Returns a no-content response.
      *
      * @param HttpHeadersMap $headers
      *
-     * @return NoContentResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function noContent(
         HttpHeadersMap $headers = new HttpHeadersMap()
-    ): NoContentResponse
+    ): HttpResponse
     {
-        return new NoContentResponse($headers);
+        return new NoContentHttpResponse($headers);
     }
 
     /**
      * Returns a not found response.
      *
-     * @return NotFoundResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
-    protected function notFound(): NotFoundResponse
+    protected function notFound(): HttpResponse
     {
-        return new NotFoundResponse();
+        return new NotFoundHttpResponse();
     }
 
     /**
@@ -174,17 +173,17 @@ trait Responds
      * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
-     * @return RedirectResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function redirect(
         string $destination,
         HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::FOUND
-    ): RedirectResponse
+    ): HttpResponse
     {
-        return new RedirectResponse($destination, $headers, $responseCode);
+        return new RedirectHttpResponse($destination, $headers, $responseCode);
     }
 
     /**
@@ -194,17 +193,17 @@ trait Responds
      * @param HttpHeadersMap $headers
      * @param HttpResponseCode $responseCode
      *
-     * @return ResultResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 2.1.0
      */
     protected function result(
         mixed $result,
         HttpHeadersMap $headers = new HttpHeadersMap(),
         HttpResponseCode $responseCode = HttpResponseCode::OK
-    ): ResultResponse
+    ): HttpResponse
     {
-        return new ResultResponse($result, $headers, $responseCode);
+        return new ResultHttpResponse($result, $headers, $responseCode);
     }
 
     /**
@@ -215,11 +214,11 @@ trait Responds
      * @param string $message
      * @param array $params
      *
-     * @return JsonResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.7.0
+     * @since 2.1.0
      */
-    protected function validationError(string $field, string $constraint, string $message, array $params = []): JsonResponse
+    protected function validationError(string $field, string $constraint, string $message, array $params = []): HttpResponse
     {
         return $this->json(
             new ValidationNotOkException([
@@ -233,11 +232,11 @@ trait Responds
      *
      * @param array $errors
      *
-     * @return JsonResponse
+     * @return HttpResponse
      * @author Bas Milius <bas@mili.us>
-     * @since 1.7.0
+     * @since 2.1.0
      */
-    protected function validationErrors(array ...$errors): JsonResponse
+    protected function validationErrors(array ...$errors): HttpResponse
     {
         $result = [];
 

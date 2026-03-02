@@ -7,9 +7,9 @@ use Attribute;
 use Raxos\Contract\Database\DatabaseExceptionInterface;
 use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
 use Raxos\Database\Orm\Model;
+use Raxos\Http\HttpRequest;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\UnexpectedException;
-use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
 
 /**
@@ -38,7 +38,7 @@ final readonly class MapModel implements AttributeInterface, ValueProviderInterf
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function getValue(Request $request, Injectable $injectable): ?Model
+    public function getValue(HttpRequest $request, Injectable $injectable): ?Model
     {
         try {
             /** @var class-string<Model> $model */

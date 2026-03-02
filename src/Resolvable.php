@@ -4,11 +4,10 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use Raxos\Contract\Router\{RouterInterface, RuntimeExceptionInterface};
-use Raxos\Http\HttpMethod;
+use Raxos\Http\{HttpMethod, HttpRequest, HttpResponse};
+use Raxos\Http\Response\NotFoundHttpResponse;
 use Raxos\Router\Error\InvalidHandlerException;
 use Raxos\Router\Frame\RouteFrame;
-use Raxos\Router\Request\Request;
-use Raxos\Router\Response\{NotFoundResponse, Response};
 use function array_diff_key;
 use function array_filter;
 use function array_key_first;
@@ -87,14 +86,14 @@ trait Resolvable
     /**
      * Turns the request into a response.
      *
-     * @param Request $request
+     * @param HttpRequest $request
      *
-     * @return Response
+     * @return HttpResponse
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      */
-    public function resolve(Request $request): Response
+    public function resolve(HttpRequest $request): HttpResponse
     {
         static $resolved = [];
 
@@ -108,27 +107,27 @@ trait Resolvable
             [$segmentCount, $route, $regex] = $resolved[$cacheKey];
 
             if (!preg_match($regex, $request->pathName, $parameters)) {
-                return new NotFoundResponse();
+                return new NotFoundHttpResponse();
             }
 
             return $this->handle($request, $this->dynamicRoutes[$segmentCount][$route], $parameters);
         }
 
         if (empty($this->dynamicRoutes)) {
-            return new NotFoundResponse();
+            return new NotFoundHttpResponse();
         }
 
         $segments = RouterUtil::pathToSegments($request->pathName);
         $segmentCount = count($segments);
 
         if (!isset($this->dynamicRoutes[$segmentCount]) || empty($this->dynamicRoutes[$segmentCount])) {
-            return new NotFoundResponse();
+            return new NotFoundHttpResponse();
         }
 
         [$combinedRegex, $keys] = $this->combinedDynamicRegexes[$segmentCount];
 
         if (!preg_match($combinedRegex, $request->pathName, $parameters)) {
-            return new NotFoundResponse();
+            return new NotFoundHttpResponse();
         }
 
         $route = $keys[(int)$parameters['MARK']];
@@ -144,16 +143,16 @@ trait Resolvable
     /**
      * Handles the request using the given route.
      *
-     * @param Request $request
+     * @param HttpRequest $request
      * @param array $mapping
      * @param array $parameters
      *
-     * @return Response
+     * @return HttpResponse
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      */
-    private function handle(Request $request, array $mapping, array $parameters = []): Response
+    private function handle(HttpRequest $request, array $mapping, array $parameters = []): HttpResponse
     {
         $methodKey = $request->method->name;
 
@@ -165,7 +164,7 @@ trait Resolvable
             }
 
             if (!isset($mapping[$methodKey])) {
-                return new NotFoundResponse();
+                return new NotFoundHttpResponse();
             }
         }
 

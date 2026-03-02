@@ -5,8 +5,8 @@ namespace Raxos\Router\Attribute;
 
 use Attribute;
 use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
+use Raxos\Http\HttpRequest;
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
 
 /**
@@ -47,7 +47,7 @@ final readonly class MapHeader implements AttributeInterface, ValueProviderInter
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function getValue(Request $request, Injectable $injectable): mixed
+    public function getValue(HttpRequest $request, Injectable $injectable): mixed
     {
         return $request->headers->get($this->header ?? $injectable->name) ?? $injectable->defaultValue->value;
     }

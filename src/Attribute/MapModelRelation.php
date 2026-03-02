@@ -9,9 +9,9 @@ use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
 use Raxos\Database\Orm\Definition\RelationDefinition;
 use Raxos\Database\Orm\Error\InvalidRelationException;
 use Raxos\Database\Orm\Model;
+use Raxos\Http\HttpRequest;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Error\{MissingInstanceException, UnexpectedException};
-use Raxos\Router\Request\Request;
 use Raxos\Router\RouterUtil;
 
 /**
@@ -54,7 +54,7 @@ final readonly class MapModelRelation implements AttributeInterface, ValueProvid
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function getValue(Request $request, Injectable $injectable): ?Model
+    public function getValue(HttpRequest $request, Injectable $injectable): ?Model
     {
         try {
             /** @var Model $parentInstance */

@@ -5,10 +5,10 @@ namespace Raxos\Router;
 
 use Closure;
 use Raxos\Contract\Router\{FrameInterface, RouterInterface, RuntimeExceptionInterface};
+use Raxos\Http\{HttpRequest, HttpResponse};
+use Raxos\Http\Response\NotFoundHttpResponse;
 use Raxos\Router\Error\{ControllerNotInstantiatedException, UnexpectedException};
 use Raxos\Router\Frame\FrameStack;
-use Raxos\Router\Request\Request;
-use Raxos\Router\Response\{NotFoundResponse, Response};
 use Throwable;
 use function count;
 
@@ -39,14 +39,14 @@ final class Runner
     /**
      * Runs the request.
      *
-     * @param Request $request
+     * @param HttpRequest $request
      *
-     * @return Response
+     * @return HttpResponse
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function run(Request $request): Response
+    public function run(HttpRequest $request): HttpResponse
     {
         try {
             $this->router->globals->set('request', $request);
@@ -95,17 +95,17 @@ final class Runner
      *
      * @param FrameInterface[] $frames
      *
-     * @return Closure(Request):Response
+     * @return Closure(HttpRequest):HttpResponse
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     private function closure(array $frames): Closure
     {
-        $next = static fn() => new NotFoundResponse();
+        $next = static fn() => new NotFoundHttpResponse();
 
         for ($i = count($frames) - 1; $i >= 0; $i--) {
             $frame = $frames[$i];
-            $next = function (Request $request) use ($frame, $next): Response {
+            $next = function (HttpRequest $request) use ($frame, $next): HttpResponse {
                 $this->router->globals->set('frame', $frame);
 
                 return $frame->handle($this, $request, $next);

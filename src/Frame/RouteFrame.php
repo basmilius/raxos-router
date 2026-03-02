@@ -5,10 +5,11 @@ namespace Raxos\Router\Frame;
 
 use Closure;
 use Raxos\Contract\Router\FrameInterface;
+use Raxos\Http\HttpRequest;
+use Raxos\Http\HttpResponse;
+use Raxos\Http\Response\ResultHttpResponse;
 use Raxos\Router\{Injector, Runner};
 use Raxos\Router\Definition\Route;
-use Raxos\Router\Request\Request;
-use Raxos\Router\Response\{Response, ResultResponse};
 use function array_column;
 use function array_map;
 use function implode;
@@ -40,18 +41,18 @@ final readonly class RouteFrame implements FrameInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function handle(Runner $runner, Request $request, Closure $next): Response
+    public function handle(Runner $runner, HttpRequest $request, Closure $next): HttpResponse
     {
         $controller = $runner->singleton($this->route->class);
         $parameters = Injector::getValues($runner, $request, $this->route->parameters, $this->route->class, $this->route->method);
 
         $response = $controller->{$this->route->method}(...$parameters);
 
-        if ($response instanceof Response) {
+        if ($response instanceof HttpResponse) {
             return $response;
         }
 
-        return new ResultResponse($response);
+        return new ResultHttpResponse($response);
     }
 
     /**

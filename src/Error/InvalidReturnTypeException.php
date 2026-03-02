@@ -5,7 +5,7 @@ namespace Raxos\Router\Error;
 
 use Raxos\Contract\Router\MappingExceptionInterface;
 use Raxos\Error\Exception;
-use Raxos\Router\Response\Response;
+use Raxos\Http\HttpResponse;
 
 /**
  * Class InvalidReturnTypeException
@@ -30,7 +30,7 @@ final class InvalidReturnTypeException extends Exception implements MappingExcep
     public function __construct(
         public readonly string $class,
         public readonly string $method,
-        public readonly string $expectedType = Response::class
+        public readonly string $expectedType = HttpResponse::class
     )
     {
         parent::__construct(
