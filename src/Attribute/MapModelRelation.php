@@ -15,7 +15,7 @@ use Raxos\Router\Error\{MissingInstanceException, UnexpectedException};
 use Raxos\Router\RouterUtil;
 
 /**
- * Class MapQuery
+ * Class MapModelRelation
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute
@@ -26,7 +26,7 @@ final readonly class MapModelRelation implements AttributeInterface, ValueProvid
 {
 
     /**
-     * MapQuery constructor.
+     * MapModelRelation constructor.
      *
      * @param string $parentInstanceName
      * @param string $relationKey

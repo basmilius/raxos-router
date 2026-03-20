@@ -12,7 +12,7 @@ use Raxos\Http\HttpFile;
 use Raxos\Http\HttpRequest;
 use Raxos\Http\Validate\HttpClassValidator;
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\UnexpectedException;
+use Raxos\Router\Error\{UnexpectedException, ValidationFailedException};
 use Raxos\Router\RouterUtil;
 use function file_get_contents;
 use function json_decode;
@@ -57,7 +57,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
 
             return $validator->get();
         } catch (ValidatorExceptionInterface $err) {
-            throw new UnexpectedException($err, __METHOD__);
+            throw new ValidationFailedException($err);
         }
     }
 

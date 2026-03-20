@@ -35,6 +35,7 @@ final class RouterUtil
     private const array SIMPLE_TYPE_PATTERNS = [
         'string' => '[\w.@=,-]+',
         'int' => '\d+',
+        'float' => '\d+(?:\.\d+)?',
         'bool' => 'true|false|[01]'
     ];
 
@@ -178,7 +179,7 @@ final class RouterUtil
      */
     public static function normalizePath(string $path): string
     {
-        if ($path === '/') {
+        if ($path === '/' || $path === '') {
             return '';
         }
 

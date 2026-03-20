@@ -13,7 +13,7 @@ use Raxos\Router\Error\UnexpectedException;
 use Raxos\Router\RouterUtil;
 
 /**
- * Class MapQuery
+ * Class MapModel
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router\Attribute

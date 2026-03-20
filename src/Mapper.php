@@ -267,7 +267,9 @@ final class Mapper
             $defined = $property instanceof ReflectionParameter ? $property->isDefaultValueAvailable() : $property->hasDefaultValue();
 
             if (!$defined) {
-                if ($property->getType()->allowsNull()) {
+                $type = $property->getType();
+
+                if ($type !== null && $type->allowsNull()) {
                     return DefaultValue::of(null);
                 }
 

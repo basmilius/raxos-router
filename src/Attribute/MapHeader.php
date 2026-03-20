@@ -49,6 +49,6 @@ final readonly class MapHeader implements AttributeInterface, ValueProviderInter
      */
     public function getValue(HttpRequest $request, Injectable $injectable): mixed
     {
-        return $request->headers->get($this->header ?? $injectable->name) ?? $injectable->defaultValue->value;
+        return $request->headers->get($this->header) ?? $injectable->defaultValue->value;
     }
 }

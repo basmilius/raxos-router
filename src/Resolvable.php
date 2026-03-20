@@ -5,13 +5,15 @@ namespace Raxos\Router;
 
 use Raxos\Contract\Router\{RouterInterface, RuntimeExceptionInterface};
 use Raxos\Http\{HttpMethod, HttpRequest, HttpResponse};
-use Raxos\Http\Response\NotFoundHttpResponse;
+use Raxos\Http\Response\{MethodNotAllowedHttpResponse, NotFoundHttpResponse};
 use Raxos\Router\Error\InvalidHandlerException;
 use Raxos\Router\Frame\RouteFrame;
 use function array_diff_key;
 use function array_filter;
 use function array_key_first;
+use function array_keys;
 use function array_merge;
+use function array_slice;
 use function class_exists;
 use function count;
 use function is_string;
@@ -137,6 +139,10 @@ trait Resolvable
         $parameters = array_filter($parameters, static fn($v, $k) => $k !== 'MARK' && (!is_string($k) || $v !== ''), ARRAY_FILTER_USE_BOTH);
         $resolved[$cacheKey] = [$segmentCount, $route, "#^{$route}\$#"];
 
+        if (count($resolved) > 1024) {
+            $resolved = array_slice($resolved, 512, preserve_keys: true);
+        }
+
         return $this->handle($request, $this->dynamicRoutes[$segmentCount][$route], $parameters);
     }
 
@@ -164,7 +170,9 @@ trait Resolvable
             }
 
             if (!isset($mapping[$methodKey])) {
-                return new NotFoundHttpResponse();
+                $allowedMethods = array_keys(array_diff_key($mapping, ['segments' => null]));
+
+                return new MethodNotAllowedHttpResponse($allowedMethods);
             }
         }
 

@@ -56,7 +56,6 @@ class DynamicRouter implements RouterInterface
      *
      * @return void
      * @throws MappingExceptionInterface
-     * @author Bas Milius
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      * @see self::route()
@@ -74,7 +73,6 @@ class DynamicRouter implements RouterInterface
      *
      * @return void
      * @throws MappingExceptionInterface
-     * @author Bas Milius
      * @author Bas Milius <bas@mili.us>
      * @since 1.5.0
      * @see self::route()
@@ -226,6 +224,7 @@ class DynamicRouter implements RouterInterface
 
                 $this->dynamicRoutes[$segmentCount][$path]['segments'] ??= $segments;
                 $this->dynamicRoutes[$segmentCount][$path][$method->name] = $stack;
+                $this->combinedDynamicRegexes[$segmentCount] = RouterUtil::buildGroupedRegex($this->dynamicRoutes[$segmentCount]);
             }
         } catch (ReflectionException $err) {
             throw new MappingReflectionErrorException($err);

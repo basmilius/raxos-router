@@ -34,7 +34,7 @@ use function is_subclass_of;
 final class Injector
 {
 
-    public const array SIMPLE_TYPES = ['string', 'int', 'bool'];
+    public const array SIMPLE_TYPES = ['string', 'int', 'float', 'bool'];
 
     /**
      * Converts the value to the given type or returns NULL if that
@@ -43,16 +43,17 @@ final class Injector
      * @param mixed $value
      * @param string $type
      *
-     * @return string|int|bool|null
+     * @return string|int|float|bool|null
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
     #[Pure]
-    public static function convertValue(mixed $value, string $type): string|int|bool|null
+    public static function convertValue(mixed $value, string $type): string|int|float|bool|null
     {
         return match ($type) {
             'string' => (string)$value,
             'int' => is_numeric($value) ? (int)$value : null,
+            'float' => is_numeric($value) ? (float)$value : null,
             'bool' => $value === true || (int)$value === 1 || $value === 'true',
             default => null
         };
@@ -187,6 +188,10 @@ final class Injector
      */
     public static function isCorrectType(mixed $value, array $types): bool
     {
+        if (!is_object($value)) {
+            return false;
+        }
+
         $valueType = $value::class;
 
         return array_any($types, fn($type) => $valueType === $type || is_subclass_of($valueType, $type));

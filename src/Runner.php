@@ -101,7 +101,7 @@ final class Runner
      */
     private function closure(array $frames): Closure
     {
-        $next = static fn() => new NotFoundHttpResponse();
+        $next = static fn(HttpRequest $request) => new NotFoundHttpResponse();
 
         for ($i = count($frames) - 1; $i >= 0; $i--) {
             $frame = $frames[$i];
