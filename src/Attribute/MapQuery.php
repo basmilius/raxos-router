@@ -54,7 +54,7 @@ final readonly class MapQuery implements AttributeInterface, ValueProviderInterf
         $result = $request->query->get($this->key ?? $injectable->name) ?? $injectable->defaultValue->value;
 
         if ($injectable->types[0] === 'array' && !is_array($result)) {
-            return [$result];
+            return $result === null ? [] : [$result];
         }
 
         if ($result !== null && in_array($injectable->types[0], Injector::SIMPLE_TYPES)) {

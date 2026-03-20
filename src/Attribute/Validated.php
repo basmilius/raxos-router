@@ -82,7 +82,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
 
             $data = $request->post->toArray();
 
-            if (($dataFile = $request->files->get('data')) !== null && $dataFile[0] instanceof HttpFile && $dataFile[0]->contentType === 'application/json') {
+            if (($dataFile = $request->files->get('data')) !== null && !empty($dataFile) && $dataFile[0] instanceof HttpFile && $dataFile[0]->contentType === 'application/json') {
                 $data = file_get_contents($dataFile[0]->temporaryFile);
 
                 if (!json_validate($data)) {
