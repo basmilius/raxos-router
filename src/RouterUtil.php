@@ -9,8 +9,7 @@ use Raxos\Contract\Router\MappingExceptionInterface;
 use Raxos\Foundation\Contract\StringParsableInterface;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\InvalidPathParameterException;
-use Raxos\Router\Error\TypeTooComplexException;
+use Raxos\Router\Error\{InvalidPathParameterException, TypeTooComplexException};
 use ReflectionType;
 use UnitEnum;
 use function array_map;
@@ -97,7 +96,7 @@ final class RouterUtil
      * @return string
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 3.2.0
      */
     public static function convertPath(string $path, array $injectables): string
     {
@@ -127,7 +126,7 @@ final class RouterUtil
                 }
 
                 if (is_subclass_of($type, BackedEnum::class)) {
-                    $regex = self::regex(implode('|', array_map(fn(UnitEnum $enum) => $enum->value, $type::cases())), $injectable->name, $injectable->defaultValue->defined);
+                    $regex = self::regex(implode('|', array_map(fn(UnitEnum $enum) => preg_quote((string)$enum->value, '#'), $type::cases())), $injectable->name, $injectable->defaultValue->defined);
                     continue;
                 }
 
@@ -229,6 +228,24 @@ final class RouterUtil
         }
 
         return $segments;
+    }
+
+    /**
+     * Returns the segment counts accepted by a route with optional parameters.
+     *
+     * @param string $path
+     *
+     * @return int[]
+     * @author Bas Milius <bas@mili.us>
+     * @since 3.2.0
+     */
+    public static function segmentCounts(string $path): array
+    {
+        $segments = self::pathToSegments($path);
+        $maximum = count($segments);
+        $optional = count(array_filter($segments, static fn(string $segment) => str_starts_with($segment, '?(?<')));
+
+        return range($maximum - $optional, $maximum);
     }
 
     /**

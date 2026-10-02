@@ -8,9 +8,7 @@ use Raxos\Contract\Router\{AttributeInterface, MappingExceptionInterface, Middle
 use Raxos\Foundation\Util\ArrayUtil;
 use Raxos\Router\Attribute\{AbstractRoute, Child, Controller, Injected};
 use Raxos\Router\Definition\{ControllerClass, DefaultValue, Injectable, Middleware, Prefix, Route};
-use Raxos\Router\Error\InvalidReturnTypeException;
-use Raxos\Router\Error\MappingReflectionErrorException;
-use Raxos\Router\Error\MissingTypeException;
+use Raxos\Router\Error\{InvalidReturnTypeException, MappingReflectionErrorException, MissingTypeException};
 use Raxos\Router\Frame\{ControllerFrame, FrameStack, MiddlewareFrame, RouteFrame};
 use ReflectionAttribute;
 use ReflectionClass;
@@ -22,7 +20,6 @@ use ReflectionProperty;
 use function array_filter;
 use function array_first;
 use function array_map;
-use function count;
 use function iterator_to_array;
 use function ltrim;
 use function rtrim;
@@ -47,7 +44,7 @@ final class Mapper
      * @return array<array<string, array<string, FrameStack>>>
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 3.2.0
      */
     public static function for(array $controllers): array
     {
@@ -68,8 +65,9 @@ final class Mapper
         $groupedDynamicRoutes = [];
 
         foreach ($dynamicRoutes as $route => $data) {
-            $segmentCount = count($data['segments']);
-            $groupedDynamicRoutes[$segmentCount][$route] = $data;
+            foreach (RouterUtil::segmentCounts($route) as $segmentCount) {
+                $groupedDynamicRoutes[$segmentCount][$route] = $data;
+            }
         }
 
         return [
@@ -141,7 +139,7 @@ final class Mapper
      * @return Generator<FrameStack>
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 3.2.0
      */
     public static function generateRoute(Route $route, Prefix $prefix, array $frames = []): Generator
     {
@@ -162,10 +160,6 @@ final class Mapper
 
             $path = RouterUtil::convertPath($path, $route->parameters);
             $path = $prefix->regex . $path;
-
-            if ($path === '') {
-                $path = '/';
-            }
 
             yield new FrameStack($r->method, $path, $pathPlain, $frames);
         }
@@ -291,14 +285,14 @@ final class Mapper
      * @return Injectable
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 3.2.0
      */
     public static function injectable(ReflectionParameter|ReflectionProperty $property): Injectable
     {
         $types = RouterUtil::types($property->getType());
 
         if (empty($types)) {
-            throw new MissingTypeException($property->class, $property->name);
+            throw new MissingTypeException($property->getDeclaringClass()?->name ?? 'closure', $property->name);
         }
 
         $attributes = self::attributes($property);
@@ -358,7 +352,7 @@ final class Mapper
      * @return Middleware
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 3.2.0
      */
     public static function middleware(ReflectionAttribute $attribute): Middleware
     {
@@ -374,11 +368,17 @@ final class Mapper
         try {
             $class = new ReflectionClass($name);
 
-            return $cache[$name] = new Middleware(
+            $middleware = new Middleware(
                 class: $class->name,
                 arguments: $arguments,
                 injectables: iterator_to_array(self::injectablesForClass($class))
             );
+
+            if (empty($arguments)) {
+                $cache[$name] = $middleware;
+            }
+
+            return $middleware;
         } catch (ReflectionException $err) {
             throw new MappingReflectionErrorException($err);
         }

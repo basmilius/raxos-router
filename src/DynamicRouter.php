@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
+use Closure;
 use Raxos\Collection\Map;
 use Raxos\Contract\Container\ContainerInterface;
 use Raxos\Contract\Router\{MappingExceptionInterface, RouterInterface};
@@ -11,7 +12,6 @@ use Raxos\Router\Error\MappingReflectionErrorException;
 use Raxos\Router\Frame\{ClosureFrame, FrameStack, MiddlewareFrame};
 use ReflectionException;
 use ReflectionFunction;
-use function count;
 use function iterator_to_array;
 
 /**
@@ -190,7 +190,7 @@ class DynamicRouter implements RouterInterface
      * @return void
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.5.0
+     * @since 3.2.0
      */
     public function route(HttpMethod $method, string $path, callable $handler): void
     {
@@ -198,7 +198,7 @@ class DynamicRouter implements RouterInterface
             foreach ($this->resolvedRoutes as $key => $_) {
                 $this->resolvedRoutes->unset($key);
             }
-            $reflector = new ReflectionFunction($handler);
+            $reflector = new ReflectionFunction(Closure::fromCallable($handler));
 
             $parameters = iterator_to_array(Mapper::injectablesForMethod($reflector));
 
@@ -220,15 +220,16 @@ class DynamicRouter implements RouterInterface
                 new ClosureFrame($reflector->getClosure(), $parameters)
             ]);
 
-            if (empty($parameters)) {
+            if (!$stack->isDynamic) {
                 $this->staticRoutes[$path][$method->name] = $stack;
             } else {
                 $segments = RouterUtil::pathToSegments($path);
-                $segmentCount = count($segments);
 
-                $this->dynamicRoutes[$segmentCount][$path]['segments'] ??= $segments;
-                $this->dynamicRoutes[$segmentCount][$path][$method->name] = $stack;
-                unset($this->combinedDynamicRegexes[$segmentCount]);
+                foreach (RouterUtil::segmentCounts($path) as $segmentCount) {
+                    $this->dynamicRoutes[$segmentCount][$path]['segments'] ??= $segments;
+                    $this->dynamicRoutes[$segmentCount][$path][$method->name] = $stack;
+                    unset($this->combinedDynamicRegexes[$segmentCount]);
+                }
             }
         } catch (ReflectionException $err) {
             throw new MappingReflectionErrorException($err);
