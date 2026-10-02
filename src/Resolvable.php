@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace Raxos\Router;
 
+use Raxos\Collection\Map;
 use Raxos\Contract\Router\{RouterInterface, RuntimeExceptionInterface};
+use Raxos\Http\Response\{MethodNotAllowedHttpResponse, NoContentHttpResponse, NotFoundHttpResponse};
 use Raxos\Http\{HttpMethod, HttpRequest, HttpResponse};
-use Raxos\Http\Response\{MethodNotAllowedHttpResponse, NotFoundHttpResponse};
 use Raxos\Router\Error\InvalidHandlerException;
 use Raxos\Router\Frame\RouteFrame;
 use function array_diff_key;
@@ -13,7 +14,6 @@ use function array_filter;
 use function array_key_first;
 use function array_keys;
 use function array_merge;
-use function array_slice;
 use function class_exists;
 use function count;
 use function is_string;
@@ -33,6 +33,13 @@ use const ARRAY_FILTER_USE_BOTH;
  */
 trait Resolvable
 {
+
+    /**
+     * @var Map<array{int, string, string}>
+     * @author Bas Milius <bas@mili.us>
+     * @since 3.2.0
+     */
+    private readonly Map $resolvedRoutes;
 
     /**
      * Returns the path of a route.
@@ -97,18 +104,23 @@ trait Resolvable
      */
     public function resolve(HttpRequest $request): HttpResponse
     {
-        static $resolved = [];
+        $pathName = RouterUtil::normalizePath($request->pathName);
+        $resolved = $this->resolvedRoutes;
 
-        if (isset($this->staticRoutes[$request->pathName])) {
-            return $this->handle($request, $this->staticRoutes[$request->pathName]);
+        if ($this instanceof DynamicRouter && !isset($this->combinedDynamicRegexes[count(RouterUtil::pathToSegments($pathName))])) {
+            $this->compile();
         }
 
-        $cacheKey = $request->method->name . $request->pathName;
+        if (isset($this->staticRoutes[$pathName])) {
+            return $this->handle($request, $this->staticRoutes[$pathName]);
+        }
 
-        if (isset($resolved[$cacheKey])) {
-            [$segmentCount, $route, $regex] = $resolved[$cacheKey];
+        $cacheKey = $request->method->name . $pathName;
 
-            if (!preg_match($regex, $request->pathName, $parameters)) {
+        if ($resolved->has($cacheKey)) {
+            [$segmentCount, $route, $regex] = $resolved->get($cacheKey);
+
+            if (!preg_match($regex, $pathName, $parameters)) {
                 return new NotFoundHttpResponse();
             }
 
@@ -119,7 +131,7 @@ trait Resolvable
             return new NotFoundHttpResponse();
         }
 
-        $segments = RouterUtil::pathToSegments($request->pathName);
+        $segments = RouterUtil::pathToSegments($pathName);
         $segmentCount = count($segments);
 
         if (!isset($this->dynamicRoutes[$segmentCount]) || empty($this->dynamicRoutes[$segmentCount])) {
@@ -128,7 +140,7 @@ trait Resolvable
 
         [$combinedRegex, $keys] = $this->combinedDynamicRegexes[$segmentCount];
 
-        if (!preg_match($combinedRegex, $request->pathName, $parameters)) {
+        if (!preg_match($combinedRegex, $pathName, $parameters)) {
             return new NotFoundHttpResponse();
         }
 
@@ -136,11 +148,19 @@ trait Resolvable
 
         // Remove MARK (PCRE control verb) and empty strings produced by
         // non-matching alternatives in the combined pattern.
-        $parameters = array_filter($parameters, static fn($v, $k) => $k !== 'MARK' && (!is_string($k) || $v !== ''), ARRAY_FILTER_USE_BOTH);
-        $resolved[$cacheKey] = [$segmentCount, $route, "#^{$route}\$#"];
+        $parameters = array_filter($parameters, static fn(mixed $v, string $k) => $k !== 'MARK' && (!is_string($k) || $v !== ''), ARRAY_FILTER_USE_BOTH);
+        $resolved->set($cacheKey, [$segmentCount, $route, "#^{$route}\$#"]);
 
         if (count($resolved) > 1024) {
-            $resolved = array_slice($resolved, 512, preserve_keys: true);
+            $removed = 0;
+
+            foreach ($resolved as $key => $_) {
+                $resolved->unset($key);
+
+                if (++$removed === 512) {
+                    break;
+                }
+            }
         }
 
         return $this->handle($request, $this->dynamicRoutes[$segmentCount][$route], $parameters);
@@ -161,10 +181,13 @@ trait Resolvable
     private function handle(HttpRequest $request, array $mapping, array $parameters = []): HttpResponse
     {
         $methodKey = $request->method->name;
+        $preflight = false;
+        $allowedMethods = array_keys(array_diff_key($mapping, ['segments' => null]));
 
         if (!isset($mapping[$methodKey])) {
             if ($request->method === HttpMethod::OPTIONS) {
                 $methodKey = strtoupper($request->headers->get('access-control-request-method') ?? array_key_first(array_diff_key($mapping, ['segments' => null])));
+                $preflight = true;
             } else {
                 $methodKey = HttpMethod::ANY->name;
             }
@@ -180,7 +203,7 @@ trait Resolvable
             $request->parameters->merge($parameters);
         }
 
-        return new Runner($this, $mapping[$methodKey])
+        return new Runner($this, $mapping[$methodKey], $preflight ? $allowedMethods : null)
             ->run($request);
     }
 

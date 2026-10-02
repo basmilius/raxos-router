@@ -42,6 +42,7 @@ readonly class Router implements RouterInterface
     )
     {
         $this->combinedDynamicRegexes = RouterUtil::buildGroupedRegexes($this->dynamicRoutes);
+        $this->resolvedRoutes = new Map();
         $this->globals = new Map();
         $this->globals->set('router', $this);
     }

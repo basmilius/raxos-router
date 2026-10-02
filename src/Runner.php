@@ -5,12 +5,13 @@ namespace Raxos\Router;
 
 use Closure;
 use Raxos\Contract\Router\{FrameInterface, RouterInterface, RuntimeExceptionInterface};
+use Raxos\Http\Response\{NoContentHttpResponse, NotFoundHttpResponse};
 use Raxos\Http\{HttpRequest, HttpResponse};
-use Raxos\Http\Response\NotFoundHttpResponse;
 use Raxos\Router\Error\{ControllerNotInstantiatedException, UnexpectedException};
-use Raxos\Router\Frame\FrameStack;
+use Raxos\Router\Frame\{ClosureFrame, FrameStack, RouteFrame};
 use Throwable;
 use function count;
+use function implode;
 
 /**
  * Class Runner
@@ -28,12 +29,17 @@ final class Runner
     /**
      * Runner constructor.
      *
+     * @param RouterInterface $router
+     * @param FrameStack $stack
+     * @param string[]|null $preflightMethods
+     *
      * @author Bas Milius <bas@mili.us>
-     * @since 1.1.0
+     * @since 3.2.0
      */
     public function __construct(
         public readonly RouterInterface $router,
-        public readonly FrameStack $stack
+        public readonly FrameStack $stack,
+        private readonly ?array $preflightMethods = null
     ) {}
 
     /**
@@ -107,6 +113,10 @@ final class Runner
             $frame = $frames[$i];
             $next = function (HttpRequest $request) use ($frame, $next): HttpResponse {
                 $this->router->globals->set('frame', $frame);
+
+                if ($this->preflightMethods !== null && ($frame instanceof ClosureFrame || $frame instanceof RouteFrame)) {
+                    return new NoContentHttpResponse()->header('Allow', implode(', ', $this->preflightMethods));
+                }
 
                 return $frame->handle($this, $request, $next);
             };

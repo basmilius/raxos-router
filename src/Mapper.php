@@ -20,6 +20,7 @@ use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 use function array_filter;
+use function array_first;
 use function array_map;
 use function count;
 use function iterator_to_array;
@@ -477,7 +478,7 @@ final class Mapper
      */
     public static function attributeOf(array $attributes, string $attributeClass): ?AttributeInterface
     {
-        return self::attributesOf($attributes, $attributeClass)[0] ?? null;
+        return array_first(self::attributesOf($attributes, $attributeClass));
     }
 
     /**

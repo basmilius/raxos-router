@@ -44,6 +44,7 @@ class DynamicRouter implements RouterInterface
         public ?ContainerInterface $container = null
     )
     {
+        $this->resolvedRoutes = new Map();
         $this->globals = new Map();
         $this->globals->set('router', $this);
     }
@@ -194,6 +195,9 @@ class DynamicRouter implements RouterInterface
     public function route(HttpMethod $method, string $path, callable $handler): void
     {
         try {
+            foreach ($this->resolvedRoutes as $key => $_) {
+                $this->resolvedRoutes->unset($key);
+            }
             $reflector = new ReflectionFunction($handler);
 
             $parameters = iterator_to_array(Mapper::injectablesForMethod($reflector));
@@ -224,7 +228,7 @@ class DynamicRouter implements RouterInterface
 
                 $this->dynamicRoutes[$segmentCount][$path]['segments'] ??= $segments;
                 $this->dynamicRoutes[$segmentCount][$path][$method->name] = $stack;
-                $this->combinedDynamicRegexes[$segmentCount] = RouterUtil::buildGroupedRegex($this->dynamicRoutes[$segmentCount]);
+                unset($this->combinedDynamicRegexes[$segmentCount]);
             }
         } catch (ReflectionException $err) {
             throw new MappingReflectionErrorException($err);
