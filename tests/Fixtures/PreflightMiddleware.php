@@ -14,6 +14,6 @@ final readonly class PreflightMiddleware implements MiddlewareInterface
 {
     public function handle(HttpRequest $request, Closure $next): HttpResponse
     {
-        return $next($request)->header('Access-Control-Allow-Origin', 'https://passly.test');
+        return $next($request)->header('Access-Control-Allow-Origin', 'https://example.test');
     }
 }

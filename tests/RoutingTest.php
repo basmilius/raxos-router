@@ -55,7 +55,7 @@ it('runs preflight middleware without invoking the requested handler', function 
     expect($calls)->toBe(0);
     expect($response->responseCode)->toBe(HttpResponseCode::NO_CONTENT);
     expect($response->headers->get('Allow'))->toBe('POST');
-    expect($response->headers->get('Access-Control-Allow-Origin'))->toBe('https://passly.test');
+    expect($response->headers->get('Access-Control-Allow-Origin'))->toBe('https://example.test');
 });
 
 it('honors explicit OPTIONS handlers and rejects unavailable preflight methods', function (): void {
