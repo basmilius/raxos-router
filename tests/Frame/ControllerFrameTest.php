@@ -18,6 +18,7 @@ it('constructs a controller with defaults and injects properties before continui
     $response = new NoContentHttpResponse();
     $next = function (HttpRequest $actual) use ($request, $runner, $response): NoContentHttpResponse {
         expect($actual)->toBe($request)->and($runner->singleton(UnitController::class)->marker)->toBe('property');
+
         return $response;
     };
     expect($frame->handle($runner, $request, $next))->toBe($response)

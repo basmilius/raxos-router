@@ -41,16 +41,18 @@ it('resolves values by provider, global, request and default priority', function
 });
 
 it('caches a null provider result without calling the provider again', function (): void {
-    $provider = new class implements Raxos\Contract\Router\ValueProviderInterface
-    {
+    $provider = new class implements Raxos\Contract\Router\ValueProviderInterface {
         public int $calls = 0;
+
         public function getRegex(Injectable $injectable): string
         {
             return '';
         }
+
         public function getValue(HttpRequest $request, Injectable $injectable): mixed
         {
             $this->calls++;
+
             return null;
         }
     };
@@ -80,7 +82,7 @@ it('uses a container only after defaults have been considered', function (): voi
     $request = HttpRequest::create();
     expect(Injector::getValue($runner, $request, new Injectable('value', [stdClass::class], DefaultValue::none(), null), 'unit'))->toBe($dependency)
         ->and(Injector::getValue($runner, $request, new Injectable('value', [stdClass::class], DefaultValue::of(null), null), 'unit'))->toBeNull();
-    expect(fn () => Injector::getValue($runner, $request, new Injectable('missing', ['MissingUnitDependency'], DefaultValue::none(), null), 'unit'))->toThrow(UnexpectedException::class);
+    expect(fn() => Injector::getValue($runner, $request, new Injectable('missing', ['MissingUnitDependency'], DefaultValue::none(), null), 'unit'))->toThrow(UnexpectedException::class);
 });
 
 it('checks object compatibility and reports invalid and missing injections', function (): void {
@@ -91,9 +93,9 @@ it('checks object compatibility and reports invalid and missing injections', fun
     expect(Injector::isCorrectType(new PathValue('AB'), [Stringable::class]))->toBeTrue()
         ->and(Injector::isCorrectType('AB', ['string']))->toBeFalse()
         ->and(Injector::isCorrectType(new stdClass(), [PathValue::class]))->toBeFalse()
-        ->and(fn () => Injector::getValue($runner, $request, $parameter, 'unit', 'handle'))->toThrow(InvalidInjectionException::class);
+        ->and(fn() => Injector::getValue($runner, $request, $parameter, 'unit', 'handle'))->toThrow(InvalidInjectionException::class);
     $request->parameters->unset('value');
-    expect(fn () => Injector::getValue($runner, $request, $parameter, 'unit'))->toThrow(MissingInjectionException::class);
+    expect(fn() => Injector::getValue($runner, $request, $parameter, 'unit'))->toThrow(MissingInjectionException::class);
 });
 
 it('injects uninitialized and private properties while preserving initialized values', function (): void {
@@ -101,5 +103,5 @@ it('injects uninitialized and private properties while preserving initialized va
     Injector::injectClassProperties($target, ['unset' => 'new', 'existing' => 'replace', 'nullable' => 'filled', 'private' => 42]);
     expect($target->unset)->toBe('new')->and($target->existing)->toBe('keep')
         ->and($target->nullable)->toBe('filled')->and($target->privateValue())->toBe(42);
-    expect(fn () => Injector::injectClassProperties($target, ['missing' => 1]))->toThrow(ReflectionErrorException::class);
+    expect(fn() => Injector::injectClassProperties($target, ['missing' => 1]))->toThrow(ReflectionErrorException::class);
 });

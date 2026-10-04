@@ -14,9 +14,7 @@ use Raxos\Http\Validate\Constraint\Min;
 
 final readonly class UnitBodyInput implements HttpRequestModelInterface
 {
-    public function __construct(#[Property] #[Min(1)] public int $quantity, #[Property(optional: true)] public ?HttpFile $attachment = null)
-    {
-    }
+    public function __construct(#[Property] #[Min(1)] public int $quantity, #[Property(optional: true)] public ?HttpFile $attachment = null) {}
 }
 
 final readonly class UnitJsonRequest extends HttpRequest
@@ -30,16 +28,21 @@ final readonly class UnitJsonRequest extends HttpRequest
 #[ORM\Table('router_units')]
 final class UnitModel extends Model
 {
-    #[ORM\PrimaryKey] public int $id;
-    #[ORM\Column] public string $name;
-    #[ORM\HasMany(UnitChildModel::class, referenceKey: 'parent_id')] public ModelArrayList $children;
+    #[ORM\PrimaryKey]
+    public int $id;
+    #[ORM\Column]
+    public string $name;
+    #[ORM\HasMany(UnitChildModel::class, referenceKey: 'parent_id')]
+    public ModelArrayList $children;
 }
 
 #[ORM\Table('router_children')]
 final class UnitChildModel extends Model
 {
-    #[ORM\PrimaryKey] public int $id;
-    #[ORM\Column] public int $parent_id;
+    #[ORM\PrimaryKey]
+    public int $id;
+    #[ORM\Column]
+    public int $parent_id;
 }
 
 function unitModels(): SQLite
@@ -51,5 +54,6 @@ function unitModels(): SQLite
     $connection->execute('CREATE TABLE router_children (id INTEGER PRIMARY KEY,parent_id INTEGER)');
     $connection->execute("INSERT INTO router_units VALUES (1,'first'),(2,'second')");
     $connection->execute('INSERT INTO router_children VALUES (10,1),(20,2)');
+
     return $connection;
 }

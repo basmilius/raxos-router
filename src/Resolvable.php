@@ -125,6 +125,7 @@ trait Resolvable
      * @param array<string, mixed> $query
      * @param HttpMethod|null $method
      * @param string|null $template
+     *
      * @return string
      * @throws RuntimeExceptionInterface
      * @author Bas Milius <bas@mili.us>

@@ -55,11 +55,11 @@ it('finds static and dynamic handlers and rejects unmapped methods', function ()
     $router = Router::createFromControllers(null, [UnitController::class]);
     expect($router->path([UnitController::class, 'index']))->toBe('/units')
         ->and($router->path([UnitController::class, 'item']))->toContain('/units/(?<id>');
-    expect(fn () => $router->path([UnitController::class, 'helper']))->toThrow(InvalidHandlerException::class);
+    expect(fn() => $router->path([UnitController::class, 'helper']))->toThrow(InvalidHandlerException::class);
 });
 
 it('rejects malformed handler references', function (array $handler): void {
-    expect(fn () => new Router(null)->path($handler))->toThrow(InvalidHandlerException::class);
+    expect(fn() => new Router(null)->path($handler))->toThrow(InvalidHandlerException::class);
 })->with([[[]], [[UnitController::class]], [['UnknownController', 'index']], [[UnitController::class, 'missing']]]);
 
 it('falls back to ANY for otherwise unsupported methods', function (): void {

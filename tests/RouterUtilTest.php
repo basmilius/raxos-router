@@ -49,8 +49,8 @@ it('treats backed enum values as literal path values', function (): void {
 });
 
 it('rejects types without path representations', function (): void {
-    expect(fn () => RouterUtil::convertPath('/$value', [new Injectable('value', [stdClass::class], DefaultValue::none(), null)]))->toThrow(InvalidPathParameterException::class)
-        ->and(fn () => RouterUtil::convertPathParam('value', 'array', false))->toThrow(TypeTooComplexException::class);
+    expect(fn() => RouterUtil::convertPath('/$value', [new Injectable('value', [stdClass::class], DefaultValue::none(), null)]))->toThrow(InvalidPathParameterException::class)
+        ->and(fn() => RouterUtil::convertPathParam('value', 'array', false))->toThrow(TypeTooComplexException::class);
 });
 
 it('orders static paths before dynamic paths and shorter peers first', function (): void {
@@ -61,7 +61,7 @@ it('orders static paths before dynamic paths and shorter peers first', function 
 });
 
 it('extracts nullable and union reflection types', function (): void {
-    $function = new ReflectionFunction(static fn (int|string|null $value): mixed => $value);
+    $function = new ReflectionFunction(static fn(int|string|null $value): mixed => $value);
     expect(RouterUtil::types(null))->toBe([])
         ->and(RouterUtil::types($function->getParameters()[0]->getType()))->toBe(['string', 'int', 'null']);
 });

@@ -34,7 +34,9 @@ readonly class Router implements RouterInterface
 
     /**
      * Caches method-specific combined patterns without recompiling them for every request.
-     * @var array<int, array{0: string, 1: string[]}> */
+     *
+     * @var array<int, array{0: string, 1: string[]}>
+     */
     public array $combinedDynamicRegexes;
 
     /**

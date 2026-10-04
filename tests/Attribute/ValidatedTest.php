@@ -18,8 +18,8 @@ it('validates JSON bodies and form values into the same model', function (): voi
     $request = new F\UnitJsonRequest($base->cookies, $base->files, $base->headers, $base->post, $base->query, $base->server, $base->method, '/', '/', new Map(['fixture_body' => '{"quantity":2}']));
     expect($provider->getValue($request, $parameter)->quantity)->toBe(2)
         ->and($provider->getValue(HttpRequest::create(post: new HttpPostMap(['quantity' => '3'])), $parameter)->quantity)->toBe(3)
-        ->and(preg_match('~^'.$provider->getRegex($parameter).'$~', 'input'))->toBe(1);
-    expect(fn () => $provider->getValue(HttpRequest::create(post: new HttpPostMap(['quantity' => 0])), $parameter))->toThrow(ValidationFailedException::class);
+        ->and(preg_match('~^' . $provider->getRegex($parameter) . '$~', 'input'))->toBe(1);
+    expect(fn() => $provider->getValue(HttpRequest::create(post: new HttpPostMap(['quantity' => 0])), $parameter))->toThrow(ValidationFailedException::class);
 });
 
 it('reads multipart JSON data, removes its pseudo-file and maps valid attachments', function (): void {
@@ -36,7 +36,7 @@ it('reads multipart JSON data, removes its pseudo-file and maps valid attachment
         expect($input->quantity)->toBe(4)->and($input->attachment)->toBe($attachment)->and($request->files->has('data'))->toBeFalse();
         file_put_contents($path, 'broken');
         $request->files->set('data', [$data]);
-        expect(fn () => $provider->getValue($request, $parameter))->toThrow(UnexpectedException::class);
+        expect(fn() => $provider->getValue($request, $parameter))->toThrow(UnexpectedException::class);
     } finally {
         unlink($path);
     }

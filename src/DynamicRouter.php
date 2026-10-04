@@ -42,7 +42,9 @@ class DynamicRouter implements RouterInterface
 
     /**
      * Caches combined route patterns for each method and invalidates them when routes change.
-     * @var array<int, array{0: string, 1: string[]}> */
+     *
+     * @var array<int, array{0: string, 1: string[]}>
+     */
     public private(set) array $combinedDynamicRegexes = [];
 
     /**

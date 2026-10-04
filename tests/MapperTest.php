@@ -35,7 +35,7 @@ it('groups dynamic routes and combines child prefixes', function (): void {
 });
 
 it('distinguishes absent, nullable and explicitly defined defaults', function (): void {
-    $function = new ReflectionFunction(static fn (int $required, ?string $nullable, int $zero = 0): int => $required);
+    $function = new ReflectionFunction(static fn(int $required, ?string $nullable, int $zero = 0): int => $required);
     $parameters = $function->getParameters();
     expect(Mapper::defaultValue($parameters[0])->defined)->toBeFalse()
         ->and(Mapper::defaultValue($parameters[1])->defined)->toBeTrue()
@@ -54,8 +54,10 @@ it('filters router attributes while preserving their identity', function (): voi
 });
 
 it('keeps middleware definitions independent of previous attribute arguments', function (): void {
-    $named = new ReflectionFunction(#[UnitMiddleware('custom')] static fn (): int => 1);
-    $default = new ReflectionFunction(#[UnitMiddleware] static fn (): int => 1);
+    $named = new ReflectionFunction(#[UnitMiddleware('custom')]
+    static fn(): int => 1);
+    $default = new ReflectionFunction(#[UnitMiddleware]
+    static fn(): int => 1);
     $namedDefinition = Mapper::middleware($named->getAttributes()[0]);
     $defaultDefinition = Mapper::middleware($default->getAttributes()[0]);
     expect($namedDefinition->arguments)->toBe(['custom'])
@@ -64,13 +66,13 @@ it('keeps middleware definitions independent of previous attribute arguments', f
 });
 
 it('reports an unknown controller as a mapping reflection error', function (): void {
-    expect(fn () => Mapper::controller('RaxosTests\\Router\\MissingController'))->toThrow(MappingReflectionErrorException::class);
+    expect(fn() => Mapper::controller('RaxosTests\\Router\\MissingController'))->toThrow(MappingReflectionErrorException::class);
 });
 
 it('rejects untyped route parameters', function (): void {
-    expect(fn () => Mapper::controller(UntypedUnitController::class))->toThrow(MissingTypeException::class);
+    expect(fn() => Mapper::controller(UntypedUnitController::class))->toThrow(MissingTypeException::class);
 });
 
 it('rejects controller methods without return types', function (): void {
-    expect(fn () => Mapper::controller(NoReturnUnitController::class))->toThrow(InvalidReturnTypeException::class);
+    expect(fn() => Mapper::controller(NoReturnUnitController::class))->toThrow(InvalidReturnTypeException::class);
 });

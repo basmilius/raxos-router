@@ -208,6 +208,7 @@ final class RouterUtil
      * Decodes path characters for typed matching while keeping encoded separators and percent signs within their original segment.
      *
      * @param string $path
+     *
      * @return string
      * @author Bas Milius <bas@mili.us>
      * @since 3.3.0

@@ -46,8 +46,10 @@ it('invalidates route caches and compiles groups only after registration', funct
 it('runs preflight middleware without invoking the requested handler', function (): void {
     $calls = 0;
     $router = new DynamicRouter();
-    $router->post('/action', #[PreflightMiddleware] function () use (&$calls): HttpResponse {
+    $router->post('/action', #[PreflightMiddleware]
+    function () use (&$calls): HttpResponse {
         $calls++;
+
         return new NoContentHttpResponse();
     });
     $request = HttpRequest::create(method: HttpMethod::OPTIONS, uri: '/action', headers: new HttpHeadersMap(['access-control-request-method' => ['POST']]));

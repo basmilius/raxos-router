@@ -16,7 +16,7 @@ it('constructs middleware with arguments and injects its properties', function (
     $router->globals->set('marker', 'injected');
     $frame = new MiddlewareFrame(new Middleware(UnitMiddleware::class, ['label'], [new Injectable('marker', ['string'], DefaultValue::none(), null)]));
     $request = HttpRequest::create();
-    $response = $frame->handle(new Runner($router, new FrameStack(HttpMethod::GET, '/', '/', [])), $request, static fn () => new NoContentHttpResponse());
+    $response = $frame->handle(new Runner($router, new FrameStack(HttpMethod::GET, '/', '/', [])), $request, static fn() => new NoContentHttpResponse());
     expect($response->headers->get('Middleware'))->toBe('label')
         ->and($request->parameters->get('trace'))->toBe(['label:injected'])
         ->and((string)$frame)->toBe(UnitMiddleware::class . ' { $marker }');
@@ -27,7 +27,7 @@ it('wraps unexpected middleware errors and preserves router failures', function 
     $frame = new MiddlewareFrame(new Middleware(UnitMiddleware::class, [], [new Injectable('marker', ['string'], DefaultValue::of('unit'), null)]));
     $runner = new Runner(new DynamicRouter(), new FrameStack(HttpMethod::GET, '/', '/', []));
     try {
-        $frame->handle($runner, HttpRequest::create(), static fn (): never => throw $error);
+        $frame->handle($runner, HttpRequest::create(), static fn(): never => throw $error);
         test()->fail('Expected middleware failure.');
     } catch (Throwable $actual) {
         if ($routerError) {

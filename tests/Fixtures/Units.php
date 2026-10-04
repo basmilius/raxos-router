@@ -28,9 +28,7 @@ enum NumericState: int
 
 final readonly class PathValue implements StringParsableInterface
 {
-    public function __construct(public string $value)
-    {
-    }
+    public function __construct(public string $value) {}
 
     public static function fromString(string $input): static
     {
@@ -61,6 +59,7 @@ final class CountingProvider implements AttributeInterface, ValueProviderInterfa
     public function getValue(HttpRequest $request, Injectable $injectable): mixed
     {
         $this->calls++;
+
         return 'provided';
     }
 }
@@ -71,14 +70,13 @@ final class UnitMiddleware implements MiddlewareInterface
     #[Injected]
     public string $marker;
 
-    public function __construct(public string $label = 'default')
-    {
-    }
+    public function __construct(public string $label = 'default') {}
 
     public function handle(HttpRequest $request, Closure $next): HttpResponse
     {
         $trace = $request->parameters->get('trace') ?? [];
         $request->parameters->set('trace', [...$trace, $this->label . ':' . $this->marker]);
+
         return $next($request)->header('Middleware', $this->label);
     }
 }
@@ -94,9 +92,7 @@ final class UnitController
     #[Injected]
     private string $privateMarker;
 
-    public function __construct(public int $seed = 7)
-    {
-    }
+    public function __construct(public int $seed = 7) {}
 
     #[Get('/')]
     public function index(): array

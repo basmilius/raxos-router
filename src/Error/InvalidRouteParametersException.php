@@ -21,6 +21,7 @@ final class InvalidRouteParametersException extends Exception implements Runtime
      * Identifies an invalid route selection or parameter without constructing a partial URL.
      *
      * @param string $message
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 3.3.0
      */

@@ -7,7 +7,7 @@ use Raxos\Router\Frame\{ClosureFrame, FrameStack};
 covers(FrameStack::class);
 
 it('distinguishes dynamic routes and exposes useful debug information', function (): void {
-    $frame = new ClosureFrame(static fn (): int => 1, []);
+    $frame = new ClosureFrame(static fn(): int => 1, []);
     $static = new FrameStack(HttpMethod::GET, '/items', '/items', [$frame]);
     $dynamic = new FrameStack(HttpMethod::POST, '/items/(?<id>\d+)', '/items/$id', [$frame]);
     expect($static->isDynamic)->toBeFalse()->and($dynamic->isDynamic)->toBeTrue()

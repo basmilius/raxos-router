@@ -33,7 +33,9 @@ final class Runner
 {
     /**
      * Reuses controller instances during this runner's lifetime.
-     * @var array<string, object> */
+     *
+     * @var array<string, object>
+     */
     public private(set) array $controllers = [];
 
     /**
@@ -50,9 +52,7 @@ final class Runner
         public readonly RouterInterface $router,
         public readonly FrameStack $stack,
         private readonly ?array $preflightMethods = null
-    )
-    {
-    }
+    ) {}
 
     /**
      * Runs the request.

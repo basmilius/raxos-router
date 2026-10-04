@@ -21,17 +21,18 @@ it('creates controller singletons once per runner', function (): void {
     $calls = 0;
     $factory = function () use (&$calls): object {
         $calls++;
+
         return new stdClass();
     };
     $instance = $runner->singleton('unit', $factory);
     expect($runner->singleton('unit', $factory))->toBe($instance)->and($runner->singleton('unit'))->toBe($instance)
         ->and($calls)->toBe(1)->and($runner->controllers)->toBe(['unit' => $instance]);
-    expect(fn () => $runner->singleton('missing'))->toThrow(ControllerNotInstantiatedException::class);
+    expect(fn() => $runner->singleton('missing'))->toThrow(ControllerNotInstantiatedException::class);
 });
 
 it('wraps unexpected failures with the active frame and preserves their cause', function (): void {
     $cause = new RuntimeException('unit failure');
-    $frame = new ClosureFrame(static fn (): never => throw $cause, []);
+    $frame = new ClosureFrame(static fn(): never => throw $cause, []);
     $runner = new Runner(new DynamicRouter(), new FrameStack(HttpMethod::GET, '/', '/', [$frame]));
     try {
         $runner->run(HttpRequest::create());
@@ -43,7 +44,7 @@ it('wraps unexpected failures with the active frame and preserves their cause', 
 
 it('preserves router runtime exceptions unchanged', function (): void {
     $cause = new MissingInstanceException('unit');
-    $runner = new Runner(new DynamicRouter(), new FrameStack(HttpMethod::GET, '/', '/', [new ClosureFrame(static fn (): never => throw $cause, [])]));
+    $runner = new Runner(new DynamicRouter(), new FrameStack(HttpMethod::GET, '/', '/', [new ClosureFrame(static fn(): never => throw $cause, [])]));
     try {
         $runner->run(HttpRequest::create());
         test()->fail('Expected a router exception.');
