@@ -99,4 +99,5 @@ readonly class Router implements RouterInterface
     {
         return new self($container, $dynamicRoutes, $staticRoutes);
     }
+
 }

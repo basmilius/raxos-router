@@ -12,8 +12,10 @@ use Raxos\Http\HttpResponse;
 #[Attribute(Attribute::TARGET_FUNCTION)]
 final readonly class PreflightMiddleware implements MiddlewareInterface
 {
+
     public function handle(HttpRequest $request, Closure $next): HttpResponse
     {
         return $next($request)->header('Access-Control-Allow-Origin', 'https://example.test');
     }
+
 }

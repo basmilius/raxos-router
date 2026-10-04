@@ -16,18 +16,23 @@ use Raxos\Router\Responds;
 
 enum PathState: string
 {
+
     case ACTIVE = 'active';
     case SPECIAL = 'a.b+';
+
 }
 
 enum NumericState: int
 {
+
     case FIRST = 1;
     case SECOND = 2;
+
 }
 
 final readonly class PathValue implements StringParsableInterface
 {
+
     public function __construct(public string $value) {}
 
     public static function fromString(string $input): static
@@ -44,11 +49,13 @@ final readonly class PathValue implements StringParsableInterface
     {
         return $this->value;
     }
+
 }
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final class CountingProvider implements AttributeInterface, ValueProviderInterface
 {
+
     public int $calls = 0;
 
     public function getRegex(Injectable $injectable): string
@@ -62,11 +69,13 @@ final class CountingProvider implements AttributeInterface, ValueProviderInterfa
 
         return 'provided';
     }
+
 }
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
 final class UnitMiddleware implements MiddlewareInterface
 {
+
     #[Injected]
     public string $marker;
 
@@ -79,6 +88,7 @@ final class UnitMiddleware implements MiddlewareInterface
 
         return $next($request)->header('Middleware', $this->label);
     }
+
 }
 
 #[Controller('/units')]
@@ -86,6 +96,7 @@ final class UnitMiddleware implements MiddlewareInterface
 #[UnitMiddleware('parent')]
 final class UnitController
 {
+
     #[Injected]
     public string $marker;
 
@@ -118,48 +129,58 @@ final class UnitController
     {
         return 'not a route';
     }
+
 }
 
 #[Controller('/child')]
 final class UnitChildController
 {
+
     #[Get('/')]
     public function index(): HttpResponse
     {
         return new NoContentHttpResponse();
     }
+
 }
 
 #[Controller]
 final class RootUnitController
 {
+
     #[Get]
     public function index(): HttpResponse
     {
         return new NoContentHttpResponse();
     }
+
 }
 
 final class UntypedUnitController
 {
+
     #[Get]
     public function index($value): HttpResponse
     {
         return new NoContentHttpResponse();
     }
+
 }
 
 final class NoReturnUnitController
 {
+
     #[Get]
     public function index()
     {
         return null;
     }
+
 }
 
 final class InjectionTarget
 {
+
     public string $unset;
     public string $existing = 'keep';
     public ?string $nullable = null;
@@ -169,10 +190,12 @@ final class InjectionTarget
     {
         return $this->private;
     }
+
 }
 
 final class ResponseFactory
 {
+
     use Responds {
         binary as public;
         error as public;
@@ -187,4 +210,5 @@ final class ResponseFactory
         validationError as public;
         validationErrors as public;
     }
+
 }

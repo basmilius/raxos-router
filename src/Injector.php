@@ -194,7 +194,7 @@ final class Injector
 
         $valueType = $value::class;
 
-        return array_any($types, fn($type) => $valueType === $type || is_subclass_of($valueType, $type));
+        return array_any($types, static fn($type) => $valueType === $type || is_subclass_of($valueType, $type));
     }
 
     /**

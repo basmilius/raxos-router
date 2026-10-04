@@ -51,6 +51,7 @@ use function uksort;
  */
 final class Mapper
 {
+
     /**
      * Returns the route mapping for the given controllers.
      *
@@ -529,4 +530,5 @@ final class Mapper
     {
         return array_filter($attributes, static fn(AttributeInterface $attr) => $attr instanceof $attributeClass);
     }
+
 }

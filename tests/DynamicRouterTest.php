@@ -39,6 +39,7 @@ it('uses globals for dependencies without treating a static path as dynamic', fu
 it('accepts invokable objects and method callables', function (): void {
     $router = new DynamicRouter();
     $handler = new class {
+
         public function __invoke(): string
         {
             return 'invoke';
@@ -48,6 +49,7 @@ it('accepts invokable objects and method callables', function (): void {
         {
             return 'method';
         }
+
     };
     $router->get('/invoke', $handler);
     $router->get('/method', [$handler, 'method']);

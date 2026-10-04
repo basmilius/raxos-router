@@ -5,8 +5,7 @@ namespace Raxos\Router\Frame;
 
 use Closure;
 use Raxos\Contract\Router\{FrameInterface, MiddlewareInterface, RuntimeExceptionInterface};
-use Raxos\Http\HttpRequest;
-use Raxos\Http\HttpResponse;
+use Raxos\Http\{HttpRequest, HttpResponse};
 use Raxos\Router\{Injector, Runner};
 use Raxos\Router\Definition\Middleware;
 use Raxos\Router\Error\UnexpectedException;
@@ -39,6 +38,7 @@ final readonly class MiddlewareFrame implements FrameInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -63,6 +63,7 @@ final readonly class MiddlewareFrame implements FrameInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

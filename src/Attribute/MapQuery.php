@@ -7,8 +7,9 @@ use Attribute;
 use BackedEnum;
 use Raxos\Contract\Router\{AttributeInterface, ValueProviderInterface};
 use Raxos\Http\HttpRequest;
-use Raxos\Router\{Error\ReflectionErrorException, Injector, RouterUtil};
+use Raxos\Router\{Injector, RouterUtil};
 use Raxos\Router\Definition\Injectable;
+use Raxos\Router\Error\ReflectionErrorException;
 use ReflectionEnum;
 use ReflectionException;
 use function in_array;
@@ -43,6 +44,7 @@ final readonly class MapQuery implements AttributeInterface, ValueProviderInterf
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -53,6 +55,7 @@ final readonly class MapQuery implements AttributeInterface, ValueProviderInterf
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

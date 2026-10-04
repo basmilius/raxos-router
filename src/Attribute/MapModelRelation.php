@@ -41,6 +41,7 @@ final readonly class MapModelRelation implements AttributeInterface, ValueProvid
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -51,6 +52,7 @@ final readonly class MapModelRelation implements AttributeInterface, ValueProvid
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

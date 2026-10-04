@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 use Raxos\Http\{HttpMethod, HttpRequest};
 use Raxos\Http\Response\NoContentHttpResponse;
-use Raxos\Router\Definition\{DefaultValue, Injectable, Middleware};
 use Raxos\Router\{DynamicRouter, Runner};
+use Raxos\Router\Definition\{DefaultValue, Injectable, Middleware};
 use Raxos\Router\Error\{MissingInstanceException, UnexpectedException};
 use Raxos\Router\Frame\{FrameStack, MiddlewareFrame};
 use RaxosTests\Router\UnitMiddleware;

@@ -7,6 +7,7 @@ use Raxos\Contract\DebuggableInterface;
 use Raxos\Contract\Router\FrameInterface;
 use Raxos\Http\HttpMethod;
 use function array_map;
+use function strval;
 
 /**
  * Class FrameStack
@@ -43,6 +44,7 @@ final readonly class FrameStack implements DebuggableInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -50,7 +52,7 @@ final readonly class FrameStack implements DebuggableInterface
     {
         return [
             'route' => "{$this->method->name} {$this->pathPlain}",
-            'stack' => array_map(\strval(...), $this->frames)
+            'stack' => array_map(strval(...), $this->frames)
         ];
     }
 

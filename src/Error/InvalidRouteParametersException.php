@@ -17,6 +17,7 @@ use Raxos\Error\Exception;
  */
 final class InvalidRouteParametersException extends Exception implements RuntimeExceptionInterface
 {
+
     /**
      * Identifies an invalid route selection or parameter without constructing a partial URL.
      *
@@ -29,4 +30,5 @@ final class InvalidRouteParametersException extends Exception implements Runtime
     {
         parent::__construct('router_invalid_route_parameters', $message);
     }
+
 }

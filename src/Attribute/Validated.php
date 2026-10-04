@@ -32,6 +32,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
@@ -42,6 +43,7 @@ final readonly class Validated implements AttributeInterface, ValueProviderInter
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */

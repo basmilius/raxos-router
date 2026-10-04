@@ -31,6 +31,7 @@ final readonly class Prefix implements SerializableInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
@@ -44,6 +45,7 @@ final readonly class Prefix implements SerializableInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */

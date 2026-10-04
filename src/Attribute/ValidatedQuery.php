@@ -26,6 +26,7 @@ final readonly class ValidatedQuery implements AttributeInterface, ValueProvider
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 2.2.0
      */
@@ -36,6 +37,7 @@ final readonly class ValidatedQuery implements AttributeInterface, ValueProvider
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 2.2.0
      */

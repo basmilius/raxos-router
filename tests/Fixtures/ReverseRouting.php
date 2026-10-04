@@ -11,6 +11,7 @@ use Raxos\Router\Attribute\Post;
 #[Controller('/links')]
 final class ReverseRoutingController
 {
+
     #[Get('/text/$value')]
     public function text(string $value): array
     {
@@ -41,4 +42,5 @@ final class ReverseRoutingController
     {
         return ['id' => $id];
     }
+
 }

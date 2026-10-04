@@ -57,6 +57,7 @@ use const PHP_QUERY_RFC3986;
  */
 trait Resolvable
 {
+
     /**
      * Caches reflected controller routes for repeated reverse-routing lookups.
      *
@@ -345,4 +346,5 @@ trait Resolvable
         return new Runner($this, $mapping[$methodKey], $preflight ? $allowedMethods : null)
             ->run($request);
     }
+
 }

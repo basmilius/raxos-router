@@ -87,7 +87,6 @@ final class RouterUtil
      */
     public static function buildGroupedRegexes(array $dynamicRoutes): array
     {
-
         return array_map(self::buildGroupedRegex(...), $dynamicRoutes);
     }
 
@@ -135,7 +134,7 @@ final class RouterUtil
                 }
 
                 if (is_subclass_of($type, BackedEnum::class)) {
-                    $regex = self::regex(implode('|', array_map(fn(UnitEnum $enum) => preg_quote((string)$enum->value, '#'), $type::cases())), $injectable->name, $injectable->defaultValue->defined);
+                    $regex = self::regex(implode('|', array_map(static fn(UnitEnum $enum) => preg_quote((string)$enum->value, '#'), $type::cases())), $injectable->name, $injectable->defaultValue->defined);
 
                     continue;
                 }
@@ -348,4 +347,5 @@ final class RouterUtil
 
         return ReflectionUtil::getTypes($type) ?? [];
     }
+
 }

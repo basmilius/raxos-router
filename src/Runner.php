@@ -31,6 +31,7 @@ use function implode;
  */
 final class Runner
 {
+
     /**
      * Reuses controller instances during this runner's lifetime.
      *
@@ -139,4 +140,5 @@ final class Runner
 
         return $next;
     }
+
 }

@@ -6,43 +6,51 @@ namespace RaxosTests\Router;
 use Raxos\Contract\Http\HttpRequestModelInterface;
 use Raxos\Database\Connection\SQLite;
 use Raxos\Database\Db;
-use Raxos\Database\Orm\Attribute as ORM;
 use Raxos\Database\Orm\{Model, ModelArrayList};
+use Raxos\Database\Orm\Attribute\{Column, HasMany, PrimaryKey, Table};
 use Raxos\Http\{HttpFile, HttpRequest};
 use Raxos\Http\Validate\Attribute\Property;
 use Raxos\Http\Validate\Constraint\Min;
 
 final readonly class UnitBodyInput implements HttpRequestModelInterface
 {
+
     public function __construct(#[Property] #[Min(1)] public int $quantity, #[Property(optional: true)] public ?HttpFile $attachment = null) {}
+
 }
 
 final readonly class UnitJsonRequest extends HttpRequest
 {
+
     public function body(): ?string
     {
         return $this->parameters->get('fixture_body');
     }
+
 }
 
-#[ORM\Table('router_units')]
+#[Table('router_units')]
 final class UnitModel extends Model
 {
-    #[ORM\PrimaryKey]
+
+    #[PrimaryKey]
     public int $id;
-    #[ORM\Column]
+    #[Column]
     public string $name;
-    #[ORM\HasMany(UnitChildModel::class, referenceKey: 'parent_id')]
+    #[HasMany(UnitChildModel::class, referenceKey: 'parent_id')]
     public ModelArrayList $children;
+
 }
 
-#[ORM\Table('router_children')]
+#[Table('router_children')]
 final class UnitChildModel extends Model
 {
-    #[ORM\PrimaryKey]
+
+    #[PrimaryKey]
     public int $id;
-    #[ORM\Column]
+    #[Column]
     public int $parent_id;
+
 }
 
 function unitModels(): SQLite

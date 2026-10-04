@@ -2,9 +2,10 @@
 declare(strict_types=1);
 
 use Raxos\Container\Container;
+use Raxos\Contract\Router\ValueProviderInterface;
 use Raxos\Http\{HttpMethod, HttpRequest};
-use Raxos\Router\Definition\{DefaultValue, Injectable};
 use Raxos\Router\{DynamicRouter, Injector, Runner};
+use Raxos\Router\Definition\{DefaultValue, Injectable};
 use Raxos\Router\Error\{InvalidInjectionException, MissingInjectionException, ReflectionErrorException, UnexpectedException};
 use Raxos\Router\Frame\FrameStack;
 use RaxosTests\Router\{CountingProvider, InjectionTarget, PathState, PathValue};
@@ -41,7 +42,8 @@ it('resolves values by provider, global, request and default priority', function
 });
 
 it('caches a null provider result without calling the provider again', function (): void {
-    $provider = new class implements Raxos\Contract\Router\ValueProviderInterface {
+    $provider = new class implements ValueProviderInterface {
+
         public int $calls = 0;
 
         public function getRegex(Injectable $injectable): string
@@ -55,6 +57,7 @@ it('caches a null provider result without calling the provider again', function 
 
             return null;
         }
+
     };
     $runner = new Runner(new DynamicRouter(), new FrameStack(HttpMethod::GET, '/', '/', []));
     $request = HttpRequest::create();

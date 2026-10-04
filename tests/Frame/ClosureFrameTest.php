@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 use Raxos\Http\{HttpMethod, HttpRequest};
 use Raxos\Http\Response\NoContentHttpResponse;
-use Raxos\Router\Definition\{DefaultValue, Injectable};
 use Raxos\Router\{DynamicRouter, Runner};
+use Raxos\Router\Definition\{DefaultValue, Injectable};
 use Raxos\Router\Frame\{ClosureFrame, FrameStack};
 
 covers(ClosureFrame::class);

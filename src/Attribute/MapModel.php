@@ -25,6 +25,7 @@ final readonly class MapModel implements AttributeInterface, ValueProviderInterf
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -35,6 +36,7 @@ final readonly class MapModel implements AttributeInterface, ValueProviderInterf
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

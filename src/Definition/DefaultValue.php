@@ -31,6 +31,7 @@ final readonly class DefaultValue implements SerializableInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -44,6 +45,7 @@ final readonly class DefaultValue implements SerializableInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */

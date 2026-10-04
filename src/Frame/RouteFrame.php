@@ -5,8 +5,7 @@ namespace Raxos\Router\Frame;
 
 use Closure;
 use Raxos\Contract\Router\FrameInterface;
-use Raxos\Http\HttpRequest;
-use Raxos\Http\HttpResponse;
+use Raxos\Http\{HttpRequest, HttpResponse};
 use Raxos\Http\Response\ResultHttpResponse;
 use Raxos\Router\{Injector, Runner};
 use Raxos\Router\Definition\Route;
@@ -38,6 +37,7 @@ final readonly class RouteFrame implements FrameInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
@@ -57,6 +57,7 @@ final readonly class RouteFrame implements FrameInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
