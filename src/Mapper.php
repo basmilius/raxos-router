@@ -4,12 +4,28 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use Generator;
-use Raxos\Contract\Router\{AttributeInterface, MappingExceptionInterface, MiddlewareInterface, ValueProviderInterface};
+use Raxos\Contract\Router\AttributeInterface;
+use Raxos\Contract\Router\MappingExceptionInterface;
+use Raxos\Contract\Router\MiddlewareInterface;
+use Raxos\Contract\Router\ValueProviderInterface;
 use Raxos\Foundation\Util\ArrayUtil;
-use Raxos\Router\Attribute\{AbstractRoute, Child, Controller, Injected};
-use Raxos\Router\Definition\{ControllerClass, DefaultValue, Injectable, Middleware, Prefix, Route};
-use Raxos\Router\Error\{InvalidReturnTypeException, MappingReflectionErrorException, MissingTypeException};
-use Raxos\Router\Frame\{ControllerFrame, FrameStack, MiddlewareFrame, RouteFrame};
+use Raxos\Router\Attribute\AbstractRoute;
+use Raxos\Router\Attribute\Child;
+use Raxos\Router\Attribute\Controller;
+use Raxos\Router\Attribute\Injected;
+use Raxos\Router\Definition\ControllerClass;
+use Raxos\Router\Definition\DefaultValue;
+use Raxos\Router\Definition\Injectable;
+use Raxos\Router\Definition\Middleware;
+use Raxos\Router\Definition\Prefix;
+use Raxos\Router\Definition\Route;
+use Raxos\Router\Error\InvalidReturnTypeException;
+use Raxos\Router\Error\MappingReflectionErrorException;
+use Raxos\Router\Error\MissingTypeException;
+use Raxos\Router\Frame\ControllerFrame;
+use Raxos\Router\Frame\FrameStack;
+use Raxos\Router\Frame\MiddlewareFrame;
+use Raxos\Router\Frame\RouteFrame;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
@@ -35,7 +51,6 @@ use function uksort;
  */
 final class Mapper
 {
-
     /**
      * Returns the route mapping for the given controllers.
      *
@@ -44,7 +59,7 @@ final class Mapper
      * @return array<array<string, array<string, FrameStack>>>
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.1.0
      */
     public static function for(array $controllers): array
     {
@@ -107,7 +122,11 @@ final class Mapper
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function generateController(ControllerClass $controller, Prefix $prefix, array $frames = []): Generator
+    public static function generateController(
+        ControllerClass $controller,
+        Prefix $prefix,
+        array $frames = []
+    ): Generator
     {
         $prefix = new Prefix(
             plain: rtrim($prefix->plain . $controller->prefix, '/'),
@@ -139,9 +158,13 @@ final class Mapper
      * @return Generator<FrameStack>
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.1.0
      */
-    public static function generateRoute(Route $route, Prefix $prefix, array $frames = []): Generator
+    public static function generateRoute(
+        Route $route,
+        Prefix $prefix,
+        array $frames = []
+    ): Generator
     {
         foreach ($route->middlewares as $middleware) {
             $frames[] = new MiddlewareFrame($middleware);
@@ -285,7 +308,7 @@ final class Mapper
      * @return Injectable
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.1.0
      */
     public static function injectable(ReflectionParameter|ReflectionProperty $property): Injectable
     {
@@ -352,7 +375,7 @@ final class Mapper
      * @return Middleware
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.1.0
      */
     public static function middleware(ReflectionAttribute $attribute): Middleware
     {
@@ -414,7 +437,10 @@ final class Mapper
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function route(ReflectionMethod $method, ReflectionClass $class): Route
+    public static function route(
+        ReflectionMethod $method,
+        ReflectionClass $class
+    ): Route
     {
         static $cache = [];
 
@@ -476,7 +502,10 @@ final class Mapper
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function attributeOf(array $attributes, string $attributeClass): ?AttributeInterface
+    public static function attributeOf(
+        array $attributes,
+        string $attributeClass
+    ): ?AttributeInterface
     {
         return array_first(self::attributesOf($attributes, $attributeClass));
     }
@@ -493,9 +522,11 @@ final class Mapper
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function attributesOf(array $attributes, string $attributeClass): array
+    public static function attributesOf(
+        array $attributes,
+        string $attributeClass
+    ): array
     {
         return array_filter($attributes, static fn(AttributeInterface $attr) => $attr instanceof $attributeClass);
     }
-
 }

@@ -6,16 +6,21 @@ namespace Raxos\Router;
 use Closure;
 use Raxos\Collection\Map;
 use Raxos\Contract\Container\ContainerInterface;
-use Raxos\Contract\Router\{MappingExceptionInterface, RouterInterface};
+use Raxos\Contract\Router\MappingExceptionInterface;
+use Raxos\Contract\Router\RouterInterface;
 use Raxos\Http\HttpMethod;
 use Raxos\Router\Error\MappingReflectionErrorException;
-use Raxos\Router\Frame\{ClosureFrame, FrameStack, MiddlewareFrame};
+use Raxos\Router\Frame\ClosureFrame;
+use Raxos\Router\Frame\FrameStack;
+use Raxos\Router\Frame\MiddlewareFrame;
 use ReflectionException;
 use ReflectionFunction;
 use function iterator_to_array;
 
 /**
  * Class DynamicRouter
+ *
+ * Registers runtime routes and invalidates compiled patterns when registrations change.
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
@@ -26,10 +31,36 @@ class DynamicRouter implements RouterInterface
 
     use Resolvable;
 
+    /**
+     * Shares configured router context with dispatched controller actions.
+     *
+     * @var Map
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.5.0
+     */
     public private(set) Map $globals;
-    /** @var array<int, array{0: string, 1: string[]}> */
+
+    /**
+     * Caches combined route patterns for each method and invalidates them when routes change.
+     * @var array<int, array{0: string, 1: string[]}> */
     public private(set) array $combinedDynamicRegexes = [];
+
+    /**
+     * Indexes parameterized routes by method for matching and cache invalidation.
+     *
+     * @var array
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.5.0
+     */
     public private(set) array $dynamicRoutes = [];
+
+    /**
+     * Indexes literal routes by method for direct lookup.
+     *
+     * @var array
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.5.0
+     */
     public private(set) array $staticRoutes = [];
 
     /**
@@ -61,7 +92,10 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function get(string $path, callable $handler): void
+    public function get(
+        string $path,
+        callable $handler
+    ): void
     {
         $this->route(HttpMethod::GET, $path, $handler);
     }
@@ -78,7 +112,10 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function post(string $path, callable $handler): void
+    public function post(
+        string $path,
+        callable $handler
+    ): void
     {
         $this->route(HttpMethod::POST, $path, $handler);
     }
@@ -95,7 +132,10 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function put(string $path, callable $handler): void
+    public function put(
+        string $path,
+        callable $handler
+    ): void
     {
         $this->route(HttpMethod::PUT, $path, $handler);
     }
@@ -112,7 +152,10 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function delete(string $path, callable $handler): void
+    public function delete(
+        string $path,
+        callable $handler
+    ): void
     {
         $this->route(HttpMethod::DELETE, $path, $handler);
     }
@@ -129,7 +172,10 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function patch(string $path, callable $handler): void
+    public function patch(
+        string $path,
+        callable $handler
+    ): void
     {
         $this->route(HttpMethod::PATCH, $path, $handler);
     }
@@ -146,7 +192,10 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function options(string $path, callable $handler): void
+    public function options(
+        string $path,
+        callable $handler
+    ): void
     {
         $this->route(HttpMethod::OPTIONS, $path, $handler);
     }
@@ -163,7 +212,10 @@ class DynamicRouter implements RouterInterface
      * @since 1.5.0
      * @see self::route()
      */
-    public function head(string $path, callable $handler): void
+    public function head(
+        string $path,
+        callable $handler
+    ): void
     {
         $this->route(HttpMethod::HEAD, $path, $handler);
     }
@@ -190,9 +242,13 @@ class DynamicRouter implements RouterInterface
      * @return void
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.5.0
      */
-    public function route(HttpMethod $method, string $path, callable $handler): void
+    public function route(
+        HttpMethod $method,
+        string $path,
+        callable $handler
+    ): void
     {
         try {
             foreach ($this->resolvedRoutes as $key => $_) {
@@ -235,5 +291,4 @@ class DynamicRouter implements RouterInterface
             throw new MappingReflectionErrorException($err);
         }
     }
-
 }

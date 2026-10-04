@@ -4,11 +4,18 @@ declare(strict_types=1);
 namespace Raxos\Router;
 
 use Closure;
-use Raxos\Contract\Router\{FrameInterface, RouterInterface, RuntimeExceptionInterface};
-use Raxos\Http\Response\{NoContentHttpResponse, NotFoundHttpResponse};
-use Raxos\Http\{HttpRequest, HttpResponse};
-use Raxos\Router\Error\{ControllerNotInstantiatedException, UnexpectedException};
-use Raxos\Router\Frame\{ClosureFrame, FrameStack, RouteFrame};
+use Raxos\Contract\Router\FrameInterface;
+use Raxos\Contract\Router\RouterInterface;
+use Raxos\Contract\Router\RuntimeExceptionInterface;
+use Raxos\Http\HttpRequest;
+use Raxos\Http\HttpResponse;
+use Raxos\Http\Response\NoContentHttpResponse;
+use Raxos\Http\Response\NotFoundHttpResponse;
+use Raxos\Router\Error\ControllerNotInstantiatedException;
+use Raxos\Router\Error\UnexpectedException;
+use Raxos\Router\Frame\ClosureFrame;
+use Raxos\Router\Frame\FrameStack;
+use Raxos\Router\Frame\RouteFrame;
 use Throwable;
 use function count;
 use function implode;
@@ -16,14 +23,17 @@ use function implode;
 /**
  * Class Runner
  *
+ * Executes mapped controller actions through their configured middleware and injected context.
+ *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
  * @since 1.1.0
  */
 final class Runner
 {
-
-    /** @var array<string, object> */
+    /**
+     * Reuses controller instances during this runner's lifetime.
+     * @var array<string, object> */
     public private(set) array $controllers = [];
 
     /**
@@ -34,13 +44,15 @@ final class Runner
      * @param string[]|null $preflightMethods
      *
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.1.0
      */
     public function __construct(
         public readonly RouterInterface $router,
         public readonly FrameStack $stack,
         private readonly ?array $preflightMethods = null
-    ) {}
+    )
+    {
+    }
 
     /**
      * Runs the request.
@@ -83,7 +95,10 @@ final class Runner
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public function singleton(string $controller, ?callable $setup = null): mixed
+    public function singleton(
+        string $controller,
+        ?callable $setup = null
+    ): mixed
     {
         if (isset($this->controllers[$controller])) {
             return $this->controllers[$controller];
@@ -124,5 +139,4 @@ final class Runner
 
         return $next;
     }
-
 }

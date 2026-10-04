@@ -9,16 +9,21 @@ use Raxos\Contract\Router\MappingExceptionInterface;
 use Raxos\Foundation\Contract\StringParsableInterface;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Error\{InvalidPathParameterException, TypeTooComplexException};
+use Raxos\Router\Error\InvalidPathParameterException;
+use Raxos\Router\Error\TypeTooComplexException;
 use ReflectionType;
 use UnitEnum;
 use function array_map;
+use function chr;
+use function hexdec;
 use function implode;
 use function in_array;
 use function is_subclass_of;
+use function preg_replace_callback;
 use function str_contains;
 use function str_replace;
 use function strlen;
+use function strtoupper;
 use function usort;
 
 /**
@@ -32,7 +37,7 @@ final class RouterUtil
 {
 
     private const array SIMPLE_TYPE_PATTERNS = [
-        'string' => '[\w.@=,-]+',
+        'string' => '[^/]+',
         'int' => '\d+',
         'float' => '\d+(?:\.\d+)?',
         'bool' => 'true|false|[01]'
@@ -96,9 +101,12 @@ final class RouterUtil
      * @return string
      * @throws MappingExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.1.0
      */
-    public static function convertPath(string $path, array $injectables): string
+    public static function convertPath(
+        string $path,
+        array $injectables
+    ): string
     {
         if (empty($injectables)) {
             return $path;
@@ -122,11 +130,13 @@ final class RouterUtil
             foreach ($injectable->types as $type) {
                 if (is_subclass_of($type, StringParsableInterface::class)) {
                     $regex = self::regex($type::pattern(), $injectable->name, $injectable->defaultValue->defined);
+
                     continue;
                 }
 
                 if (is_subclass_of($type, BackedEnum::class)) {
                     $regex = self::regex(implode('|', array_map(fn(UnitEnum $enum) => preg_quote((string)$enum->value, '#'), $type::cases())), $injectable->name, $injectable->defaultValue->defined);
+
                     continue;
                 }
 
@@ -135,6 +145,7 @@ final class RouterUtil
                 }
 
                 $regex = self::convertPathParam($injectable->name, $type, $injectable->defaultValue->defined);
+
                 break;
             }
 
@@ -160,7 +171,11 @@ final class RouterUtil
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function convertPathParam(string $name, string $type, bool $isOptional): string
+    public static function convertPathParam(
+        string $name,
+        string $type,
+        bool $isOptional
+    ): string
     {
         $pattern = self::SIMPLE_TYPE_PATTERNS[$type] ?? throw new TypeTooComplexException($name);
 
@@ -187,6 +202,23 @@ final class RouterUtil
         }
 
         return '/' . $path;
+    }
+
+    /**
+     * Decodes path characters for typed matching while keeping encoded separators and percent signs within their original segment.
+     *
+     * @param string $path
+     * @return string
+     * @author Bas Milius <bas@mili.us>
+     * @since 3.3.0
+     */
+    public static function decodePath(string $path): string
+    {
+        return preg_replace_callback('/%([0-9a-f]{2})/i', static function (array $match): string {
+            $code = strtoupper($match[1]);
+
+            return in_array($code, ['2F', '25'], true) ? '%' . $code : chr(hexdec($code));
+        }, $path);
     }
 
     /**
@@ -260,7 +292,11 @@ final class RouterUtil
      * @since 1.1.0
      */
     #[Pure]
-    public static function regex(string $regex, string $name, bool $isOptional): string
+    public static function regex(
+        string $regex,
+        string $name,
+        bool $isOptional
+    ): string
     {
         if ($isOptional) {
             return "?(?<{$name}>{$regex})?";
@@ -279,7 +315,10 @@ final class RouterUtil
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function routeSorter(string $a, string $b): int
+    public static function routeSorter(
+        string $a,
+        string $b
+    ): int
     {
         $aParenthesis = str_contains($a, '(');
         $bParenthesis = str_contains($b, '(');
@@ -308,5 +347,4 @@ final class RouterUtil
 
         return ReflectionUtil::getTypes($type) ?? [];
     }
-
 }

@@ -5,11 +5,14 @@ namespace Raxos\Router;
 
 use Raxos\Collection\Map;
 use Raxos\Contract\Container\ContainerInterface;
-use Raxos\Contract\Router\{MappingExceptionInterface, RouterInterface};
+use Raxos\Contract\Router\MappingExceptionInterface;
+use Raxos\Contract\Router\RouterInterface;
 use Raxos\Router\Frame\FrameStack;
 
 /**
  * Class Router
+ *
+ * Matches controller routes and reuses compiled metadata for repeated request dispatch.
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\Router
@@ -20,9 +23,18 @@ readonly class Router implements RouterInterface
 
     use Resolvable;
 
+    /**
+     * Shares configured router context with dispatched controller actions.
+     *
+     * @var Map
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.1.0
+     */
     public Map $globals;
 
-    /** @var array<int, array{0: string, 1: string[]}> */
+    /**
+     * Caches method-specific combined patterns without recompiling them for every request.
+     * @var array<int, array{0: string, 1: string[]}> */
     public array $combinedDynamicRegexes;
 
     /**
@@ -58,7 +70,10 @@ readonly class Router implements RouterInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function createFromControllers(?ContainerInterface $container, array $controllers): self
+    public static function createFromControllers(
+        ?ContainerInterface $container,
+        array $controllers
+    ): self
     {
         return new self($container, ...Mapper::for($controllers));
     }
@@ -74,9 +89,12 @@ readonly class Router implements RouterInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.1.0
      */
-    public static function createFromMapping(?ContainerInterface $container, array $dynamicRoutes, array $staticRoutes): self
+    public static function createFromMapping(
+        ?ContainerInterface $container,
+        array $dynamicRoutes,
+        array $staticRoutes
+    ): self
     {
         return new self($container, $dynamicRoutes, $staticRoutes);
     }
-
 }
